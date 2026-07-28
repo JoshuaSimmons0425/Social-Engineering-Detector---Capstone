@@ -1,3 +1,14 @@
+You must return exactly one annotation object for every submitted message.
+
+There are {{MESSAGE_COUNT}} messages in this request.
+
+Requirements:
+- Return exactly {{MESSAGE_COUNT}} objects in the annotations array.
+- Preserve every message_id exactly as supplied.
+- Do not combine messages.
+- Do not omit messages, even when a message is benign or contains no techniques.
+- Return each message_id exactly once.
+
 Annotate the following message according to the provided taxonomy.
 
 Requirements:

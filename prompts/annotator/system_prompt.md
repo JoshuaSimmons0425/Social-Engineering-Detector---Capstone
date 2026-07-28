@@ -18,8 +18,7 @@ If an attribute is not present, set:
 
 Return the JSON in the following format:
 
-{
-  "security_attributes": {
+  {
     "authority": {
       "label": false,
       "confidence": 0.00
@@ -32,11 +31,11 @@ Return the JSON in the following format:
       "label": false,
       "confidence": 0.00
     },
-    "credential_request": {
+    "reciprocity": {
       "label": false,
       "confidence": 0.00
     },
-    "financial_request": {
+    "curiosity": {
       "label": false,
       "confidence": 0.00
     },
@@ -44,8 +43,6 @@ Return the JSON in the following format:
       "label": false,
       "confidence": 0.00
     }
-  },
-  "communication_attributes": {
     "promotional": {
       "label": false,
       "confidence": 0.00
@@ -63,6 +60,5 @@ Return the JSON in the following format:
       "confidence": 0.00
     }
   }
-}
 
 Your response must consist only of this JSON object and nothing else.
