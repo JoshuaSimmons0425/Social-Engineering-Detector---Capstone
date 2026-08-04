@@ -19,6 +19,12 @@ class DataEngine:
         :param columns_to_keep: List of column names to keep in the DataFrame.
         """
         self.df = self.df[columns_to_keep]
+        return self.df
+    
+    def concat_subject2body(self, subject_column, body_column):
+        self.df[body_column] = self.df[subject_column].astype(str) + self.df[body_column].astype(str)
+        self.df = self.df.drop(columns=[subject_column])
+        self.df = self.df.rename(columns={subject_column: body_column})
 
         return self.df
 
