@@ -31,7 +31,16 @@ class DataEngine:
     def rename_columns(self, df, label_column, text_column):
         
         df = df.rename(columns={label_column: self.label_name, text_column: self.text_name})
+        return df
+    
+    def clear_rows(self, df, column, condition):
 
+        df = df[~df[column].str.contains(condition, case=False, na=False)]
+        return df
+    
+    def rename_classes(self, df, label_column, label_mapping):
+
+        df[label_column] = df[label_column].map(label_mapping)
         return df
 
     def anonymize_data(self, df, text_column: str):
