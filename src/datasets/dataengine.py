@@ -7,39 +7,36 @@ from presidio_anonymizer import BatchAnonymizerEngine
 
 class DataEngine:
 
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
+    def __init__(self):
+        self.label_name = "Label"
+        self.text_name = "Full_Text"
         self.analyzer = AnalyzerEngine()
         self.batch_analyzer = BatchAnalyzerEngine()
         self.batch_anonymizer = BatchAnonymizerEngine()
 
-    def clear_irrelevant_columns(self, columns_to_keep: list):
+    def clear_irrelevant_columns(self, df, columns_to_drop: list):
         """
         Remove irrelevant columns from the DataFrame.
         :param columns_to_keep: List of column names to keep in the DataFrame.
         """
-        self.df = self.df[columns_to_keep]
-        return self.df
+        df = df.drop(columns=columns_to_drop)
+        return df
     
-    def concat_subject2body(self, subject_column, body_column):
-        self.df[body_column] = self.df[subject_column].astype(str) + self.df[body_column].astype(str)
-        self.df = self.df.drop(columns=[subject_column])
-        self.df = self.df.rename(columns={subject_column: body_column})
+    def concat_subject2body(self, df, subject_column, body_column):
+        df[body_column] = df[subject_column].astype(str) + df[body_column].astype(str)
+        df = df.drop(columns=[subject_column])
+        df = df.rename(columns={subject_column: body_column})
+        return df
 
-        return self.df
-
-    def rename_columns(self, columns_mapping: dict):
-        """
-        Rename columns in the DataFrame.
-        :param columns_mapping: Dictionary mapping old column names to new column names.
-        """
-        self.df.rename(columns=columns_mapping, inplace=True)
-
-        return self.df
-
-    def anonymize_data(self, text_column: str):
+    def rename_columns(self, df, label_column, text_column):
         
-        texts_dict = {text_column: self.df[text_column].fillna("").astype(str).tolist()}
+        df = df.rename(columns={label_column: self.label_name, text_column: self.text_name})
+
+        return df
+
+    def anonymize_data(self, df, text_column: str):
+        
+        texts_dict = {text_column: df[text_column].fillna("").astype(str).tolist()}
         
         analyzer_results = self.batch_analyzer.analyze_dict(
             texts_dict,
@@ -53,7 +50,7 @@ class DataEngine:
         
         masked_list = anonymizer_results.get(text_column, [])
         
-        output_df = self.df.copy()
+        output_df = df.copy()
         output_df[text_column] = masked_list
         
         print(f"Successfully masked {text_column} column")
