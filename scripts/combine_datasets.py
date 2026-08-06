@@ -12,11 +12,15 @@ label_name = "label"
 text_name = "text"
 irrelevant_columns = ["phishing_type", "severity", "confidence"]
 label_mapping = {0: standardised_benign, 1: standardised_malicious}
+drop_on_condition = r'Keywords:.*\r?\n'
 
 # Perform any necessary data processing or initialization
 df_one = engine.clear_irrelevant_columns(df_one, irrelevant_columns)
+df_one = engine.strip_with_regex(df_one, text_name, drop_on_condition)
 df_one = engine.rename_classes(df_one, label_name, label_mapping)
 df_one = engine.rename_columns(df_one, label_name, text_name)
+
+df_one.to_csv("temp.csv", index=False)
 
 print(df_one.head())
 

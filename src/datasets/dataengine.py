@@ -27,15 +27,19 @@ class DataEngine:
         df = df.drop(columns=[subject_column])
         df = df.rename(columns={subject_column: body_column})
         return df
+    
+    def clear_rows(self, df, column, condition, regex=False):
+
+        df = df[~df[column].str.contains(condition, case=False, na=False, regex=regex)]
+        return df
+
+    def strip_with_regex(self, df, text_column, regex_pattern):
+        df[text_column] = df[text_column].str.replace(regex_pattern, "", regex=True)
+        return df
 
     def rename_columns(self, df, label_column, text_column):
-        
+            
         df = df.rename(columns={label_column: self.label_name, text_column: self.text_name})
-        return df
-    
-    def clear_rows(self, df, column, condition):
-
-        df = df[~df[column].str.contains(condition, case=False, na=False)]
         return df
     
     def rename_classes(self, df, label_column, label_mapping):
