@@ -37,7 +37,21 @@ df_two = engine.rename_columns(df_two, label_name, text_name)
 
 print(df_two.head())
 
-df_three = pd.read_csv("data/bronze/archive/CEAS_08.csv")
+df_three = pd.read_csv("data/bronze/smishtank/Dataset_10191.csv")
+text_name = "TEXT"
+label_name = "LABEL"
+irrelevant_columns = ["URL", "EMAIL", "PHONE"]
+label_mapping = {"ham": standardised_benign, "smishing": standardised_malicious}
+drop_row_condition = "spam"
+
+df_three = engine.clear_irrelevant_columns(df_three, irrelevant_columns)
+df_three = engine.clear_rows(df_three, label_name, drop_row_condition)
+df_three = engine.rename_classes(df_three, label_name, label_mapping)
+df_three = engine.rename_columns(df_three, label_name, text_name)
+
+print(df_three.head())
+
+df_four = pd.read_csv("data/bronze/archive/CEAS_08.csv")
 text_name = "body"
 subject_name = "subject"
 label_name = "label"
@@ -45,15 +59,15 @@ irrelevant_columns = ["sender", "receiver", "date", "urls"]
 label_mapping = {0: standardised_benign, 1: standardised_malicious}
 drop_on_condition = r'CNN.com Daily Top 10'
 
-df_three = engine.clear_irrelevant_columns(df_three, irrelevant_columns)
-df_three = engine.concat_subject2body(df_three, subject_name, text_name)
-df_three = engine.clear_rows(df_three, text_name, drop_on_condition)
-df_three = engine.rename_classes(df_three, label_name, label_mapping)
-df_three = engine.rename_columns(df_three, label_name, text_name)
+df_four = engine.clear_irrelevant_columns(df_four, irrelevant_columns)
+df_four = engine.concat_subject2body(df_four, subject_name, text_name)
+df_four = engine.clear_rows(df_four, text_name, drop_on_condition)
+df_four = engine.rename_classes(df_four, label_name, label_mapping)
+df_four = engine.rename_columns(df_four, label_name, text_name)
 
-print(df_three.head())
+print(df_four.head())
 
-datasets = [df_one, df_two, df_three]
+datasets = [df_one, df_two, df_three, df_four]
 
 unified_df = engine.unify_datasets(datasets)
 
