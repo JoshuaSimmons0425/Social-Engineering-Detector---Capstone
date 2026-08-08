@@ -2,6 +2,7 @@ import pandas as pd
 import json
 from presidio_analyzer import AnalyzerEngine, BatchAnalyzerEngine
 from presidio_anonymizer import BatchAnonymizerEngine
+import spacy
 
 # Class to handle data cleaning, preprocessing, and anonymization
 
@@ -10,6 +11,7 @@ class DataEngine:
     def __init__(self):
         self.label_name = "Label"
         self.text_name = "Full_Text"
+        self.nlp = spacy.load("en_core_web_sm")
         self.analyzer = AnalyzerEngine()
         self.batch_analyzer = BatchAnalyzerEngine()
         self.batch_anonymizer = BatchAnonymizerEngine()
@@ -26,6 +28,14 @@ class DataEngine:
         df[body_column] = df[subject_column].astype(str) + df[body_column].astype(str)
         df = df.drop(columns=[subject_column])
         df = df.rename(columns={subject_column: body_column})
+        return df
+
+    def clear_na_rows(self, df, text_column):
+        df = df.dropna(subset=[text_column])
+        return df
+
+    def deduplicate_rows(self, df, text_column):
+        df = df.drop_duplicates(subset=[text_column])
         return df
     
     def clear_rows(self, df, column, condition, regex=False):
@@ -47,6 +57,33 @@ class DataEngine:
         df[label_column] = df[label_column].map(label_mapping)
         return df
 
+    def unify_datasets(self, df_list: list):
+        unified_df = pd.concat(df_list, ignore_index=True)
+        return unified_df
+
+    def mask_money(self, df, text_column):
+
+        PII_ENTITIES = {"MONEY"}
+
+        def mask_text(text):
+            if not isinstance(text, str):
+                return text
+
+            doc = self.nlp(text)
+            text_list = list(text)
+
+            ents = sorted(doc.ents, key=lambda e: e.start_char, reverse=True)
+
+            for ent in sorted(doc.ents, key=lambda e: e.start_char, reverse=True):
+                if ent.label_ in PII_ENTITIES:
+                    text_list[ent.start_char:ent.end_char] = f"[{ent.label_}]"
+
+            return "".join(text_list)
+
+        df = df.copy()
+        df[text_column] = df[text_column].apply(mask_text)
+        return df
+
     def anonymize_data(self, df, text_column: str):
         
         texts_dict = {text_column: df[text_column].fillna("").astype(str).tolist()}
@@ -54,7 +91,7 @@ class DataEngine:
         analyzer_results = self.batch_analyzer.analyze_dict(
             texts_dict,
             language="en",
-            entities=["NAME", "EMAIL_ADDRESS", "PHONE_NUMBER", "ORGANIZATION", "LOCATION", "URL", "DATE_TIME", "CREDIT_CARD"],
+            entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "ORGANIZATION", "LOCATION", "URL", "DATE_TIME", "CREDIT_CARD"],
         )
         
         anonymizer_results = self.batch_anonymizer.anonymize_dict(
