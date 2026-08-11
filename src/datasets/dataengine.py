@@ -17,10 +17,7 @@ class DataEngine:
         self.batch_anonymizer = BatchAnonymizerEngine()
 
     def clear_irrelevant_columns(self, df, columns_to_drop: list):
-        """
-        Remove irrelevant columns from the DataFrame.
-        :param columns_to_keep: List of column names to keep in the DataFrame.
-        """
+    
         if df is None:
             raise ValueError("DataFrame is None")
 
@@ -168,7 +165,7 @@ class DataEngine:
         analyzer_results = self.batch_analyzer.analyze_dict(
             texts_dict,
             language="en",
-            entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "ORGANIZATION", "LOCATION", "URL", "DATE_TIME", "CREDIT_CARD"],
+            entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "URL", "CREDIT_CARD", "CRYPTO", "IP_ADDRESS", "IBAN_CODE"],
         )
         
         anonymizer_results = self.batch_anonymizer.anonymize_dict(
