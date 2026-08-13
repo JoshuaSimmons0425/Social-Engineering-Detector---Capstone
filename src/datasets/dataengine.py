@@ -1,3 +1,4 @@
+import numpy
 import pandas as pd
 import json
 from presidio_analyzer import AnalyzerEngine, BatchAnalyzerEngine
@@ -35,7 +36,7 @@ class DataEngine:
         if subject_column is None or body_column is None:
             raise ValueError("Subject or body column is None")
 
-        df[body_column] = df[subject_column].astype(str) + df[body_column].astype(str)
+        df[body_column] = df[subject_column].astype(str) + " " + df[body_column].astype(str)
         df = df.drop(columns=[subject_column])
         df = df.rename(columns={subject_column: body_column})
         return df
@@ -72,7 +73,12 @@ class DataEngine:
         if condition is None:
             raise ValueError("Condition is required")
 
-        df = df[~df[column].str.contains(condition, case=False, na=False, regex=regex)]
+        if df[column].dtype == 'int64':
+           df = df[df[column] != condition]
+
+        else:
+            df = df[~df[column].str.contains(condition, regex=regex, na=False)]
+
         return df
 
     def strip_with_regex(self, df, text_column, regex_pattern):
@@ -116,6 +122,44 @@ class DataEngine:
 
         df[label_column] = df[label_column].map(label_mapping)
         return df
+
+    def clear_lengthy_rows(self, df, text_column, max_length):
+        if df is None:
+            raise ValueError("DataFrame is None")
+
+        if text_column is None:
+            raise ValueError("Text column is None")
+
+        if max_length is None:
+            raise ValueError("Max length is required")
+
+        df = df[df[text_column].str.len() <= max_length]
+        return df
+
+    def sample_dataset(self, df, label_column, sample_size, ratio=0.5, seed=42):
+
+        numpy.random.seed(seed)
+
+        if df is None:
+            raise ValueError("DataFrame is None")
+
+        if label_column is None:
+            raise ValueError("Label column is None")
+
+        if sample_size is None or ratio is None:
+            raise ValueError("Sample size and ratio are required")
+
+        class_1 = df[df[label_column] == "Malicious"]
+        class_0 = df[df[label_column] == "Benign"]
+
+        size_1 = int(sample_size * ratio)
+        size_0 = sample_size - size_1
+ 
+        sampled_1 = class_1.sample(min(len(class_1), size_1))
+        sampled_0 = class_0.sample(min(len(class_0), size_0))
+
+        df_sampled = pd.concat([sampled_1, sampled_0]).sample(frac=1).reset_index(drop=True)
+        return df_sampled
 
     def unify_datasets(self, df_list: list):
         if df_list is None:
