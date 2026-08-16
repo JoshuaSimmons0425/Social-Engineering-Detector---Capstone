@@ -1,6 +1,6 @@
 You must return exactly one valid JSON annotation object for every submitted message ({{MESSAGE_COUNT}} total). Do not combine, omit, or modify message_ids. Include no markdown, explanations, or extra text.
 
-Task & Rules
+Task & Rules:
 
 This is a multi-label classification task. Evaluate each attribute independently. Messages can have zero, one, or multiple labels.
 
@@ -10,13 +10,13 @@ Do not infer missing information or assume malicious intent. Do not judge if a m
 
 Masked Entities: The text contains masked placeholders (e.g., <EMAIL_ADDRESS>, <PHONE_NUMBER>, <URL>). Focus heavily on the linguistic structure, tone, syntactic patterns, and formatting cues around these placeholders to identify the techniques.
 
-Attribute Output Schema
+Attribute Output Schema:
 
 If "label": true****: Provide a confidence score (0.00 to 1.00), the exact evidence phrase(s) from the text, and a concise justification.
 
 If "label": false****: Provide only "label": false (omit confidence, evidence, and justification).
 
-Taxonomy
+Taxonomy:
 
 Urgency: Creates pressure to bypass critical thinking.
 

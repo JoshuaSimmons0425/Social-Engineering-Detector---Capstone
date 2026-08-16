@@ -188,7 +188,7 @@ class DataEngine:
 
             for ent in sorted(doc.ents, key=lambda e: e.start_char, reverse=True):
                 if ent.label_ in PII_ENTITIES:
-                    text_list[ent.start_char:ent.end_char] = f"[{ent.label_}]"
+                    text_list[ent.start_char:ent.end_char] = f"<{ent.label_}>"
 
             return "".join(text_list)
 
