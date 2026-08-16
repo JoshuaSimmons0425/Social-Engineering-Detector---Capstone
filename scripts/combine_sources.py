@@ -137,12 +137,26 @@ drop_row_condition = 1
 df_nine = engine.clear_rows(df_nine, label_name, drop_row_condition)
 df_nine = engine.deduplicate_rows(df_nine, body_name)
 df_nine = engine.rename_classes(df_nine, label_name, label_mapping)
-df_nine = engine.sample_dataset(df_nine, label_name, sample_size=10000, ratio=0.15)
+df_nine = engine.sample_dataset(df_nine, label_name, sample_size=10000, ratio=0.3)
 df_nine = engine.rename_columns(df_nine, label_name, body_name)
 
 print(df_nine.head())
 
-datasets = [df_one, df_two, df_three, df_four, df_five, df_six, df_seven, df_eight, df_nine]
+df_ten = pd.read_csv("data/bronze/enron/enron_spam_data.csv")
+text_name = "Message"
+subject_name = "Subject"
+label_name = "Spam/Ham"
+label_mapping = {"ham": standardised_benign, "spam": standardised_malicious}
+
+df_ten = engine.deduplicate_rows(df_ten, text_name)
+df_ten = engine.concat_subject2body(df_ten, subject_name, text_name)
+df_ten = engine.rename_classes(df_ten, label_name, label_mapping)
+df_ten = engine.sample_dataset(df_ten, label_name, sample_size=8000, ratio=0.15)
+df_ten = engine.rename_columns(df_ten, label_name, text_name)
+
+print(df_ten.head())
+
+datasets = [df_one, df_two, df_three, df_four, df_five, df_six, df_seven, df_eight, df_nine, df_ten]
 
 unified_df = engine.unify_datasets(datasets)
 
