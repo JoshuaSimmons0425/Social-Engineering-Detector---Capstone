@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.amp import autocast_mode
 from transformers import AutoModel
 
 class BERTClassifier(nn.Module):
@@ -34,8 +35,11 @@ class BERTClassifier(nn.Module):
                 labels = batch['labels'].to(device)
 
                 optimizer.zero_grad()
-                outputs = self(input_ids, attention_mask)
-                loss = criterion(outputs, labels)
+
+                with autocast_mode.autocast(device_type = 'cuda' if device.type == 'cuda' else 'cpu', dtype=torch.float16):
+                    outputs = self(input_ids, attention_mask)
+                    loss = criterion(outputs, labels)
+
                 loss.backward()
                 optimizer.step()
 
