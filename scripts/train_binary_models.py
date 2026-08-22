@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from src.modelling.binary.baseline_model import TFIDFBaselineModel
+from modelling.binary.baseline.baseline_model import TFIDFBaselineModel
 
 training_set = pd.read_csv('data/splits/training_50_50.csv')
 validation_set = pd.read_csv('data/splits/validation_50_50.csv')
