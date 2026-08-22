@@ -1,0 +1,84 @@
+# Baseline model class
+
+import pandas as pd
+import os
+import joblib
+import pickle
+import json
+from sklearn import model_selection, preprocessing, metrics
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from scipy.optimize import minimize_scalar
+from typing import Dict
+
+class TFIDFBaselineModel:
+    def __init__(self, training_set, validation_set, text_column: str, label_column: str):
+        self.training_set = training_set
+        self.validation_set = validation_set
+        self.text_column = text_column
+        self.label_column = label_column
+        self.vectorizer = TfidfVectorizer()
+        self.label_encoder = LabelEncoder()
+        self.model = LogisticRegression(max_iter=1000)
+
+    def preprocess_data(self):
+        # Fit the TF-IDF vectorizer on the training data and transform both training and validation data
+
+        self.X_train = self.vectorizer.fit_transform(self.training_set[self.text_column])
+        self.X_validation = self.vectorizer.transform(self.validation_set[self.text_column])
+
+        # Encode the labels
+        self.y_train = self.label_encoder.fit_transform(self.training_set[self.label_column])
+        self.y_validation = self.label_encoder.transform(self.validation_set[self.label_column])
+
+    def train_model(self):
+        # Train the logistic regression model
+        self.model.fit(self.X_train, self.y_train)
+
+    def evaluate_model(self):
+        # Make predictions on the validation set
+        y_pred = self.model.predict(self.X_validation)
+
+        # Calculate accuracy
+        accuracy = metrics.accuracy_score(self.y_validation, y_pred)
+        classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
+        brier = metrics.brier_score_loss(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
+        print(f'Validation Accuracy: {accuracy:.4f}')
+        print(f'Classification Report: \n{classification_report}')
+        print(f'Validation Brier score: {brier:.4f}')
+
+    def run_pipeline(self):
+        self.preprocess_data()
+        self.train_model()
+        self.evaluate_model()
+
+    def save_model(self, output_dir):
+        # Save the trained model, vectorizer, and label encoder to the specified output directory
+        os.makedirs(output_dir, exist_ok=True)
+        with open(os.path.join(output_dir, 'model.pkl'), 'wb') as f:
+            pickle.dump(self.model, f)
+        with open(os.path.join(output_dir, 'vectorizer.pkl'), 'wb') as f:
+            pickle.dump(self.vectorizer, f)
+        with open(os.path.join(output_dir, 'label_encoder.pkl'), 'wb') as f:
+            pickle.dump(self.label_encoder, f)
+
+    def save_metrics(self, output_dir, output_format='txt'):
+        # Save the evaluation metrics to a text file in the specified output directory
+        os.makedirs(output_dir, exist_ok=True)
+        y_pred = self.model.predict(self.X_validation)
+        accuracy = metrics.accuracy_score(self.y_validation, y_pred)
+        classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
+        if output_format == 'txt':
+            with open(os.path.join(output_dir, 'metrics.txt'), 'w') as f:
+                f.write(f'Validation Accuracy: {accuracy:.4f}\n')
+                f.write(f'Classification Report: \n{classification_report}\n')
+        elif output_format == 'json':
+            with open(os.path.join(output_dir, 'metrics.json'), 'w') as f:
+                json.dump({
+                    'validation_accuracy': accuracy,
+                    'classification_report': classification_report
+                }, f)
+
+
+        
