@@ -1,7 +1,10 @@
 import os
 import joblib
 import pickle
+import pickle
+import json
 import numpy as np
+from sklearn import model_selection, preprocessing, metrics
 from scipy.optimize import minimize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
@@ -12,7 +15,7 @@ from sklearn import metrics
 
 # A class for calibrating the baseline model using temperature scaling
 
-class BaselineCalibrator:
+class TFIDFBaselineCalibrator:
     def __init__(self, model, vectorizer, encoder, calibration_set, validation_set, text_column: str, label_column: str, temperature: float = 1.0):
         self.original_model = model
         self.calibration_set = calibration_set
@@ -93,10 +96,34 @@ class BaselineCalibrator:
             'encoder': self.label_encoder
         }
         
-        filepath = os.path.join(output_dir, 'temperature_calibrated_meta.pkl')
+        filepath = os.path.join(output_dir, 'calibrated_baseline_meta.pkl')
         with open(filepath, 'wb') as f:
             pickle.dump(artifacts, f)
         print(f'Calibrated model artifacts saved to {filepath}')
+
+    def save_calibration_metrics(self, output_dir, output_format='txt'):
+        # Save the evaluation metrics to a text file in the specified output directory
+        os.makedirs(output_dir, exist_ok=True)
+        scaled_logits = self.predict_proba(self.X_validation)
+        loss = log_loss(self.y_validation, scaled_logits)
+        brier = brier_score_loss(self.y_validation, scaled_logits[:, 1])
+        accuracy = np.mean(np.argmax(scaled_logits, axis=1) == self.y_validation)
+        classification_report = metrics.classification_report(self.y_validation, np.argmax(scaled_logits, axis=1), target_names=self.label_encoder.classes_)
+
+        if output_format == 'txt':
+            with open(os.path.join(output_dir, 'calibrated_baseline_metrics.txt'), 'w') as f:
+                f.write(f'Validation Loss after calibration: {loss:.4f}\n')
+                f.write(f'Validation Brier score after calibration: {brier:.4f}\n')
+                f.write(f'Validation Accuracy after calibration: {accuracy:.4f}\n')
+                f.write(f'Classification Report after calibration: \n{classification_report}\n')
+        elif output_format == 'json':
+            with open(os.path.join(output_dir, 'calibrated_baseline_metrics.json'), 'w') as f:
+                json.dump({
+                    'validation_loss': loss,
+                    'validation_brier_score': brier,
+                    'validation_accuracy': accuracy,
+                    'classification_report': classification_report
+                }, f)
         
 
 
