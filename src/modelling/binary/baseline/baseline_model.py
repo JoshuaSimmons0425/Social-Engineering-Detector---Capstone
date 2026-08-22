@@ -43,10 +43,8 @@ class TFIDFBaselineModel:
         # Calculate accuracy
         accuracy = metrics.accuracy_score(self.y_validation, y_pred)
         classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
-        brier = metrics.brier_score_loss(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
         print(f'Validation Accuracy: {accuracy:.4f}')
         print(f'Classification Report: \n{classification_report}')
-        print(f'Validation Brier score: {brier:.4f}')
 
     def run_pipeline(self):
         self.preprocess_data()
