@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.amp import autocast_mode
+from torch.amp import autocast
 from transformers import AutoModel
 
 class BERTClassifier(nn.Module):
@@ -25,6 +25,11 @@ class BERTClassifier(nn.Module):
         return self.out(output)
 
     def train_model(self, device, optimizer, criterion, epochs):
+
+        # Determine device type string safely
+        dev_type = 'cuda' if 'cuda' in str(device) else 'cpu'
+        # CPU autocast uses bfloat16, GPU uses float16
+        amp_dtype = torch.float16 if dev_type == 'cuda' else torch.bfloat16
         
         for epoch in range(epochs):
             self.train()
@@ -36,7 +41,7 @@ class BERTClassifier(nn.Module):
 
                 optimizer.zero_grad()
 
-                with autocast_mode.autocast(device_type = 'cuda' if device.type == 'cuda' else 'cpu', dtype=torch.float16):
+                with autocast(device_type=dev_type, dtype=amp_dtype):
                     outputs = self(input_ids, attention_mask)
                     loss = criterion(outputs, labels)
 
