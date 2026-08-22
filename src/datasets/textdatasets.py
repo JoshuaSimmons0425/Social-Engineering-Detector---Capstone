@@ -1,3 +1,5 @@
+import os
+import pickle
 import torch
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
@@ -5,13 +7,19 @@ from transformers import AutoTokenizer
 
 class TextDataset(Dataset):
 
-    def __init__(self, dataset, mode, max_len):
+    def __init__(self, dataset, mode, max_len, encoder=None):
         self.texts = dataset['Full_Text'].values
         self.labels = dataset['Label'].values
-        self.encoder = LabelEncoder()
         self.tokenizer = AutoTokenizer.from_pretrained(mode)
         self.max_len = max_len
-        self.attention_mask = None
+        self.encoder = encoder if encoder is not None else LabelEncoder()
+
+    def preprocess_labels(self, training=True):
+        if training:
+            self.labels = self.encoder.fit_transform(self.labels)
+        else:
+            self.labels = self.encoder.transform(self.labels)
+        return self.encoder
 
     def __len__(self):
         return len(self.texts)
@@ -21,7 +29,6 @@ class TextDataset(Dataset):
         label = self.labels[idx]
 
         if self.tokenizer:
-
             encoding = self.tokenizer.encode_plus(
                 text,
                 add_special_tokens=True,
@@ -41,3 +48,11 @@ class TextDataset(Dataset):
             }
 
         return {'text': text, 'labels': torch.tensor(label, dtype=torch.long)}
+
+    def save_encoder(self, output_dir):
+        # Save the fitted label encoder to the specified output directory
+        os.makedirs(output_dir, exist_ok=True)
+        encoder_path = os.path.join(output_dir, 'label_encoder.pkl')
+        with open(encoder_path, 'wb') as f:
+            pickle.dump(self.encoder, f)
+        print(f'Label encoder saved to {encoder_path}')
