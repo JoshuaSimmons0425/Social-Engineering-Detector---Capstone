@@ -16,7 +16,10 @@ class BERTClassifier(nn.Module):
             input_ids=input_ids,
             attention_mask=attention_mask
         )
-        pooled_output = outputs[1]
+        if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
+            pooled_output = outputs.pooler_output
+        else:
+            pooled_output = outputs.last_hidden_state[:, 0, :]
         output = self.drop(pooled_output)
         return self.out(output)
 
