@@ -1,16 +1,11 @@
 import os
-import joblib
 import pickle
 import pickle
 import json
 import numpy as np
-from sklearn import model_selection, preprocessing, metrics
+from sklearn import metrics
 from scipy.optimize import minimize
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss, brier_score_loss
-from sklearn.calibration import CalibratedClassifierCV
 from sklearn import metrics
 
 # A class for calibrating the baseline model using temperature scaling
@@ -124,7 +119,3 @@ class TFIDFBaselineCalibrator:
                     'validation_accuracy': accuracy,
                     'classification_report': classification_report
                 }, f)
-        
-
-
-    
