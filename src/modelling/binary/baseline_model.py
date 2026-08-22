@@ -69,15 +69,19 @@ class TFIDFBaselineModel:
         y_pred = self.model.predict(self.X_validation)
         accuracy = metrics.accuracy_score(self.y_validation, y_pred)
         classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
+        brier = metrics.brier_score_loss(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
         if output_format == 'txt':
-            with open(os.path.join(output_dir, 'metrics.txt'), 'w') as f:
+            with open(os.path.join(output_dir, 'baseline_uncalibrated_validation_metrics.txt'), 'w') as f:
                 f.write(f'Validation Accuracy: {accuracy:.4f}\n')
                 f.write(f'Classification Report: \n{classification_report}\n')
+                f.write(f'Validation Brier score: {brier:.4f}\n')
+
         elif output_format == 'json':
-            with open(os.path.join(output_dir, 'metrics.json'), 'w') as f:
+            with open(os.path.join(output_dir, 'baseline_uncalibrated_validation_metrics.json'), 'w') as f:
                 json.dump({
                     'validation_accuracy': accuracy,
-                    'classification_report': classification_report
+                    'classification_report': classification_report,
+                    'validation_brier_score': brier
                 }, f)
 
 
