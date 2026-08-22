@@ -56,12 +56,16 @@ class TFIDFBaselineModel:
     def save_model(self, output_dir):
         # Save the trained model, vectorizer, and label encoder to the specified output directory
         os.makedirs(output_dir, exist_ok=True)
-        with open(os.path.join(output_dir, 'model.pkl'), 'wb') as f:
-            pickle.dump(self.model, f)
-        with open(os.path.join(output_dir, 'vectorizer.pkl'), 'wb') as f:
-            pickle.dump(self.vectorizer, f)
-        with open(os.path.join(output_dir, 'label_encoder.pkl'), 'wb') as f:
-            pickle.dump(self.label_encoder, f)
+        artifacts = {
+                    'model': self.model,
+                    'vectorizer': self.vectorizer,
+                    'encoder': self.label_encoder
+                    }
+                
+        filepath = os.path.join(output_dir, 'uncalibrated_baseline_meta.pkl')
+        with open(filepath, 'wb') as f:
+            pickle.dump(artifacts, f)
+        print(f'Uncalibrated model artifacts saved to {filepath}')
 
     def save_metrics(self, output_dir, output_format='txt'):
         # Save the evaluation metrics to a text file in the specified output directory
@@ -69,19 +73,15 @@ class TFIDFBaselineModel:
         y_pred = self.model.predict(self.X_validation)
         accuracy = metrics.accuracy_score(self.y_validation, y_pred)
         classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
-        brier = metrics.brier_score_loss(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
         if output_format == 'txt':
-            with open(os.path.join(output_dir, 'baseline_uncalibrated_validation_metrics.txt'), 'w') as f:
+            with open(os.path.join(output_dir, 'baseline_validation_metrics.txt'), 'w') as f:
                 f.write(f'Validation Accuracy: {accuracy:.4f}\n')
                 f.write(f'Classification Report: \n{classification_report}\n')
-                f.write(f'Validation Brier score: {brier:.4f}\n')
-
         elif output_format == 'json':
-            with open(os.path.join(output_dir, 'baseline_uncalibrated_validation_metrics.json'), 'w') as f:
+            with open(os.path.join(output_dir, 'baseline_validation_metrics.json'), 'w') as f:
                 json.dump({
                     'validation_accuracy': accuracy,
-                    'classification_report': classification_report,
-                    'validation_brier_score': brier
+                    'classification_report': classification_report
                 }, f)
 
 
