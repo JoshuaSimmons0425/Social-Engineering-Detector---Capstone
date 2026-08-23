@@ -1,5 +1,4 @@
 import os
-
 import torch
 import torch.nn as nn
 from torch.amp import autocast
@@ -9,16 +8,21 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 from sklearn import metrics
 
 class BERTClassifier(nn.Module):
-    def __init__(self, n_classes, train_loader, val_loader, pretrained_model_name='answerdotai/ModernBERT-base'):
+    def __init__(self, n_classes, train_loader, val_loader, optimizer, criterion, epochs, pretrained_model_name='answerdotai/ModernBERT-base'):
         super(BERTClassifier, self).__init__()
         self.bert = AutoModel.from_pretrained(pretrained_model_name)
         self.drop = nn.Dropout(p=0.3)
         self.out = nn.Linear(self.bert.config.hidden_size, n_classes)
         self.train_loader = train_loader
         self.val_loader = val_loader
+        self.optimizer = optimizer
+        self.criterion = criterion
+        self.epochs = epochs
 
         self.training_losses = []
         self.validation_losses = []
+        self.all_preds = []
+        self.all_labels = []
 
         # metrics for evaluation
         self.accuracy = None
@@ -38,7 +42,10 @@ class BERTClassifier(nn.Module):
         output = self.drop(pooled_output)
         return self.out(output)
 
-    def train_model(self, device, optimizer, criterion, epochs):
+    def train_model(self, device):
+        optimizer = self.optimizer
+        criterion = self.criterion
+        epochs = self.epochs
 
         # Determine device type string safely
         dev_type = 'cuda' if 'cuda' in str(device) else 'cpu'
@@ -90,30 +97,36 @@ class BERTClassifier(nn.Module):
 
     def evaluate_model(self, device):
         self.eval()
-        all_preds = []
-        all_labels = []
+        self.all_preds = []
+        self.all_labels = []
 
         for batch in self.val_loader:
             with torch.no_grad():
                 outputs = self(batch['input_ids'].to(device), batch['attention_mask'].to(device))
 
             preds = torch.argmax(outputs, dim=1)
-
-            all_preds.extend(preds.cpu().numpy())
-            all_labels.extend(batch['labels'].cpu().numpy())
+            self.all_preds.extend(preds.cpu().numpy())
+            self.all_labels.extend(batch['labels'].cpu().numpy())
                 
-        self.accuracy = metrics.accuracy_score(all_labels, all_preds)
-        self.classification_report = classification_report(all_labels, all_preds, target_names = self.val_loader.dataset.classes)
+        self.accuracy = metrics.accuracy_score(self.all_labels, self.all_preds)
+        class_names = getattr(self.val_loader.dataset, 'classes', None)
+        self.classification_report = classification_report(self.all_labels, self.all_preds, target_names=class_names)
         
         print(f'Validation Accuracy: {self.accuracy}')
         print(f'Classification Report:\n{self.classification_report}')
 
+    def run_pipeline(self, device):
+        self.train_model(device)
+        self.evaluate_model(device)
+
     def plot_visuals(self):
-        assert self.classification_report is not None, "Please run evaluate_model() before plotting visuals."
-        cm = confusion_matrix(self.val_loader.dataset.targets, self.val_loader.dataset.classes.index(self.classification_report.splitlines()[1].split()[0]))
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=self.val_loader.dataset.classes)
-        disp.plot(cmap=plt.cm.Blues)
-        self.confusion_matrix = disp.figure_
+        assert hasattr(self, 'all_labels'), "Please run evaluate_model() before plotting visuals."
+        cm = confusion_matrix(self.all_labels, self.all_preds)
+        class_names = getattr(self.val_loader.dataset, 'classes', None)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+        fig_cm, ax = plt.subplots(figsize=(6, 6))
+        disp.plot(cmap=plt.cm.Blues, ax=ax)
+        self.confusion_matrix = fig_cm
 
         loss_curve = plt.figure()
         plt.plot(self.training_losses, label='Training Loss')
@@ -125,6 +138,8 @@ class BERTClassifier(nn.Module):
         self.loss_curve = loss_curve
 
     def save_model(self, path):
+        if os.path.dirname(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
         torch.save(self.state_dict(), path)
 
     def save_metrics(self, path, output_format='txt'):
@@ -141,12 +156,17 @@ class BERTClassifier(nn.Module):
                 json.dump({
                     'validation_accuracy': self.accuracy,
                     'classification_report': self.classification_report
-                }, f)
+                }, f, indent=4)
         else:
             raise ValueError(f"Unsupported output format: {output_format}")
 
-        assert self.confusion_matrix is not None and self.loss_curve is not None, "Please run plot_visuals() before saving the visuals."
-        self.confusion_matrix.savefig(os.path.join(os.path.dirname(path), 'confusion_matrix.png'))
-        self.loss_curve.savefig(os.path.join(os.path.dirname(path), 'loss_curve.png'))
+        assert hasattr(self, 'confusion_matrix') and hasattr(self, 'loss_curve'), "Please run plot_visuals() before saving the visuals."
+        
+        output_dir = os.path.dirname(path) if os.path.dirname(path) else '.'
+        self.confusion_matrix.savefig(os.path.join(output_dir, 'confusion_matrix.png'), bbox_inches='tight')
+        self.loss_curve.savefig(os.path.join(output_dir, 'loss_curve.png'), bbox_inches='tight')
+
+        plt.close(self.confusion_matrix)
+        plt.close(self.loss_curve)
 
         
