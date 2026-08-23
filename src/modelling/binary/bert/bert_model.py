@@ -1,14 +1,14 @@
 import os
+import json
 import torch
 import torch.nn as nn
-from torch.amp import autocast
 from transformers import AutoModel
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 from sklearn import metrics
 
 class BERTClassifier(nn.Module):
-    def __init__(self, n_classes, train_loader, val_loader, optimizer, criterion, epochs, pretrained_model_name='answerdotai/ModernBERT-base'):
+    def __init__(self, n_classes, train_loader, val_loader, optimizer, criterion, epochs, learning_rate, pretrained_model_name='answerdotai/ModernBERT-base'):
         super(BERTClassifier, self).__init__()
         self.bert = AutoModel.from_pretrained(pretrained_model_name)
         self.drop = nn.Dropout(p=0.3)
@@ -18,6 +18,7 @@ class BERTClassifier(nn.Module):
         self.optimizer = optimizer
         self.criterion = criterion
         self.epochs = epochs
+        self.learning_rate = learning_rate
 
         self.training_losses = []
         self.validation_losses = []
@@ -35,15 +36,22 @@ class BERTClassifier(nn.Module):
             input_ids=input_ids,
             attention_mask=attention_mask
         )
-        if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-            pooled_output = outputs.pooler_output
-        else:
-            pooled_output = outputs.last_hidden_state[:, 0, :]
+        last_hidden = outputs.last_hidden_state 
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(last_hidden.size()).float()
+        sum_embeddings = torch.sum(last_hidden * input_mask_expanded, 1)
+        sum_mask = input_mask_expanded.sum(1)
+        sum_mask = torch.clamp(sum_mask, min=1e-9)
+        pooled_output = sum_embeddings / sum_mask
+        
         output = self.drop(pooled_output)
         return self.out(output)
-
+    
     def train_model(self, device):
-        optimizer = self.optimizer
+        if self.optimizer == "adamw":
+            optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
+        else:
+            optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+
         criterion = self.criterion
         epochs = self.epochs
 
@@ -52,28 +60,47 @@ class BERTClassifier(nn.Module):
         # CPU autocast uses bfloat16, GPU uses float16
         amp_dtype = torch.float16 if dev_type == 'cuda' else torch.bfloat16
 
+        scaler = torch.amp.GradScaler(device=dev_type) if dev_type == 'cuda' else None
+
+        accumulation_steps = 4
+
         if self.training_losses is not None and self.validation_losses is not None:
             self.training_losses = [] # Reset loss lists at the start of training
             self.validation_losses = []
+
+        print(f"Starting training on {dev_type.upper()} for {epochs} epochs with optimizer {self.optimizer} and learning rate {self.learning_rate}" + "\n")
         
         for epoch in range(epochs):
             self.train()
             total_loss = 0
-            for batch in self.train_loader:
+            optimizer.zero_grad()
+
+            for batch_idx, batch in enumerate(self.train_loader):
+
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
                 labels = batch['labels'].to(device)
 
-                optimizer.zero_grad()
-
-                with autocast(device_type=dev_type, dtype=amp_dtype):
+                with torch.amp.autocast(device_type=dev_type, dtype=amp_dtype):
                     outputs = self(input_ids, attention_mask)
-                    loss = criterion(outputs, labels)
+                    loss = criterion(outputs, labels)   
 
-                loss.backward()
-                optimizer.step()
+                    loss = loss / accumulation_steps  # Normalize loss for gradient accumulation
 
-                total_loss += loss.item()
+                # 4. Scale loss and step using the scaler
+                if scaler is not None:
+                    scaler.scale(loss).backward()
+                    if (batch_idx + 1) % accumulation_steps == 0 or (batch_idx + 1) == len(self.train_loader):
+                        scaler.step(optimizer)
+                        scaler.update()
+                        optimizer.zero_grad()
+                else:
+                    loss.backward()
+                    if (batch_idx + 1) % accumulation_steps == 0 or (batch_idx + 1) == len(self.train_loader):
+                        optimizer.step()
+                        optimizer.zero_grad()
+
+                total_loss += loss.item() * accumulation_steps  # Multiply back to get the original loss value
 
             self.training_losses.append(total_loss / len(self.train_loader))
 
@@ -116,8 +143,10 @@ class BERTClassifier(nn.Module):
         print(f'Classification Report:\n{self.classification_report}')
 
     def run_pipeline(self, device):
+        self.to(device)
         self.train_model(device)
         self.evaluate_model(device)
+        self.plot_visuals()
 
     def plot_visuals(self):
         assert hasattr(self, 'all_labels'), "Please run evaluate_model() before plotting visuals."
@@ -144,14 +173,15 @@ class BERTClassifier(nn.Module):
 
     def save_metrics(self, path, output_format='txt'):
 
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if os.path.dirname(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            
         if output_format == 'txt':
             with open(path, 'w') as f:
                 f.write(f'Validation Accuracy: {self.accuracy}\n')
                 f.write(f'Classification Report:\n{self.classification_report}\n')
 
         elif output_format == 'json':
-            import json
             with open(path, 'w') as f:
                 json.dump({
                     'validation_accuracy': self.accuracy,

@@ -132,6 +132,7 @@ class TFIDFBaselineCalibrator:
 
     def save_calibration_metrics(self, output_dir, output_format='txt'):
         # Save the evaluation metrics to a text file in the specified output directory
+        assert self.calibrated_metrics is not None and self.uncalibrated_metrics is not None, "Please run the calibration pipeline before saving metrics."
         os.makedirs(output_dir, exist_ok=True)
         
         if output_format == 'txt':
