@@ -5,6 +5,7 @@ import os
 import joblib
 import pickle
 import json
+import matplotlib.pyplot as plt
 from sklearn import model_selection, preprocessing, metrics
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
@@ -70,7 +71,7 @@ class TFIDFBaselineModel:
         os.makedirs(output_dir, exist_ok=True)
         y_pred = self.model.predict(self.X_validation)
         accuracy = metrics.accuracy_score(self.y_validation, y_pred)
-        classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
+        classification_report = metrics.classification_report(self.y_validation, y_pred, digits=4, target_names=self.label_encoder.classes_)
         if output_format == 'txt':
             with open(os.path.join(output_dir, 'baseline_validation_metrics.txt'), 'w') as f:
                 f.write(f'Validation Accuracy: {accuracy:.4f}\n')
@@ -81,6 +82,15 @@ class TFIDFBaselineModel:
                     'validation_accuracy': accuracy,
                     'classification_report': classification_report
                 }, f)
+
+        cm = metrics.confusion_matrix(self.y_validation, y_pred)
+        class_names = self.label_encoder.classes_
+        cm_filepath = os.path.join(output_dir, 'baseline_confusion_matrix.png')
+        disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+        fig_cm, ax = plt.subplots(figsize=(6, 6))
+        disp.plot(cmap=plt.cm.Blues, ax=ax)
+        fig_cm.savefig(cm_filepath, bbox_inches='tight')
+        
 
 
         

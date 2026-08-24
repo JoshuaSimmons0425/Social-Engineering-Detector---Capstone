@@ -1,7 +1,8 @@
 import gc
 import sys
 import torch 
-from torch.nn import BCELoss
+import yaml
+from torch.nn import BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 import pandas as pd
 from src.datasets.textdatasets import TextDataset
@@ -29,27 +30,37 @@ def main():
 
     # Train the Bert model and evaluate it
 
-    training_data = TextDataset(training_set, mode='answerdotai/ModernBERT-base', max_len=512)
+    with open('config/binary_model.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+
+    batch_size = config['data']['batch_size']
+    tokenizer_name = config['data']['tokenizer_name']
+    max_len = config['data']['max_len']
+    
+
+    training_data = TextDataset(training_set, mode=tokenizer_name, max_len=max_len)
     fitted_encoder = training_data.preprocess_labels(training=True)
 
-    validation_data = TextDataset(validation_set, mode='answerdotai/ModernBERT-base', max_len=512, encoder=fitted_encoder)
+    validation_data = TextDataset(validation_set, mode=tokenizer_name, max_len=max_len, encoder=fitted_encoder)
     validation_data.preprocess_labels(training=False)
 
-    training_loader = DataLoader(training_data, batch_size=4, shuffle=True, num_workers=0)
-    validation_loader = DataLoader(validation_data, batch_size=4, shuffle=False, num_workers=0)
+    training_loader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
+    validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=False)
+    learning_rate = float(config['bert_model']['learning_rate'])
+    n_classes = config['bert_model']['n_classes']
+    epochs = config['bert_model']['epochs']
+    optimizer = config['bert_model']['optimizer']
+    model_name = config['bert_model']['model_name']
+        
 
-    epochs = 5
-    optimizer = "adamw"
-    learning_rate = 2e-5
     bert_model = BERTClassifier(
-        n_classes=2,
+        n_classes=n_classes,
         train_loader=training_loader,
         val_loader=validation_loader,
         optimizer=optimizer,
-        criterion=BCELoss(),
         epochs=epochs,
         learning_rate=learning_rate,
-        pretrained_model_name='answerdotai/ModernBERT-base'
+        pretrained_model_name=model_name
     )
     bert_model.run_pipeline(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 

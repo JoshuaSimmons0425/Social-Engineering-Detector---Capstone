@@ -121,7 +121,7 @@ class BERTClassifier(nn.Module):
 
             print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {total_loss / len(self.train_loader)}, Validation Loss: {validation_loss / len(self.val_loader)}')
             
-        print(f'Training Loss: {total_loss / len(self.train_loader)}, Validation Loss: {validation_loss / len(self.val_loader)}')
+        print(f'Training Loss: {total_loss / len(self.train_loader):.4f}, Validation Loss: {validation_loss / len(self.val_loader):.4f}')
 
     def evaluate_model(self, device):
         self.eval()
@@ -142,7 +142,7 @@ class BERTClassifier(nn.Module):
                 
         self.accuracy = metrics.accuracy_score(self.all_labels, self.all_preds)
         class_names = getattr(self.val_loader.dataset, 'classes', None)
-        self.classification_report = classification_report(self.all_labels, self.all_preds, target_names=class_names)
+        self.classification_report = classification_report(self.all_labels, self.all_preds, digits=4, target_names=class_names)
         
         print(f'Validation Accuracy: {self.accuracy}')
         print(f'Classification Report:\n{self.classification_report}')
