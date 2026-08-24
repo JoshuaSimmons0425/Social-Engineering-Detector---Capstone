@@ -8,7 +8,7 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 from sklearn import metrics
 
 class BERTClassifier(nn.Module):
-    def __init__(self, n_classes, train_loader, val_loader, optimizer, criterion, epochs, learning_rate, pretrained_model_name='answerdotai/ModernBERT-base'):
+    def __init__(self, n_classes, train_loader, val_loader, optimizer, epochs, learning_rate, pretrained_model_name='answerdotai/ModernBERT-base'):
         super(BERTClassifier, self).__init__()
         self.bert = AutoModel.from_pretrained(pretrained_model_name)
         self.drop = nn.Dropout(p=0.3)
@@ -16,12 +16,13 @@ class BERTClassifier(nn.Module):
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.optimizer = optimizer
-        self.criterion = criterion
+        self.criterion = nn.BCEWithLogitsLoss()
         self.epochs = epochs
         self.learning_rate = learning_rate
 
         self.training_losses = []
         self.validation_losses = []
+        self.all_probs = []
         self.all_preds = []
         self.all_labels = []
 
@@ -51,7 +52,7 @@ class BERTClassifier(nn.Module):
             optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
         else:
             optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-
+    
         criterion = self.criterion
         epochs = self.epochs
 
@@ -79,11 +80,11 @@ class BERTClassifier(nn.Module):
 
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
-                labels = batch['labels'].to(device)
+                labels = batch['labels'].to(device).float()  # Ensure labels are float for BCEWithLogitsLoss
 
                 with torch.amp.autocast(device_type=dev_type, dtype=amp_dtype):
-                    outputs = self(input_ids, attention_mask)
-                    loss = criterion(outputs, labels)   
+                    outputs = self(input_ids, attention_mask).squeeze(-1)
+                    loss = criterion(outputs, labels)
 
                     loss = loss / accumulation_steps  # Normalize loss for gradient accumulation
 
@@ -110,9 +111,9 @@ class BERTClassifier(nn.Module):
                 for batch in self.val_loader:
                     input_ids = batch['input_ids'].to(device)
                     attention_mask = batch['attention_mask'].to(device)
-                    labels = batch['labels'].to(device)
+                    labels = batch['labels'].to(device).float()  
 
-                    outputs = self(input_ids, attention_mask)
+                    outputs = self(input_ids, attention_mask).squeeze(-1)
                     loss = criterion(outputs, labels)
                     validation_loss += loss.item()
 
@@ -124,14 +125,18 @@ class BERTClassifier(nn.Module):
 
     def evaluate_model(self, device):
         self.eval()
+
+        self.all_probs = []
         self.all_preds = []
         self.all_labels = []
 
         for batch in self.val_loader:
             with torch.no_grad():
                 outputs = self(batch['input_ids'].to(device), batch['attention_mask'].to(device))
+                probs = torch.sigmoid(outputs).squeeze(-1)
 
-            preds = torch.argmax(outputs, dim=1)
+            preds = (probs > 0.5).long()
+            self.all_probs.extend(probs.cpu().numpy())
             self.all_preds.extend(preds.cpu().numpy())
             self.all_labels.extend(batch['labels'].cpu().numpy())
                 

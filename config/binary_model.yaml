@@ -1,0 +1,7 @@
+bert_model: 
+  batch_size: 4
+  learning_rate: 2e-5
+  tokenizer: "answerdotai/ModernBERT-base"
+  epochs: 5
+  optimizer: "adamw"
+  n_classes: 1
