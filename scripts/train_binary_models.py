@@ -35,7 +35,7 @@ def main():
 
     batch_size = config['data']['batch_size']
     tokenizer_name = config['data']['tokenizer_name']
-    max_len = config['data']['max_len']
+    max_len = config['data']['max_length']
     
 
     training_data = TextDataset(training_set, mode=tokenizer_name, max_len=max_len)
@@ -46,6 +46,7 @@ def main():
 
     training_loader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
     validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=False)
+
     learning_rate = float(config['bert_model']['learning_rate'])
     n_classes = config['bert_model']['n_classes']
     epochs = config['bert_model']['epochs']
@@ -65,11 +66,13 @@ def main():
     bert_model.run_pipeline(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
     # Save the trained models and their evaluation metrics
-
     baseline_model.save_model(output_dir='models/binary/baseline/uncalibrated')
     baseline_model.save_metrics(output_dir='experiments/binary/baseline/uncalibrated', output_format='txt')
     bert_model.save_model(path='models/binary/bert/uncalibrated/uncalibrated_bert_model.pt')
     bert_model.save_metrics(path='experiments/binary/bert/uncalibrated/uncalibrated_bert_model_metrics.txt', output_format='txt')
+
+    # Save the fitted label encoder for future use
+    training_data.save_encoder(output_dir='models/binary/bert/uncalibrated')
 
     sys.exit(0)
 

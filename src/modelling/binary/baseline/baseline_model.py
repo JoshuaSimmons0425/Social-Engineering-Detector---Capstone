@@ -43,7 +43,7 @@ class TFIDFBaselineModel:
 
         # Calculate accuracy
         accuracy = metrics.accuracy_score(self.y_validation, y_pred)
-        classification_report = metrics.classification_report(self.y_validation, y_pred, target_names=self.label_encoder.classes_)
+        classification_report = metrics.classification_report(self.y_validation, y_pred, digits=4, target_names=self.label_encoder.classes_)
         print(f'Validation Accuracy: {accuracy:.4f}')
         print(f'Classification Report: \n{classification_report}')
 

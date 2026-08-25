@@ -119,9 +119,9 @@ class BERTClassifier(nn.Module):
 
             self.validation_losses.append(validation_loss / len(self.val_loader))
 
-            print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {total_loss / len(self.train_loader)}, Validation Loss: {validation_loss / len(self.val_loader)}')
+            print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {total_loss / len(self.train_loader):.4f}, Validation Loss: {validation_loss / len(self.val_loader):.4f}')
             
-        print(f'Training Loss: {total_loss / len(self.train_loader):.4f}, Validation Loss: {validation_loss / len(self.val_loader):.4f}')
+        print(f'Final Training Loss: {total_loss / len(self.train_loader):.4f}, Final Validation Loss: {validation_loss / len(self.val_loader):.4f}')
 
     def evaluate_model(self, device):
         self.eval()
