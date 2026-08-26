@@ -26,6 +26,8 @@ def main():
     # Train and evaluate the baseline model
 
     baseline_model = TFIDFBaselineModel(training_set, validation_set, text_column=text_column, label_column=label_column)
+
+    print("Running the pipeline for the baseline model...")
     baseline_model.run_pipeline()
 
     # Train the Bert model and evaluate it
@@ -63,6 +65,8 @@ def main():
         learning_rate=learning_rate,
         pretrained_model_name=model_name
     )
+
+    print("Running the pipeline for the BERT model...")
     bert_model.run_pipeline(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
     # Save the trained models and their evaluation metrics

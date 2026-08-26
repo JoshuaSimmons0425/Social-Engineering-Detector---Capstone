@@ -90,7 +90,19 @@ class TFIDFBaselineModel:
         fig_cm, ax = plt.subplots(figsize=(6, 6))
         disp.plot(cmap=plt.cm.Blues, ax=ax)
         fig_cm.savefig(cm_filepath, bbox_inches='tight')
-        
+
+        roc_auc = metrics.roc_auc_score(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
+        fpr, tpr, _ = metrics.roc_curve(self.y_validation, self.model.predict_proba(self.X_validation)[:, 1])
+        fig_roc, ax = plt.subplots(figsize=(6, 6))
+        ax.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.4f})')
+        ax.plot([0, 1], [0, 1], 'k--')
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Positive Rate')
+        ax.set_title('Receiver Operating Characteristic of Baseline Model')
+        ax.legend(loc="lower right")
+        fig_roc.savefig(os.path.join(output_dir, 'baseline_roc_curve.png'), bbox_inches='tight')
 
 
         

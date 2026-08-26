@@ -25,11 +25,13 @@ class BERTClassifier(nn.Module):
         self.all_probs = []
         self.all_preds = []
         self.all_labels = []
+        self.y_true = []  # Store true labels for ROC AUC calculation
 
         # metrics for evaluation
         self.accuracy = None
         self.classification_report = None
         self.confusion_matrix = None
+        self.roc_auc = None
         self.loss_curve = None
 
     def forward(self, input_ids, attention_mask):
@@ -171,6 +173,19 @@ class BERTClassifier(nn.Module):
         plt.legend()
         self.loss_curve = loss_curve
 
+        roc_auc = metrics.roc_auc_score(self.all_labels, self.all_probs)
+        fpr, tpr, _ = metrics.roc_curve(self.all_labels, self.all_probs)
+        fig_roc, ax = plt.subplots(figsize=(6, 6))
+        ax.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.4f})')
+        ax.plot([0, 1], [0, 1], 'k--')
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Positive Rate')
+        ax.set_title('Receiver Operating Characteristic of BERT Model')
+        ax.legend(loc="lower right")
+        self.roc_auc = fig_roc
+
     def save_model(self, path):
         if os.path.dirname(path):
             os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -200,8 +215,10 @@ class BERTClassifier(nn.Module):
         output_dir = os.path.dirname(path) if os.path.dirname(path) else '.'
         self.confusion_matrix.savefig(os.path.join(output_dir, 'confusion_matrix.png'), bbox_inches='tight')
         self.loss_curve.savefig(os.path.join(output_dir, 'loss_curve.png'), bbox_inches='tight')
+        self.roc_auc.savefig(os.path.join(output_dir, 'roc_auc_curve.png'), bbox_inches='tight')
 
         plt.close(self.confusion_matrix)
         plt.close(self.loss_curve)
+        plt.close(self.roc_auc)
 
         
