@@ -6,52 +6,292 @@ from torch import nn
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import metrics
+from sklearn.calibration import calibration_curve
 from scipy.optimize import minimize
-from sklearn.metrics import log_loss, brier_score_loss
+from sklearn.metrics import log_loss, brier_score_loss, accuracy_score, classification_report
 
 class TemperatureScaler(nn.Module):
     def __init__(self):
         super(TemperatureScaler, self).__init__()
-        self.temperature = nn.Parameter(torch.ones(1) * 1.5)
+        # Initialise temperature parameter at 1.5
+        self.temperature = nn.Parameter(torch.tensor([1.5], dtype=torch.float32))
 
     def forward(self, logits):
-        return logits / self.temperature
+        # Enforce a strict minimum temperature value to prevent division by zero
+        clamped_temp = torch.clamp(self.temperature, min=1e-4)
+        return logits / clamped_temp
 
-    def fit(self, logits, labels):
-        nll_criterion = nn.BCEWithLogitsLoss()
-        logits_tensor = torch.tensor(logits, dtype=torch.float32)
-        labels_tensor = torch.tensor(labels, dtype=torch.float32)
+    def fit(self, logits_list, labels_list, device):
+        """Fits temperature using PyTorch's native LBFGS optimizer."""
+        self.to(device)
+        self.temperature.requires_grad = True
+        
+        # Convert collected lists to tensors
+        logits_tensor = torch.cat(logits_list, dim=0).to(device)
+        labels_tensor = torch.cat(labels_list, dim=0).to(device).float()
 
-        def loss_fn(temp):
-            temp = torch.tensor(temp, requires_grad=True)
-            scaled_logits = logits_tensor / temp
-            loss = nll_criterion(scaled_logits, labels_tensor)
-            return loss.item()
+        # BCEWithLogitsLoss expects labels matching logit dimensions (usually squeezed for binary)
+        criterion = nn.BCEWithLogitsLoss()
+        optimizer = torch.optim.LBFGS([self.temperature], lr=0.01, max_iter=100)
 
-        result = minimize(loss_fn, x0=[1.5], bounds=[(1e-6, None)], method='L-BFGS-B')
-        self.temperature.data = torch.tensor(result.x[0], dtype=torch.float32)
+        def closure():
+            optimizer.zero_grad()
+            scaled_logits = self(logits_tensor).squeeze(-1) # Align dimensions if necessary
+            loss = criterion(scaled_logits, labels_tensor)
+            loss.backward()
+            return loss
 
+        optimizer.step(closure)
+        print(f"Optimized temperature: {self.temperature.item():.4f}")
 
 class BinaryBERTCalibrator:
-    def __init__(self, model, device, scaler=None):
+    def __init__(self, model, device, calibration_loader, validation_loader, scaler=None):
         self.model = model
         self.device = device
+        self.calibration_loader = calibration_loader
+        self.validation_loader = validation_loader
         self.scaler = scaler if scaler is not None else TemperatureScaler().to(device)
 
-        self.brier_score = None
-        self.log_loss = None
-        
-    def calibrate(self, logits, labels):
-        self.scaler.fit(logits, labels)
+        self.uncal_val_probs = None
+        self.cal_val_probs = None
+        self.val_labels = None
 
-    def predict(self, logits):
-        logits_tensor = torch.tensor(logits, dtype=torch.float32).to(self.device)
-        scaled_logits = self.scaler(logits_tensor)
-        probs = torch.sigmoid(scaled_logits).cpu().detach().numpy()
-        return probs
+        self.uncalibrated_metrics = {}
+        self.calibrated_metrics = {}
 
-    def evaluate(self, logits, labels):
-        probs = self.predict(logits)
-        self.brier_score = brier_score_loss(labels, probs)
-        self.log_loss = log_loss(labels, probs)
-        return self.brier_score, self.log_loss
+        self.diagrams = None
+        self.optimal_threshold = 0.5
+
+    def forward(self, input_ids, attention_mask):
+        self.model.eval()
+        with torch.no_grad():
+            output = self.model(input_ids=input_ids, attention_mask=attention_mask)
+            logits = output.logits
+
+        calibrated_logits = self.scaler(logits)
+        return calibrated_logits
+
+    def calibrate(self):
+        self.model.eval()
+        logits_list = []
+        labels_list = []
+
+        with torch.no_grad():
+            for batch in self.calibration_loader:
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                labels = batch['labels']
+
+                output = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                logits = output.cpu()
+
+                logits_list.append(logits)
+                labels_list.append(labels)
+
+        self.scaler.fit(logits_list, labels_list, self.device)
+
+    def get_before_and_after_probs(self):
+            """
+            Helper method to extract both raw and calibrated probabilities 
+            over the validation dataset for a fair visualization baseline.
+            """
+            self.model.eval()
+            self.scaler.to(self.device)
+            raw_probs_list = []
+            cal_probs_list = []
+            labels_list = []
+    
+            with torch.no_grad():
+                for batch in self.validation_loader:
+                    input_ids = batch['input_ids'].to(self.device)
+                    attention_mask = batch['attention_mask'].to(self.device)
+                    labels = batch['labels'].numpy()
+    
+                    # 1. Fetch raw logit outputs on the active target hardware engine (e.g. cuda)
+                    raw_logits = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                    
+                    # Compute raw uncalibrated probabilities on GPU, then extract to CPU NumPy array
+                    raw_probs = torch.sigmoid(raw_logits.squeeze(-1)).cpu().numpy()
+
+                    # 2. Compute calibrated logit outputs directly on the same hardware engine
+                    # Pass the raw GPU logits directly to your GPU-bound scaler
+                    cal_logits = self.scaler(raw_logits)
+                    
+                    # Compute calibrated probabilities on GPU, then extract to CPU NumPy array
+                    cal_probs = torch.sigmoid(cal_logits.squeeze(-1)).cpu().numpy()
+    
+                    raw_probs_list.append(raw_probs)
+                    cal_probs_list.append(cal_probs)
+                    labels_list.append(labels)
+    
+            # Force clean 1D tracking arrays 
+            self.uncal_val_probs = np.concatenate(raw_probs_list, axis=0).ravel()
+            self.cal_val_probs = np.concatenate(cal_probs_list, axis=0).ravel()
+            self.val_labels = np.concatenate(labels_list, axis=0).ravel()
+
+    def dynamic_decision_threshold(self, metric = "f1"):
+
+            if self.cal_val_probs is None or self.val_labels is None:
+                self.get_before_and_after_probs()
+            
+            thresholds = np.linspace(0, 1, 101)
+            best_threshold = 0.5
+            best_metric_value = -np.inf
+    
+            for threshold in thresholds:
+                preds = (self.cal_val_probs >= threshold).astype(int)
+                if metric == "f1":
+                    metric_value = metrics.f1_score(self.val_labels, preds)
+                elif metric == "f2":
+                    metric_value = metrics.fbeta_score(self.val_labels, preds, beta=2)
+                elif metric == "f0.5":
+                    metric_value = metrics.fbeta_score(self.val_labels, preds, beta=0.5)
+                else:
+                    raise ValueError(f"Unsupported metric: {metric}")
+    
+                if metric_value > best_metric_value:
+                    best_metric_value = metric_value
+                    best_threshold = threshold
+    
+            print(f"Optimal decision threshold for {metric}: {best_threshold:.4f} with {metric} score: {best_metric_value:.4f}")
+            self.optimal_threshold = best_threshold
+    
+
+    def evaluate(self):
+        if self.uncal_val_probs is None or self.cal_val_probs is None or self.val_labels is None:
+            self.get_before_and_after_probs()
+
+        self.calibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.cal_val_probs)
+        self.calibrated_metrics['log_loss'] = log_loss(self.val_labels, self.cal_val_probs)
+        self.calibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int))
+        self.calibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int), output_dict=True)
+
+        self.uncalibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.uncal_val_probs)
+        self.uncalibrated_metrics['log_loss'] = log_loss(self.val_labels, self.uncal_val_probs)
+        self.uncalibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int))
+        self.uncalibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int), output_dict=True)
+
+        print("\n --- Performance Comparison Before vs After Calibration ---")
+        print(f"Brier Score -> Before: {self.uncalibrated_metrics['brier_score']:.4f} | After: {self.calibrated_metrics['brier_score']:.4f}")
+        print(f"Log Loss    -> Before: {self.uncalibrated_metrics['log_loss']:.4f} | After: {self.calibrated_metrics['log_loss']:.4f}")
+        print(f"Accuracy    -> Before: {self.uncalibrated_metrics['accuracy']:.4f} | After: {self.calibrated_metrics['accuracy']:.4f}")
+
+    def plot_visualizations(self, n_bins=10):
+            """
+            Generates a 1x3 dashboard featuring the Reliability Diagram, 
+            PR-AUC curve, and Confusion Matrix comparing performance before/after.
+            """
+
+            if self.uncal_val_probs is None or self.cal_val_probs is None or self.val_labels is None:
+                self.get_before_and_after_probs()
+            # Construct single layout canvas
+            fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
+    
+            # ==========================================
+            # 1. RELIABILITY DIAGRAM
+            # ==========================================
+            
+            # Calculate curve details
+            uncal_true, uncal_pred = calibration_curve(self.val_labels, self.uncal_val_probs, n_bins=n_bins)
+            cal_true, cal_pred = calibration_curve(self.val_labels, self.cal_val_probs, n_bins=n_bins)
+    
+            ax1.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
+            ax1.plot(uncal_pred, uncal_true, marker='s', color='tab:red', label='Before Calibration')
+            ax1.plot(cal_pred, cal_true, marker='o', color='tab:green', label='After Calibration')
+            
+            ax1.set_xlabel('Mean Predicted Probability')
+            ax1.set_ylabel('Fraction of Positives')
+            ax1.set_title('Reliability Diagram')
+            ax1.legend(loc='lower right')
+            ax1.grid(True, linestyle=':')
+    
+            # ==========================================
+            # 2. PRECISION-RECALL AUC CURVE
+            # ==========================================
+            # Uncalibrated curve stats
+            uncal_prec, uncal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.uncal_val_probs)
+            uncal_auc = metrics.auc(uncal_rec, uncal_prec)
+    
+            # Calibrated curve stats
+            cal_prec, cal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.cal_val_probs)
+            cal_auc = metrics.auc(cal_rec, cal_prec)
+    
+            # Operational baseline (No skill model matches the positive class ratio)
+            no_skill = len(self.val_labels[self.val_labels == 1]) / len(self.val_labels)
+            ax2.plot([0, 1], [no_skill, no_skill], 'k--', label=f'No Skill (AUC = {no_skill:.2f})')
+            
+            ax2.plot(uncal_rec, uncal_prec, color='tab:red', label=f'Before (AUC = {uncal_auc:.4f})')
+            ax2.plot(cal_rec, cal_prec, color='tab:green', label=f'After (AUC = {cal_auc:.4f})')
+            
+            ax2.set_xlabel('Recall')
+            ax2.set_ylabel('Precision')
+            ax2.set_title('Precision-Recall Curve')
+            ax2.legend(loc='lower left')
+            ax2.grid(True, linestyle=':')
+    
+            # ==========================================
+            # 3. CONFUSION MATRIX (POST-CALIBRATION)
+            # ==========================================
+            # Assign classification flags using optimized threshold
+            preds = (self.cal_val_probs >= self.optimal_threshold).astype(int)
+            cm = metrics.confusion_matrix(self.val_labels, preds)
+            disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1])
+            # Render visual overlay context straight into third canvas slot
+            disp.plot(cmap=plt.cm.Blues, ax=ax3, values_format='d')
+            ax3.set_title(f'Confusion Matrix\n(Threshold: {self.optimal_threshold:.2f})')
+    
+            plt.tight_layout()
+            
+            # Archive tracking references back to wrapper
+            self.diagrams = fig
+
+    def run_calibration_pipeline(self):
+        self.calibrate()
+        self.dynamic_decision_threshold(metric="f1")  # Can change the metric as needed
+        self.evaluate()
+        self.plot_visualizations(n_bins=10)
+
+    def save_calibration_artifacts(self, save_dir):
+        os.makedirs(save_dir, exist_ok=True)
+        # Save the temperature scaler and model state dict
+        scaler_path = os.path.join(save_dir, 'temperature_scaler.pt')
+        torch.save(self.scaler.state_dict(), scaler_path)
+
+        model_path = os.path.join(save_dir, 'model_state_dict.pt')
+        torch.save(self.model.state_dict(), model_path)
+
+        decision_threshold_path = os.path.join(save_dir, 'optimal_threshold.json')
+        with open(decision_threshold_path, 'w') as f:
+            json.dump({'optimal_threshold': self.optimal_threshold}, f)
+
+
+    def save_metrics(self, save_dir, output_format='txt'):
+
+        if self.uncalibrated_metrics is not None and self.calibrated_metrics is not None:
+            os.makedirs(save_dir, exist_ok=True)
+            metrics_path = os.path.join(save_dir, f'uncalibrated_metrics.{output_format}')
+            if output_format == 'txt':
+                with open(metrics_path, 'w') as f:
+                    for key, value in self.uncalibrated_metrics.items():
+                        f.write(f"{key}: {value}\n")
+            elif output_format == 'json':
+                with open(metrics_path, 'w') as f:
+                    json.dump(self.uncalibrated_metrics, f)
+            print(f"Saved uncalibrated metrics to {metrics_path}")
+            calibrated_metrics_path = os.path.join(save_dir, f'calibrated_metrics.{output_format}')
+            if output_format == 'txt':
+                with open(calibrated_metrics_path, 'w') as f:
+                    for key, value in self.calibrated_metrics.items():
+                        f.write(f"{key}: {value}\n")
+            elif output_format == 'json':
+                with open(calibrated_metrics_path, 'w') as f:
+                    json.dump(self.calibrated_metrics, f)
+            print(f"Saved calibrated metrics to {calibrated_metrics_path}")
+
+        if self.diagrams is not None:
+            os.makedirs(save_dir, exist_ok=True)
+            viz_path = os.path.join(save_dir, 'calibration_visualizations.png')
+            self.diagrams.savefig(viz_path)
+            print(f"Saved calibration visualizations to {viz_path}")
+        else:
+            print("No visualizations to save. Please run plot_visualizations() first.")

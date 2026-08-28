@@ -72,7 +72,7 @@ def main():
     # Save the trained models and their evaluation metrics
     baseline_model.save_model(output_dir='models/binary/baseline/uncalibrated')
     baseline_model.save_metrics(output_dir='experiments/binary/baseline/uncalibrated', output_format='txt')
-    bert_model.save_model(path='models/binary/bert/uncalibrated/uncalibrated_bert_model.pt')
+    bert_model.save_model(path='models/binary/bert/uncalibrated/uncalibrated_bert_model.pth')
     bert_model.save_metrics(path='experiments/binary/bert/uncalibrated/uncalibrated_bert_model_metrics.txt', output_format='txt')
 
     # Save the fitted label encoder for future use

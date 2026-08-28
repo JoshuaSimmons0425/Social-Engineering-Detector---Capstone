@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import torch
 import torch.nn as nn
 from transformers import AutoModel
@@ -72,11 +73,13 @@ class BERTClassifier(nn.Module):
             self.validation_losses = []
 
         print(f"Starting training on {dev_type.upper()} for {epochs} epochs with optimizer {self.optimizer} and learning rate {self.learning_rate}" + "\n")
-        
+
+        time_per_epoch = []
         for epoch in range(epochs):
             self.train()
             total_loss = 0
             optimizer.zero_grad()
+            start_time = time.time()
 
             for batch_idx, batch in enumerate(self.train_loader):
 
@@ -106,6 +109,8 @@ class BERTClassifier(nn.Module):
                 total_loss += loss.item() * accumulation_steps  # Multiply back to get the original loss value
 
             self.training_losses.append(total_loss / len(self.train_loader))
+            epoch_time = (time.time() - start_time) / 60  # Time in minutes
+            time_per_epoch.append(epoch_time)
 
             self.eval()
             validation_loss = 0
@@ -122,8 +127,8 @@ class BERTClassifier(nn.Module):
             self.validation_losses.append(validation_loss / len(self.val_loader))
 
             print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {total_loss / len(self.train_loader):.4f}, Validation Loss: {validation_loss / len(self.val_loader):.4f}')
-            
-        print(f'Final Training Loss: {total_loss / len(self.train_loader):.4f}, Final Validation Loss: {validation_loss / len(self.val_loader):.4f}')
+            print(f'Time for epoch {epoch + 1}: {epoch_time:.2f} minutes')
+        print(f'Final Training Loss: {total_loss / len(self.train_loader):.4f}, Final Validation Loss: {validation_loss / len(self.val_loader):.4f}, Total Training Time: {sum(time_per_epoch):.2f} minutes' + "\n")
 
     def evaluate_model(self, device):
         self.eval()
@@ -189,7 +194,22 @@ class BERTClassifier(nn.Module):
     def save_model(self, path):
         if os.path.dirname(path):
             os.makedirs(os.path.dirname(path), exist_ok=True)
-        torch.save(self.state_dict(), path)
+        torch.save(self.state_dict, path)
+
+    @staticmethod
+    def load_model(path, n_classes, device, train_loader=None, val_loader=None, optimizer='adam', epochs=3, learning_rate=2e-5):
+        model = BERTClassifier(
+            n_classes=n_classes,
+            train_loader=train_loader,
+            val_loader=val_loader,
+            optimizer=optimizer,
+            epochs=epochs,
+            learning_rate=learning_rate
+        )
+        state_dict = torch.load(path, map_location=device)
+        model.load_state_dict(state_dict)
+        model.to(device)
+        return model
 
     def save_metrics(self, path, output_format='txt'):
 
