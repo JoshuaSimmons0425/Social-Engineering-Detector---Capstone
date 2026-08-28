@@ -104,5 +104,17 @@ class TFIDFBaselineModel:
         ax.legend(loc="lower right")
         fig_roc.savefig(os.path.join(output_dir, 'baseline_roc_curve.png'), bbox_inches='tight')
 
+    @staticmethod
+    def load_model(model_path):
+        with open(model_path, 'rb') as f:
+            artifacts = pickle.load(f)
+        model = artifacts['model']
+        vectorizer = artifacts['vectorizer']
+        label_encoder = artifacts['encoder']
+
+        return model, vectorizer, label_encoder
+
+        
+
 
         
