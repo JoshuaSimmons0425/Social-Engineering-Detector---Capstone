@@ -175,6 +175,7 @@ class BinaryBERTCalibrator:
         print(f"Brier Score -> Before: {self.uncalibrated_metrics['brier_score']:.4f} | After: {self.calibrated_metrics['brier_score']:.4f}")
         print(f"Log Loss    -> Before: {self.uncalibrated_metrics['log_loss']:.4f} | After: {self.calibrated_metrics['log_loss']:.4f}")
         print(f"Accuracy    -> Before: {self.uncalibrated_metrics['accuracy']:.4f} | After: {self.calibrated_metrics['accuracy']:.4f}")
+        print(f"Classification Report -> Before: {self.uncalibrated_metrics['classification_report']} | After: {self.calibrated_metrics['classification_report']}")
 
     def plot_visualizations(self, n_bins=10):
             """
@@ -245,11 +246,11 @@ class BinaryBERTCalibrator:
             # Archive tracking references back to wrapper
             self.diagrams = fig
 
-    def run_calibration_pipeline(self):
+    def run_calibration_pipeline(self, metric="f1", n_bins=10):
         self.calibrate()
-        self.dynamic_decision_threshold(metric="f1")  # Can change the metric as needed
+        self.dynamic_decision_threshold(metric=metric)  # Can change the metric as needed
         self.evaluate()
-        self.plot_visualizations(n_bins=10)
+        self.plot_visualizations(n_bins=n_bins)
 
     def save_calibration_artifacts(self, save_dir):
         os.makedirs(save_dir, exist_ok=True)
@@ -263,7 +264,6 @@ class BinaryBERTCalibrator:
         decision_threshold_path = os.path.join(save_dir, 'optimal_threshold.json')
         with open(decision_threshold_path, 'w') as f:
             json.dump({'optimal_threshold': self.optimal_threshold}, f)
-
 
     def save_metrics(self, save_dir, output_format='txt'):
 

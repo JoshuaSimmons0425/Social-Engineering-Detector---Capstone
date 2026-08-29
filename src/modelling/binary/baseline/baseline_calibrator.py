@@ -3,8 +3,10 @@ import pickle
 import pickle
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn import metrics
 from scipy.optimize import minimize
+from sklearn.calibration import calibration_curve
 from sklearn.metrics import log_loss, brier_score_loss
 from sklearn import metrics
 
@@ -65,6 +67,12 @@ class TFIDFBaselineCalibrator:
         raw_logits = self._get_logits(X)
         scaled_logits = raw_logits / self.temperature
         probs = 1 / (1 + np.exp(-scaled_logits))
+        return np.vstack([1 - probs, probs]).T  # Return as a 2D array with shape (n_samples, 2)
+
+    def predict_uncalibrated_proba(self, X):
+        # Predict probabilities using the uncalibrated model
+        raw_logits = self._get_logits(X)
+        probs = 1 / (1 + np.exp(-raw_logits))
         return np.vstack([1 - probs, probs]).T  # Return as a 2D array with shape (n_samples, 2)
 
     def evaluate_calibration(self):
@@ -163,3 +171,57 @@ class TFIDFBaselineCalibrator:
                     'validation_accuracy': self.uncalibrated_metrics["accuracy"],
                     'classification_report': self.uncalibrated_metrics["classification_report"]
                 }, f)
+        probs_before = self.predict_uncalibrated_proba(self.X_validation)[:, 1]
+        probs_after = self.predict_proba(self.X_validation)[:, 1]
+        
+        preds_before = np.argmax(self.predict_uncalibrated_proba(self.X_validation), axis=1)
+        preds_after = np.argmax(self.predict_proba(self.X_validation), axis=1)
+
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(24, 5))
+
+        cm_before = metrics.confusion_matrix(self.y_validation, preds_before)
+        disp_before = metrics.ConfusionMatrixDisplay(confusion_matrix=cm_before, display_labels=self.label_encoder.classes_)
+        disp_before.plot(ax=ax1, cmap=plt.cm.Blues)
+        ax1.set_title('Confusion Matrix (Before Calibration)')
+        ax1.set_xlabel('Predicted Labels')
+        ax1.set_ylabel('True Labels')
+
+        
+        cm_after = metrics.confusion_matrix(self.y_validation, preds_after)
+        disp_after = metrics.ConfusionMatrixDisplay(confusion_matrix=cm_after, display_labels=self.label_encoder.classes_)
+        disp_after.plot(ax=ax2, cmap=plt.cm.Blues)
+        ax2.set_title('Confusion Matrix (After Calibration)')
+        ax2.set_xlabel('Predicted Labels')
+        ax2.set_ylabel('True Labels')
+
+        prec_before, recall_before, _ = metrics.precision_recall_curve(self.y_validation, probs_before)
+        pr_auc_before = metrics.auc(recall_before, prec_before)
+
+        prec_after, recall_after, _ = metrics.precision_recall_curve(self.y_validation, probs_after)
+        pr_auc_after = metrics.auc(recall_after, prec_after)
+
+        no_skill = len(self.y_validation[self.y_validation == 1]) / len(self.y_validation)
+        ax3.plot([0, 1], [no_skill, no_skill], 'k--', label=f'No Skill (AUC = {no_skill:.2f})')        
+        ax3.plot(recall_before, prec_before, color='tab:red', label=f'Before (AUC = {pr_auc_before:.4f})')
+        ax3.plot(recall_after, prec_after, color='tab:green', label=f'After (AUC = {pr_auc_after:.4f})')
+        ax3.set_xlabel('Recall')
+        ax3.set_ylabel('Precision')
+        ax3.set_title('Precision-Recall Curve')
+        ax3.legend(loc='lower left')
+        ax3.grid(True, linestyle=':')
+
+        true_before, pred_before = calibration_curve(self.y_validation, probs_before, n_bins=10)
+        cal_true, cal_pred = calibration_curve(self.y_validation, probs_after, n_bins=10)
+
+        ax4.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
+        ax4.plot(pred_before, true_before, marker='o', color='tab:red', label='Before Calibration')
+        ax4.plot(cal_pred, cal_true, marker='o', color='tab:green', label='After Calibration')
+        ax4.set_xlabel('Mean Predicted Probability')
+        ax4.set_ylabel('Fraction of Positives')
+        ax4.set_title('Calibration Curve')
+        ax4.legend(loc='lower right')
+        ax4.grid(True, linestyle=':')
+
+        plt.tight_layout()
+
+        plt.savefig(os.path.join(output_dir, 'calibration_evaluation_plots.png'), bbox_inches='tight')

@@ -1,11 +1,11 @@
-Validation Accuracy: 0.988
+Validation Accuracy: 0.987
 Classification Report:
               precision    recall  f1-score   support
 
-           0     0.9969    0.9790    0.9879      2000
-           1     0.9794    0.9970    0.9881      2000
+           0     0.9939    0.9800    0.9869      2000
+           1     0.9803    0.9940    0.9871      2000
 
-    accuracy                         0.9880      4000
-   macro avg     0.9882    0.9880    0.9880      4000
-weighted avg     0.9882    0.9880    0.9880      4000
+    accuracy                         0.9870      4000
+   macro avg     0.9871    0.9870    0.9870      4000
+weighted avg     0.9871    0.9870    0.9870      4000
 

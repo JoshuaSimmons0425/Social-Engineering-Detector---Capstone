@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification
 from src.modelling.binary.bert.bert_model import BERTClassifier
+from src.modelling.binary.baseline.baseline_model import TFIDFBaselineModel
 from src.modelling.binary.baseline.baseline_calibrator import TFIDFBaselineCalibrator
 from src.modelling.binary.bert.bert_calibrator import BinaryBERTCalibrator
 from src.datasets.textdatasets import TextDataset
@@ -17,12 +18,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    with open('models/binary/baseline/uncalibrated/uncalibrated_baseline_meta.pkl', 'rb') as f:
-        uncalibrated_artifacts = pickle.load(f)
-
-    model = uncalibrated_artifacts['model']
-    vectorizer = uncalibrated_artifacts['vectorizer']
-    encoder = uncalibrated_artifacts['encoder']
+    model, vectorizer, encoder = TFIDFBaselineModel.load_model(model_path='models/binary/baseline/uncalibrated/uncalibrated_baseline_meta.pkl')
 
     calibration_set = pd.read_csv('data/splits/calibration_80_20.csv')
     validation_set = pd.read_csv('data/splits/validation_80_20.csv')
@@ -54,7 +50,7 @@ def main():
                                            calibration_loader=calibration_loader,
                                            validation_loader=validation_loader,
                                            device=device)
-    bert_calibrator.run_calibration_pipeline()
+    bert_calibrator.run_calibration_pipeline(metric="f2")
 
     baseline_calibrator.save_calibrated_model(output_dir='models/binary/baseline/calibrated')
     baseline_calibrator.save_calibration_metrics(output_dir='experiments/binary/baseline/calibrated', output_format='txt')

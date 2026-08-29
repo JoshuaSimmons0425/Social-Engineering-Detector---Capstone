@@ -1,4 +1,4 @@
 brier_score: 0.016651317477226257
 log_loss: 0.06517072767019272
-accuracy: 0.9915
-classification_report: {'0': {'precision': 0.9965495608531995, 'recall': 0.9928125, 'f1-score': 0.9946775203506575, 'support': 3200.0}, '1': {'precision': 0.9716748768472906, 'recall': 0.98625, 'f1-score': 0.9789081885856079, 'support': 800.0}, 'accuracy': 0.9915, 'macro avg': {'precision': 0.984112218850245, 'recall': 0.98953125, 'f1-score': 0.9867928544681327, 'support': 4000.0}, 'weighted avg': {'precision': 0.9915746240520177, 'recall': 0.9915, 'f1-score': 0.9915236539976475, 'support': 4000.0}}
+accuracy: 0.99075
+classification_report: {'0': {'precision': 0.9968583097706566, 'recall': 0.9915625, 'f1-score': 0.9942033526554912, 'support': 3200.0}, '1': {'precision': 0.966952264381885, 'recall': 0.9875, 'f1-score': 0.9771181199752629, 'support': 800.0}, 'accuracy': 0.99075, 'macro avg': {'precision': 0.9819052870762708, 'recall': 0.98953125, 'f1-score': 0.9856607363153771, 'support': 4000.0}, 'weighted avg': {'precision': 0.9908771006929024, 'recall': 0.99075, 'f1-score': 0.9907863061194455, 'support': 4000.0}}
