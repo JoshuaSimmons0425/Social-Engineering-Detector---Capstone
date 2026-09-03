@@ -27,15 +27,15 @@ class BaselineEvaluator:
         self.uncalibrated_diagrams = None
         self.calibrated_diagrams = None
 
-    def preprocess(self, X):
-        X_encoded = self.encoder.transform(X)
-        X_vectorized = self.vectorizer.transform(X_encoded)
-        return X_vectorized
+    def preprocess(self, X, y):
+        y_encoded = self.encoder.transform(y)
+        X_vectorized = self.vectorizer.transform(X)
+        return X_vectorized, y_encoded
 
     def get_test_data(self, test_set):
         X_test, y_test = test_set[self.text_column], test_set[self.label_column]
-        X_test_preprocessed = self.preprocess(X_test)
-        return X_test_preprocessed, y_test
+        X_test_preprocessed, y_test_encoded = self.preprocess(X_test, y_test)
+        return X_test_preprocessed, y_test_encoded
 
     def evaluate_uncalibrated(self):
 
@@ -46,11 +46,15 @@ class BaselineEvaluator:
         precision = metrics.precision_score(y_test_50_50, y_pred)
         recall = metrics.recall_score(y_test_50_50, y_pred)
         f1 = metrics.f1_score(y_test_50_50, y_pred)
+        brier_score = brier_score_loss(y_test_50_50, y_pred)  
+        log_loss = metrics.log_loss(y_test_50_50, y_pred)
         self.uncalibrated_results = {
             "accuracy": accuracy,
             "precision": precision,
             "recall": recall,
-            "f1": f1
+            "f1": f1,
+            "brier_score": brier_score,
+            "log_loss": log_loss
         }
 
     def _get_logits(self, X):
@@ -166,5 +170,45 @@ class BaselineEvaluator:
 
         plt.tight_layout()
         self.calibrated_diagrams = fig
+
+    def run_evaluation(self):
+        self.evaluate_calibrated()
+        self.evaluate_uncalibrated()
+        self.plot_calibrated_results()
+        self.plot_uncalibrated_results()
+        
+    def save_metrics(self, filepath, output_format="txt"):
+        assert self.uncalibrated_results is not None and self.calibrated_results is not None, "Metrics have not been evaluated yet."
+
+        metrics_data = {
+            "uncalibrated": self.uncalibrated_results,
+            "calibrated": self.calibrated_results
+        }
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        output_path = os.path.join(filepath, f"metrics.{output_format}")
+        if output_format == "txt":
+            with open(output_path, "w") as f:
+                for key, value in metrics_data.items():
+                    f.write(f"{key}:\n")
+                    for metric, score in value.items():
+                        f.write(f"  {metric}: {score}\n")
+                    f.write("\n")
+        elif output_format == "json":
+            with open(output_path, "w") as f:
+                json.dump(metrics_data, f)
+
+    def save_visualizations(self, filepath, output_format="png"):
+        if self.uncalibrated_diagrams is not None or self.calibrated_diagrams is not None:
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            uncal_vis_path = os.path.join(filepath, f"uncalibrated.{output_format}")
+            self.uncalibrated_diagrams.savefig(uncal_vis_path)
+            cal_vis_path = os.path.join(filepath, f"calibrated.{output_format}")
+            self.calibrated_diagrams.savefig(cal_vis_path)
+            print(f"Saved uncalibrated visualization to {uncal_vis_path}")
+            print(f"Saved calibrated visualization to {cal_vis_path}")
+
+        else:
+            print("No visualizations to save.")
+        
 
 

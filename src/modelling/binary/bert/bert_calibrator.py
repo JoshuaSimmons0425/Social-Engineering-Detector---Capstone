@@ -164,12 +164,12 @@ class BinaryBERTCalibrator:
         self.calibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.cal_val_probs)
         self.calibrated_metrics['log_loss'] = log_loss(self.val_labels, self.cal_val_probs)
         self.calibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int))
-        self.calibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int), output_dict=True)
+        self.calibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int), digits = 4,  output_dict=True)
 
         self.uncalibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.uncal_val_probs)
         self.uncalibrated_metrics['log_loss'] = log_loss(self.val_labels, self.uncal_val_probs)
         self.uncalibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int))
-        self.uncalibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int), output_dict=True)
+        self.uncalibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int), digits = 4, output_dict=True)
 
         print("\n --- Performance Comparison Before vs After Calibration ---")
         print(f"Brier Score -> Before: {self.uncalibrated_metrics['brier_score']:.4f} | After: {self.calibrated_metrics['brier_score']:.4f}")
