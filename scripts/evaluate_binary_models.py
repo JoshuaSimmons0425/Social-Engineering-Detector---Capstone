@@ -1,12 +1,14 @@
 import sys
 import gc
 import pickle
+import json
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification
 from src.datasets.textdatasets import TextDataset
 from src.evaluation.binary.baseline_evaluator import BaselineEvaluator
+from src.evaluation.binary.bert_evaluator import BinaryBertEvaluator
 
 def main():
 
@@ -46,10 +48,50 @@ def main():
 
     baseline_evaluator.run_evaluation()
 
-    baseline_target_path = "results/binary/baseline"
+    temperature_path = "models/binary/bert/calibrated/temperature_scaler.pt"
+    optimal_threshold_path = "models/binary/bert/calibrated/optimal_threshold.json"
+    model_state_dict_path = "models/binary/bert/calibrated/model_state_dict.pt"
+    bert_encoder_path = "models/binary/bert/uncalibrated/label_encoder.pkl"
 
+    temperature_scaler = torch.load(temperature_path)
+    
+    with open(optimal_threshold_path, "r", encoding="utf-8") as f:
+        threhold_file = json.load(f)
+    optimal_threshold = threhold_file["optimal_threshold"]
+
+    with open(bert_encoder_path, "rb") as f:
+        bert_encoder = pickle.load(f)
+
+    architecture = 'answerdotai/ModernBERT-base'
+
+    model_state_dict = torch.load(model_state_dict_path)
+    model = AutoModelForSequenceClassification.from_pretrained(architecture, num_labels=1)
+    model.load_state_dict(model_state_dict)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    test_50_50_dataset = TextDataset(test_50_50_df, mode = architecture, max_len=1024, encoder = bert_encoder)
+    test_80_20_dataset = TextDataset(test_80_20_df, mode = architecture, max_len=1024, encoder = bert_encoder)
+
+    test_50_50_loader = DataLoader(test_50_50_dataset, batch_size=4, shuffle=False)
+    test_80_20_loader = DataLoader(test_80_20_dataset, batch_size=4, shuffle=False)
+
+    bert_evaluator = BinaryBertEvaluator(
+        model=model,
+        device=device,
+        temperature=temperature_scaler,
+        threshold=optimal_threshold,
+        test_50_50=test_50_50_loader,
+        test_80_20=test_80_20_loader
+    )
+
+    baseline_target_path = "results/binary/baseline"
     baseline_evaluator.save_metrics(baseline_target_path)
     baseline_evaluator.save_visualizations(baseline_target_path)
+
+    bert_evaluator.run_evaluation()
+    bert_target_path = "results/binary/bert"
+    bert_evaluator.save_metrics(bert_target_path)
 
     sys.exit(0)
 
