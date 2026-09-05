@@ -46,8 +46,6 @@ class BaselineEvaluator:
         precision_50_50 = metrics.precision_score(y_test_50_50, y_pred_50_50)
         recall_50_50 = metrics.recall_score(y_test_50_50, y_pred_50_50)
         f1_50_50 = metrics.f1_score(y_test_50_50, y_pred_50_50)
-        brier_score_50_50 = brier_score_loss(y_test_50_50, y_pred_50_50)  
-        log_loss_50_50 = metrics.log_loss(y_test_50_50, y_pred_50_50)
 
         X_test_80_20, y_test_80_20 = self.get_test_data(self.test_set_80_20)
 
@@ -65,8 +63,7 @@ class BaselineEvaluator:
                 "precision": precision_50_50,
                 "recall": recall_50_50,
                 "f1": f1_50_50,
-                "brier_score": brier_score_50_50,
-                "log_loss": log_loss_50_50},
+                },
             "80_20": {
                 "accuracy": accuracy_80_20,
                 "precision": precision_80_20,
