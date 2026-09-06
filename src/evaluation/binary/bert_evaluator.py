@@ -2,6 +2,7 @@ import os
 import json
 import torch
 import pickle
+import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.calibration import calibration_curve
@@ -16,12 +17,12 @@ class BinaryBertEvaluator:
         self.test_50_50 = test_50_50
         self.test_80_20 = test_80_20
 
-        self._50_50_uncal_probs = []
-        self._80_20_uncal_probs = []
-        self._80_20_cal_probs = []
+        self._50_50_uncal_probs = None
+        self._80_20_uncal_probs = None
+        self._80_20_cal_probs = None
 
-        self._50_50_labels = []
-        self._80_20_labels = []
+        self._50_50_labels = None
+        self._80_20_labels = None
 
         self.uncalibrated_results = {}
         self.calibrated_results = {}
@@ -29,93 +30,88 @@ class BinaryBertEvaluator:
         self.uncalibrated_diagrams = None
         self.calibrated_diagrams = None
 
-    def evaluate_uncalibrated(self):
-
+    def evaluate_all(self):
+    
         self.model.eval()
+        self.temperature.eval()
         self.model.to(self.device)
+        self.temperature.to(self.device)
 
-        for batch in self.test_50_50:
-            input_ids = batch['input_ids'].to(self.device)
-            attention_mask = batch['attention_mask'].to(self.device)
-            labels = batch['labels'].to(self.device)
+        all_probs_50_50 = []
+        all_labels_50_50 = []
 
-            with torch.no_grad():
+        with torch.no_grad():
+            for batch in self.test_50_50:
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                labels = batch['labels'].to(self.device)
+
                 outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
-                logits = outputs.logits
-                probs = torch.sigmoid(logits)
-                preds = (probs > 0.5).long() # Use 0.5 as the baseline threshold to evaluate model discriminative ability
+                probs = torch.sigmoid(outputs.squeeze(-1))
 
-            self._50_50_labels.extend(labels.cpu().numpy())
-            self._50_50_uncal_probs.extend(probs.cpu().numpy())
-            
+                all_probs_50_50.append(probs.cpu().numpy())
+                all_labels_50_50.append(labels.cpu().numpy())
 
+        self._50_50_uncal_probs = np.concatenate(all_probs_50_50, axis=0).ravel()
+        self._50_50_labels = np.concatenate(all_labels_50_50, axis=0).ravel()
+
+        # Generate metrics using globally assigned evaluation thresholds
+        preds_50 = (self._50_50_uncal_probs > self.threshold).astype(int)
         self.uncalibrated_results['50_50'] = {
-            'accuracy': metrics.accuracy_score(self._50_50_labels, (torch.tensor(self._50_50_uncal_probs) > 0.5).long().numpy()),
-            'precision': metrics.precision_score(self._50_50_labels, (torch.tensor(self._50_50_uncal_probs) > 0.5).long().numpy()),
-            'recall': metrics.recall_score(self._50_50_labels, (torch.tensor(self._50_50_uncal_probs) > 0.5).long().numpy()),
-            'f1': metrics.f1_score(self._50_50_labels, (torch.tensor(self._50_50_uncal_probs) > 0.5).long().numpy())
+            'accuracy': metrics.accuracy_score(self._50_50_labels, preds_50),
+            'precision': metrics.precision_score(self._50_50_labels, preds_50, zero_division=0),
+            'recall': metrics.recall_score(self._50_50_labels, preds_50, zero_division=0),
+            'f1': metrics.f1_score(self._50_50_labels, preds_50, zero_division=0)
         }
 
-        
-        all_preds_80_20 = []
+        all_labels_80_20 = []
+        all_uncal_probs_80_20 = []
+        all_cal_probs_80_20 = []
 
-        for batch in self.test_80_20:
-            input_ids = batch['input_ids'].to(self.device)
-            attention_mask = batch['attention_mask'].to(self.device)
-            labels = batch['labels'].to(self.device)
+        with torch.no_grad():
+            for batch in self.test_80_20:
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                labels = batch['labels'].to(self.device)
 
-            with torch.no_grad():
                 outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
-                logits = outputs.logits
-                probs = torch.sigmoid(logits)
-                preds = (probs > 0.5).long() # Use 0.5 as the baseline threshold to evaluate model discriminative ability
+                
+                # Uncalibrated Pathway
+                uncal_probs = torch.sigmoid(outputs.squeeze(-1))
+                
+                # Calibrated Pathway (using your custom module)
+                scaled_logits = self.temperature(outputs)
+                cal_probs = torch.sigmoid(scaled_logits.squeeze(-1))
 
-            self._80_20_labels.extend(labels.cpu().numpy())
-            self._80_20_uncal_probs.extend(probs.cpu().numpy())
-            all_preds_80_20.extend(preds.cpu().numpy())
+                all_labels_80_20.append(labels.cpu().numpy())
+                all_uncal_probs_80_20.append(uncal_probs.cpu().numpy())
+                all_cal_probs_80_20.append(cal_probs.cpu().numpy())
 
+        # Safely flatten outputs globally prior to evaluation calculations
+        self._80_20_labels = np.concatenate(all_labels_80_20, axis=0).ravel()
+        self._80_20_uncal_probs = np.concatenate(all_uncal_probs_80_20, axis=0).ravel()
+        self._80_20_cal_probs = np.concatenate(all_cal_probs_80_20, axis=0).ravel()
+
+        # Compute Uncalibrated 80_20 Metrics
+        preds_80_uncal = (self._80_20_uncal_probs > self.threshold).astype(int)
         self.uncalibrated_results['80_20'] = {
-            'accuracy': metrics.accuracy_score(self._80_20_labels, all_preds_80_20),
-            'precision': metrics.precision_score(self._80_20_labels, all_preds_80_20),
-            'recall': metrics.recall_score(self._80_20_labels, all_preds_80_20),
-            'f1': metrics.f1_score(self._80_20_labels, all_preds_80_20),
-            'brier_score': metrics.mean_squared_error(self._80_20_labels, self._80_20_uncal_probs),
+            'accuracy': metrics.accuracy_score(self._80_20_labels, preds_80_uncal),
+            'precision': metrics.precision_score(self._80_20_labels, preds_80_uncal, zero_division=0),
+            'recall': metrics.recall_score(self._80_20_labels, preds_80_uncal, zero_division=0),
+            'f1': metrics.f1_score(self._80_20_labels, preds_80_uncal, zero_division=0),
+            'brier_score': metrics.brier_score_loss(self._80_20_labels, self._80_20_uncal_probs),
             'log_loss': metrics.log_loss(self._80_20_labels, self._80_20_uncal_probs)
         }
 
-    def evaluate_calibrated(self):
-
-        self.model.eval()
-        self.model.to(self.device)
-
-        all_labels_80_20 = []
-        all_probs_80_20 = []
-        all_preds_80_20 = []
-
-        for batch in self.test_80_20:
-
-            input_ids = batch['input_ids'].to(self.device)
-            attention_mask = batch['attention_mask'].to(self.device)
-            labels = batch['labels'].to(self.device)
-
-            with torch.no_grad():
-                outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
-                logits = outputs.logits
-                scaled_logits = self.temperature(logits)
-                probs = torch.sigmoid(scaled_logits.squeeze(-1).cpu().numpy())
-                preds = (probs > self.threshold).long() # Use 0.5 as the baseline threshold to evaluate model discriminative ability
-
-            all_labels_80_20.extend(labels.cpu().numpy())
-            all_probs_80_20.extend(probs.cpu().numpy())
-            all_preds_80_20.extend(preds.cpu().numpy())
-
+        # Compute Calibrated 80_20 Metrics
+        preds_80_cal = (self._80_20_cal_probs > self.threshold).astype(int)
         self.calibrated_results['80_20'] = {
-            'accuracy': metrics.accuracy_score(all_labels_80_20, all_preds_80_20),
-            'precision': metrics.precision_score(all_labels_80_20, all_preds_80_20),
-            'recall': metrics.recall_score(all_labels_80_20, all_preds_80_20),
-            'f1': metrics.f1_score(all_labels_80_20, all_preds_80_20),
-            'brier_score': metrics.mean_squared_error(all_labels_80_20, all_probs_80_20),
-            'log_loss': metrics.log_loss(all_labels_80_20, all_probs_80_20)
+            'accuracy': metrics.accuracy_score(self._80_20_labels, preds_80_cal),
+            'precision': metrics.precision_score(self._80_20_labels, preds_80_cal, zero_division=0),
+            'recall': metrics.recall_score(self._80_20_labels, preds_80_cal, zero_division=0),
+            'f1': metrics.f1_score(self._80_20_labels, preds_80_cal, zero_division=0),
+            'brier_score': metrics.brier_score_loss(self._80_20_labels, self._80_20_cal_probs),
+            'log_loss': metrics.log_loss(self._80_20_labels, self._80_20_cal_probs)
         }
 
     def plot_uncal_visualisations(self):
@@ -131,10 +127,12 @@ class BinaryBertEvaluator:
         ax1.set_title("Confusion Matrix (50_50 Uncalibrated)")
 
         fpr, tpr, _ = metrics.roc_curve(self._50_50_labels, self._50_50_uncal_probs)
+        roc_auc = metrics.auc(fpr, tpr)
         ax2.plot(fpr, tpr, marker='.')
         ax2.set_title("ROC Curve (50_50 Uncalibrated)")
         ax2.set_xlabel("False Positive Rate")
         ax2.set_ylabel("True Positive Rate")
+        ax2.legend([f"AUC = {roc_auc:.4f}"], loc="lower right")
         ax2.plot([0, 1], [0, 1], linestyle='--', color='gray')  # Diagonal line for random classifier
 
         self.uncalibrated_diagrams = fig
@@ -201,24 +199,42 @@ class BinaryBertEvaluator:
         self.calibrated_diagrams = fig
 
     def run_evaluation(self):
-        self.evaluate_uncalibrated()
-        self.evaluate_calibrated()
+        self.evaluate_all()
         self.plot_uncal_visualisations()
         self.plot_cal_visualisations()
 
     def save_metrics(self, filepath, output_format = 'txt'):
 
-        with open(filepath, 'w') as f:
-            if output_format == 'txt':
-                f.write("Uncalibrated Results (80_20):\n")
-                for key, value in self.uncalibrated_results['80_20'].items():
-                    f.write(f"{key}: {value}\n")
-                f.write("\nCalibrated Results (80_20):\n")
-                for key, value in self.calibrated_results['80_20'].items():
-                    f.write(f"{key}: {value}\n")
-            elif output_format == 'json':
-                import json
-                json.dump({
-                    'uncalibrated_results': self.uncalibrated_results['80_20'],
-                    'calibrated_results': self.calibrated_results['80_20']
-                }, f)
+        if self.uncalibrated_results and self.calibrated_results:
+            os.makedirs(filepath, exist_ok=True)
+            metrics_file_path = os.path.join(filepath, f"test_evaluation_metrics.{output_format}")
+            with open(metrics_file_path, 'w') as f:
+                if output_format == 'txt':
+                    f.write("Uncalibrated Results:\n")
+                    for key, value in self.uncalibrated_results.items():
+                        f.write(f"{key}: {value}\n")
+                    f.write("\nCalibrated Results (80_20):\n")
+                    for key, value in self.calibrated_results.items():
+                        f.write(f"{key}: {value}\n")
+                elif output_format == 'json':
+                    import json
+                    json.dump({
+                        'uncalibrated_results': self.uncalibrated_results,
+                        'calibrated_results': self.calibrated_results
+                    }, f)
+
+        if self.uncalibrated_diagrams and self.calibrated_diagrams:
+            os.makedirs(filepath, exist_ok=True)
+            uncalibration_viz_path = os.path.join(filepath, f"test_uncalibration_evaluation_visualizations.png")
+            self.uncalibrated_diagrams.savefig(uncalibration_viz_path)
+            print(f"Saved uncalibrated evaluation visualizations to {uncalibration_viz_path}")
+            calibration_viz_path = os.path.join(filepath, f"test_calibration_evaluation_visualizations.png")
+            self.calibrated_diagrams.savefig(calibration_viz_path)
+            print(f"Saved calibrated evaluation visualizations to {calibration_viz_path}")
+
+        else:
+            print("No evaluation results or visualizations to save. Please run run_evaluation() first.")
+
+
+
+            

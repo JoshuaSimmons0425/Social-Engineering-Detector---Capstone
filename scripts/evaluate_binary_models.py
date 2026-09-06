@@ -5,7 +5,9 @@ import json
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from src.modelling.binary.bert.bert_calibrator import BinaryBERTCalibrator
 from transformers import AutoModelForSequenceClassification
+from src.modelling.binary.bert.bert_model import BERTClassifier
 from src.datasets.textdatasets import TextDataset
 from src.evaluation.binary.baseline_evaluator import BaselineEvaluator
 from src.evaluation.binary.bert_evaluator import BinaryBertEvaluator
@@ -48,30 +50,32 @@ def main():
 
     baseline_evaluator.run_evaluation()
 
-    temperature_path = "models/binary/bert/calibrated/temperature_scaler.pt"
-    optimal_threshold_path = "models/binary/bert/calibrated/optimal_threshold.json"
+    calibrated_artifacts_path = "models/binary/bert/calibrated"
     model_state_dict_path = "models/binary/bert/calibrated/model_state_dict.pt"
     bert_encoder_path = "models/binary/bert/uncalibrated/label_encoder.pkl"
 
-    temperature_scaler = torch.load(temperature_path)
-    
-    with open(optimal_threshold_path, "r", encoding="utf-8") as f:
-        threhold_file = json.load(f)
-    optimal_threshold = threhold_file["optimal_threshold"]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     with open(bert_encoder_path, "rb") as f:
         bert_encoder = pickle.load(f)
 
     architecture = 'answerdotai/ModernBERT-base'
 
-    model_state_dict = torch.load(model_state_dict_path)
-    model = AutoModelForSequenceClassification.from_pretrained(architecture, num_labels=1)
-    model.load_state_dict(model_state_dict)
+    model = BERTClassifier.load_model(
+        path=model_state_dict_path,
+        n_classes=1,
+        device=device
+    )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    temperature_scaler, optimal_threshold = BinaryBERTCalibrator.load_calibration_artifacts(
+        path=calibrated_artifacts_path,
+        device=device
+    )
 
     test_50_50_dataset = TextDataset(test_50_50_df, mode = architecture, max_len=1024, encoder = bert_encoder)
+    test_50_50_dataset.preprocess_labels()
     test_80_20_dataset = TextDataset(test_80_20_df, mode = architecture, max_len=1024, encoder = bert_encoder)
+    test_80_20_dataset.preprocess_labels()
 
     test_50_50_loader = DataLoader(test_50_50_dataset, batch_size=4, shuffle=False)
     test_80_20_loader = DataLoader(test_80_20_dataset, batch_size=4, shuffle=False)
