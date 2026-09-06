@@ -265,6 +265,23 @@ class BinaryBERTCalibrator:
         with open(decision_threshold_path, 'w') as f:
             json.dump({'optimal_threshold': self.optimal_threshold}, f)
 
+    @staticmethod
+    def load_calibration_artifacts(path, device):
+        scaler_path = os.path.join(path, 'temperature_scaler.pt')
+        decision_threshold_path = os.path.join(path, 'optimal_threshold.json')
+
+        # Load the temperature scaler
+        scaler = TemperatureScaler().to(device)
+        scaler_state_dict = torch.load(scaler_path, map_location=device)
+        scaler.load_state_dict(scaler_state_dict)
+
+        # Load the optimal decision threshold
+        with open(decision_threshold_path, 'r') as f:
+            threshold_data = json.load(f)
+            optimal_threshold = threshold_data['optimal_threshold']
+
+        return scaler, optimal_threshold
+
     def save_metrics(self, save_dir, output_format='txt'):
 
         if self.uncalibrated_metrics is not None and self.calibrated_metrics is not None:
