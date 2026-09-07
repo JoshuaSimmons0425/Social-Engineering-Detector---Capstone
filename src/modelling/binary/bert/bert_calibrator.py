@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import metrics
 from sklearn.calibration import calibration_curve
-from scipy.optimize import minimize
+from scipy.optimize import  minimize_scalar
 from sklearn.metrics import log_loss, brier_score_loss, accuracy_score, classification_report
 
 class TemperatureScaler(nn.Module):
     def __init__(self):
         super(TemperatureScaler, self).__init__()
         # Initialise temperature parameter at 1.5
-        self.temperature = nn.Parameter(torch.tensor([1.5], dtype=torch.float32))
+        self.temperature = nn.Parameter(torch.tensor([10.0], dtype=torch.float32))
 
     def forward(self, logits):
         # Enforce a strict minimum temperature value to prevent division by zero
@@ -22,26 +22,39 @@ class TemperatureScaler(nn.Module):
         return logits / clamped_temp
 
     def fit(self, logits_list, labels_list, device):
-        """Fits temperature using PyTorch's native LBFGS optimizer."""
-        self.to(device)
-        self.temperature.requires_grad = True
         
         # Convert collected lists to tensors
         logits_tensor = torch.cat(logits_list, dim=0).to(device)
         labels_tensor = torch.cat(labels_list, dim=0).to(device).float()
 
-        # BCEWithLogitsLoss expects labels matching logit dimensions (usually squeezed for binary)
-        criterion = nn.BCEWithLogitsLoss()
-        optimizer = torch.optim.LBFGS([self.temperature], lr=0.01, max_iter=100)
+        logits = logits_tensor.squeeze(-1)
 
-        def closure():
-            optimizer.zero_grad()
-            scaled_logits = self(logits_tensor).squeeze(-1) # Align dimensions if necessary
-            loss = criterion(scaled_logits, labels_tensor)
-            loss.backward()
-            return loss
+        def objective(T):
+            T = float(T)
+            scaled_logits = logits.squeeze(-1) / T
+            loss = nn.functional.binary_cross_entropy_with_logits(
+                scaled_logits,
+                labels_tensor
+            )
+            return loss.item()
 
-        optimizer.step(closure)
+        result = minimize_scalar(
+            objective,
+            bounds=(0.05, 20.0),
+            method='bounded',
+            options={'xatol': 1e-6}
+        )
+
+        if not result.success:
+            raise RuntimeError(
+                f"Temperature optimisation failed: {result.message}"
+            )
+
+        self.temperature.data = torch.tensor(
+            [result.x],
+            dtype=torch.float32,
+            device=device
+        )
         print(f"Optimized temperature: {self.temperature.item():.4f}")
 
 class BinaryBERTCalibrator:
@@ -90,7 +103,7 @@ class BinaryBERTCalibrator:
 
         self.scaler.fit(logits_list, labels_list, self.device)
 
-    def get_before_and_after_probs(self):
+    def get_probs_from_loader(self, data_loader):
             """
             Helper method to extract both raw and calibrated probabilities 
             over the validation dataset for a fair visualization baseline.
@@ -102,7 +115,7 @@ class BinaryBERTCalibrator:
             labels_list = []
     
             with torch.no_grad():
-                for batch in self.validation_loader:
+                for batch in data_loader:
                     input_ids = batch['input_ids'].to(self.device)
                     attention_mask = batch['attention_mask'].to(self.device)
                     labels = batch['labels'].numpy()
@@ -125,27 +138,31 @@ class BinaryBERTCalibrator:
                     labels_list.append(labels)
     
             # Force clean 1D tracking arrays 
-            self.uncal_val_probs = np.concatenate(raw_probs_list, axis=0).ravel()
-            self.cal_val_probs = np.concatenate(cal_probs_list, axis=0).ravel()
-            self.val_labels = np.concatenate(labels_list, axis=0).ravel()
+            raw_probs_flat = np.concatenate(raw_probs_list, axis=0).ravel()
+            cal_probs_flat = np.concatenate(cal_probs_list, axis=0).ravel()
+            labels_flat = np.concatenate(labels_list, axis=0).ravel()
+        
+            return raw_probs_flat, cal_probs_flat, labels_flat
+
+    def get_before_and_after_probs(self):
+        self.uncal_val_probs, self.cal_val_probs, self.val_labels = self.get_probs_from_loader(self.validation_loader)
 
     def dynamic_decision_threshold(self, metric = "f1"):
 
-            if self.cal_val_probs is None or self.val_labels is None:
-                self.get_before_and_after_probs()
+            _, cal_cal_probs, cal_labels = self.get_probs_from_loader(self.calibration_loader)
             
             thresholds = np.linspace(0, 1, 101)
             best_threshold = 0.5
             best_metric_value = -np.inf
     
             for threshold in thresholds:
-                preds = (self.cal_val_probs >= threshold).astype(int)
+                preds = (cal_cal_probs >= threshold).astype(int)
                 if metric == "f1":
-                    metric_value = metrics.f1_score(self.val_labels, preds)
+                    metric_value = metrics.f1_score(cal_labels, preds)
                 elif metric == "f2":
-                    metric_value = metrics.fbeta_score(self.val_labels, preds, beta=2)
+                    metric_value = metrics.fbeta_score(cal_labels, preds, beta=2)
                 elif metric == "f0.5":
-                    metric_value = metrics.fbeta_score(self.val_labels, preds, beta=0.5)
+                    metric_value = metrics.fbeta_score(cal_labels, preds, beta=0.5)
                 else:
                     raise ValueError(f"Unsupported metric: {metric}")
     
