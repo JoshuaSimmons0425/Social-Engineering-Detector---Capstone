@@ -11,11 +11,12 @@ from sklearn.metrics import log_loss, brier_score_loss
 from sklearn import metrics
 
 class BaselineEvaluator:
-    def __init__(self, model, encoder, vectorizer, temperature, test_set_50_50, test_set_80_20, text_column, label_column): 
+    def __init__(self, model, encoder, vectorizer, A, B, test_set_50_50, test_set_80_20, text_column, label_column): 
         self.model = model
         self.encoder = encoder
         self.vectorizer = vectorizer
-        self.temperature = temperature
+        self.A = A
+        self.B = B
         self.test_set_50_50 = test_set_50_50
         self.test_set_80_20 = test_set_80_20
         self.text_column = text_column
@@ -85,10 +86,10 @@ class BaselineEvaluator:
         return np.vstack([1 - probs, probs]).T  # Return as a 2D array with shape (n_samples, 2)
 
     def predict_proba_temp_scaled(self, X):
-        logits = self.model.predict_proba(X)
-        scaled_logits = logits ** (1 / self.temperature)
-        scaled_probs = scaled_logits / scaled_logits.sum(axis=1, keepdims=True)
-        return scaled_probs
+        raw_logits = self._get_logits(X)
+        scaled_logits = self.A * raw_logits + self.B
+        probs = 1 / (1 + np.exp(-scaled_logits))
+        return np.vstack([1 - probs, probs]).T  # Return as a 2D array with shape (n_samples, 2)
 
     def evaluate_calibrated(self):
 
@@ -156,8 +157,31 @@ class BaselineEvaluator:
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
 
         ## 1. Create Reliability Diagram comparing uncalibrated vs calibrated models
-        prob_true_uncal, prob_pred_uncal = calibration_curve(y_test_80_20, y_uncal_proba, n_bins=10)
-        prob_true_cal, prob_pred_cal = calibration_curve(y_test_80_20, y_cal_proba_pos, n_bins=10)
+        n_bins = 10
+        prob_true_uncal, prob_pred_uncal = calibration_curve(y_test_80_20, y_uncal_proba, n_bins=n_bins, strategy='uniform')
+        prob_true_cal, prob_pred_cal = calibration_curve(y_test_80_20, y_cal_proba_pos, n_bins=n_bins, strategy='uniform')
+
+        bin_edges = np.linspace(0, 1, n_bins + 1)
+                                
+        # np.digitize returns 1-indexed bins; subtract 1 to match 0-indexing
+        uncal_bin_idx = np.digitize(y_uncal_proba, bin_edges) - 1
+        cal_bin_idx = np.digitize(y_cal_proba_pos, bin_edges) - 1
+        
+        # Clip upper outliers (like exactly 1.0) into the topmost bin
+        uncal_bin_idx = np.clip(uncal_bin_idx, 0, n_bins - 1)
+        cal_bin_idx = np.clip(cal_bin_idx, 0, n_bins - 1)
+
+        # 3. Calculate sample sizes per bin
+        bin_total_uncal = np.bincount(uncal_bin_idx, minlength=n_bins) 
+        bin_total_cal = np.bincount(cal_bin_idx, minlength=n_bins) 
+
+        # 4. Filter missing bins to match scikit-learn's shortened output arrays
+        uncal_mask = bin_total_uncal > 0
+        cal_mask = bin_total_cal > 0
+
+        # 5. Compute accurate ECE weights
+        uncal_ece = np.sum(np.abs(prob_true_uncal - prob_pred_uncal) * bin_total_uncal[uncal_mask]) / len(y_test_80_20)
+        cal_ece = np.sum(np.abs(prob_true_cal - prob_pred_cal) * bin_total_cal[cal_mask]) / len(y_test_80_20)
         
         ax1.plot([0, 1], [0, 1], "k--", label="Perfect Calibration")
         ax1.plot(prob_pred_uncal, prob_true_uncal, "s-", color="red", label="Uncalibrated")
@@ -165,7 +189,11 @@ class BaselineEvaluator:
         ax1.set_xlabel("Mean Predicted Probability")
         ax1.set_ylabel("Fraction of Positives")
         ax1.set_title("Reliability Diagram")
-        ax1.legend(loc="lower right")
+        ax1.legend(loc='upper left')
+        ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
+                verticalalignment='bottom', horizontalalignment='right',
+                transform=ax1.transAxes,
+                color='black', fontsize=10)
 
         ## 2. Create confusion matrix for calibrated results
         cm = metrics.confusion_matrix(y_test_80_20, y_pred_cal)

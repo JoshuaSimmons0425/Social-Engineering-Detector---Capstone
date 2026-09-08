@@ -32,7 +32,8 @@ def main():
 
     baseline_model = baseline_artifacts["model"]
     baseline_vectorizer= baseline_artifacts["vectorizer"]
-    baseline_temperature = baseline_artifacts["temperature"]
+    baseline_A = baseline_artifacts["A"]
+    baseline_B = baseline_artifacts["B"]
     baseline_encoder = baseline_artifacts["encoder"]
 
     text_column, label_column = "Full_Text", "Label"
@@ -40,7 +41,8 @@ def main():
     baseline_evaluator = BaselineEvaluator(
         model=baseline_model,
         vectorizer=baseline_vectorizer,
-        temperature=baseline_temperature,
+        A=baseline_A,
+        B=baseline_B,
         encoder=baseline_encoder,
         test_set_50_50=test_50_50_df,
         test_set_80_20=test_80_20_df,
@@ -67,7 +69,7 @@ def main():
         device=device
     )
 
-    temperature_scaler, optimal_threshold = BinaryBERTCalibrator.load_calibration_artifacts(
+    scaler, optimal_threshold = BinaryBERTCalibrator.load_calibration_artifacts(
         path=calibrated_artifacts_path,
         device=device
     )
@@ -83,7 +85,7 @@ def main():
     bert_evaluator = BinaryBertEvaluator(
         model=model,
         device=device,
-        temperature=temperature_scaler,
+        scaler=scaler,
         threshold=optimal_threshold,
         test_50_50=test_50_50_loader,
         test_80_20=test_80_20_loader

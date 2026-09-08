@@ -9,10 +9,10 @@ from sklearn.calibration import calibration_curve
 
 
 class BinaryBertEvaluator:
-    def __init__(self, model, device, temperature, threshold, test_50_50, test_80_20):
+    def __init__(self, model, device, scaler, threshold, test_50_50, test_80_20):
         self.model = model
         self.device = device
-        self.temperature = temperature
+        self.scaler = scaler
         self.threshold = threshold
         self.test_50_50 = test_50_50
         self.test_80_20 = test_80_20
@@ -33,9 +33,9 @@ class BinaryBertEvaluator:
     def evaluate_all(self):
     
         self.model.eval()
-        self.temperature.eval()
+        self.scaler.eval()
         self.model.to(self.device)
-        self.temperature.to(self.device)
+        self.scaler.to(self.device)
 
         all_probs_50_50 = []
         all_labels_50_50 = []
@@ -80,7 +80,7 @@ class BinaryBertEvaluator:
                 uncal_probs = torch.sigmoid(outputs.squeeze(-1))
                 
                 # Calibrated Pathway (using your custom module)
-                scaled_logits = self.temperature(outputs)
+                scaled_logits = self.scaler(outputs)
                 cal_probs = torch.sigmoid(scaled_logits.squeeze(-1))
 
                 all_labels_80_20.append(labels.cpu().numpy())

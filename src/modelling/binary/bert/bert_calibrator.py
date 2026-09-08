@@ -375,7 +375,7 @@ class BinaryBERTCalibrator:
     def save_calibration_artifacts(self, save_dir):
         os.makedirs(save_dir, exist_ok=True)
         # Save the temperature scaler and model state dict
-        scaler_path = os.path.join(save_dir, 'temperature_scaler.pt')
+        scaler_path = os.path.join(save_dir, 'platt_scaler.pt')
         torch.save(self.scaler.state_dict(), scaler_path)
 
         model_path = os.path.join(save_dir, 'model_state_dict.pt')
@@ -387,11 +387,11 @@ class BinaryBERTCalibrator:
 
     @staticmethod
     def load_calibration_artifacts(path, device):
-        scaler_path = os.path.join(path, 'temperature_scaler.pt')
+        scaler_path = os.path.join(path, 'platt_scaler.pt')
         decision_threshold_path = os.path.join(path, 'optimal_threshold.json')
 
         # Load the temperature scaler
-        scaler = TemperatureScaler().to(device)
+        scaler = PlattScaler().to(device)
         scaler_state_dict = torch.load(scaler_path, map_location=device)
         scaler.load_state_dict(scaler_state_dict)
 

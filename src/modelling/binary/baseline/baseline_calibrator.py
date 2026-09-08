@@ -248,9 +248,9 @@ class TFIDFBaselineCalibrator:
         ax4.set_ylabel('Fraction of Positives')
         ax4.set_title('Calibration Curve')
         ax4.legend(loc='upper left')
-        ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
+        ax4.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
                                     verticalalignment='bottom', horizontalalignment='right',
-                                    transform=ax1.transAxes,
+                                    transform=ax4.transAxes,
                                     color='black', fontsize=10)
         ax4.grid(True, linestyle=':')
 
