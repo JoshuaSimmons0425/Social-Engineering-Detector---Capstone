@@ -143,10 +143,31 @@ class BinaryBertEvaluator:
 
         # Visualisation logic for the calibrated results, involving plotting the roc_curve and confusion matrix with the 80_20 probs
 
-        # Calculate curve details
         n_bins = 10  # Number of bins for the calibration curve
         uncal_true, uncal_pred = calibration_curve(self._80_20_labels, self._80_20_uncal_probs, n_bins=n_bins)
         cal_true, cal_pred = calibration_curve(self._80_20_labels, self._80_20_cal_probs, n_bins=n_bins)
+
+        bin_edges = np.linspace(0, 1, n_bins + 1)
+                
+        # np.digitize returns 1-indexed bins; subtract 1 to match 0-indexing
+        uncal_bin_idx = np.digitize(self._80_20_uncal_probs, bin_edges) - 1
+        cal_bin_idx = np.digitize(self._80_20_cal_probs, bin_edges) - 1
+        
+        # Clip upper outliers (like exactly 1.0) into the topmost bin
+        uncal_bin_idx = np.clip(uncal_bin_idx, 0, n_bins - 1)
+        cal_bin_idx = np.clip(cal_bin_idx, 0, n_bins - 1)
+
+        # 3. Calculate sample sizes per bin
+        bin_total_uncal = np.bincount(uncal_bin_idx, minlength=n_bins) 
+        bin_total_cal = np.bincount(cal_bin_idx, minlength=n_bins) 
+
+        # 4. Filter missing bins to match scikit-learn's shortened output arrays
+        uncal_mask = bin_total_uncal > 0
+        cal_mask = bin_total_cal > 0
+
+        # 5. Compute accurate ECE weights
+        uncal_ece = np.sum(np.abs(uncal_true - uncal_pred) * bin_total_uncal[uncal_mask]) / len(self._80_20_labels)
+        cal_ece = np.sum(np.abs(cal_true - cal_pred) * bin_total_cal[cal_mask]) / len(self._80_20_labels)
     
         ax1.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
         ax1.plot(uncal_pred, uncal_true, marker='s', color='tab:red', label='Before Calibration')
@@ -155,7 +176,11 @@ class BinaryBertEvaluator:
         ax1.set_xlabel('Mean Predicted Probability')
         ax1.set_ylabel('Fraction of Positives')
         ax1.set_title('Reliability Diagram')
-        ax1.legend(loc='lower right')
+        ax1.legend(loc='upper left')
+        ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
+                            verticalalignment='bottom', horizontalalignment='right',
+                            transform=ax1.transAxes,
+                            color='black', fontsize=10)
         ax1.grid(True, linestyle=':')
     
         # ==========================================

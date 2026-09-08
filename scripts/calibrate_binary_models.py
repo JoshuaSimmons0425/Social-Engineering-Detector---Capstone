@@ -50,7 +50,7 @@ def main():
                                            calibration_loader=calibration_loader,
                                            validation_loader=validation_loader,
                                            device=device)
-    bert_calibrator.run_calibration_pipeline(metric="f2")
+    bert_calibrator.run_calibration_pipeline(metric="f1")
 
     baseline_calibrator.save_calibrated_model(output_dir='models/binary/baseline/calibrated')
     baseline_calibrator.save_calibration_metrics(output_dir='experiments/binary/baseline/calibrated', output_format='txt')

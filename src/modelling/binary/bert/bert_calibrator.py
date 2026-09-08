@@ -7,8 +7,72 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import metrics
 from sklearn.calibration import calibration_curve
-from scipy.optimize import  minimize_scalar
+from scipy.optimize import minimize, minimize_scalar
 from sklearn.metrics import log_loss, brier_score_loss, accuracy_score, classification_report
+
+class PlattScaler(nn.Module):
+    def __init__(self):
+        super(PlattScaler, self).__init__()
+        # Initial values: A = 1, B = 0
+        self.A = nn.Parameter(torch.tensor(1.0))
+        self.B = nn.Parameter(torch.tensor(0.0))
+
+    def forward(self, logits):
+        return self.A * logits + self.B
+
+    def fit(self, logits_list, labels_list, device):
+
+        # Combine calibration data
+        logits = torch.cat(logits_list, dim=0).to(device).squeeze(-1)
+        labels = torch.cat(labels_list, dim=0).to(device).float()
+
+        # SciPy operates on CPU/NumPy
+        logits_np = logits.detach().cpu().numpy()
+        labels_np = labels.detach().cpu().numpy()
+
+        def objective(params):
+
+            A, B = params
+
+            scaled_logits = A * logits_np + B
+
+            # Numerically stable BCE
+            loss = (
+                np.maximum(scaled_logits, 0)
+                - scaled_logits * labels_np
+                + np.log1p(np.exp(-np.abs(scaled_logits)))
+            )
+
+            return np.mean(loss)
+
+        result = minimize(
+            objective,
+            x0=np.array([1.0, 0.0]),
+            method="L-BFGS-B",
+            bounds=[
+                (1e-4, 50.0),
+                (-20.0, 20.0),
+            ],  # Keep parameters physically stable
+        )
+
+        if not result.success:
+            raise RuntimeError(
+                f"Platt scaling optimization failed: {result.message}"
+            )
+
+        # Store optimized parameters on the correct device
+        with torch.no_grad():
+            self.A.copy_(
+                torch.tensor(result.x[0], dtype=torch.float32, device=device)
+            )
+            self.B.copy_(
+                torch.tensor(result.x[1], dtype=torch.float32, device=device)
+            )
+
+        print("Optimized Platt parameters:")
+        print(f"A = {self.A.item():.6f}")
+        print(f"B = {self.B.item():.6f}")
+        print(f"Calibration NLL = {result.fun:.6f}")
 
 class TemperatureScaler(nn.Module):
     def __init__(self):
@@ -30,12 +94,24 @@ class TemperatureScaler(nn.Module):
 
         logits = logits_tensor.squeeze(-1)
 
+        # With an 80/20 split, this evaluates to 3200 / 800 = 4.0
+        num_benign = (labels_tensor == 0).sum().item()
+        num_malicious = (labels_tensor == 1).sum().item()
+        
+        # Guard against zero-division just in case, default to 4.0 if empty
+        malicious_weight_factor = num_benign / max(num_malicious, 1) if num_malicious > 0 else 4.0
+        
+        # Convert to a tensor matching the data's device
+        pos_weight_tensor = torch.tensor([malicious_weight_factor], dtype=torch.float32, device=device)
+
+
         def objective(T):
             T = float(T)
             scaled_logits = logits.squeeze(-1) / T
             loss = nn.functional.binary_cross_entropy_with_logits(
                 scaled_logits,
-                labels_tensor
+                labels_tensor,
+                pos_weight=pos_weight_tensor
             )
             return loss.item()
 
@@ -64,7 +140,7 @@ class BinaryBERTCalibrator:
         self.device = device
         self.calibration_loader = calibration_loader
         self.validation_loader = validation_loader
-        self.scaler = scaler if scaler is not None else TemperatureScaler().to(device)
+        self.scaler = scaler if scaler is not None else PlattScaler()
 
         self.uncal_val_probs = None
         self.cal_val_probs = None
@@ -196,88 +272,99 @@ class BinaryBERTCalibrator:
         print(f"Classification Report -> Before: {self.uncalibrated_metrics['classification_report']} | After: {self.calibrated_metrics['classification_report']}")
 
     def plot_visualizations(self, n_bins=10):
-            """
-            Generates a 1x3 dashboard featuring the Reliability Diagram, 
-            PR-AUC curve, and Confusion Matrix comparing performance before/after.
-            """
+        """
+        Generates a 1x3 dashboard featuring the Reliability Diagram, 
+        PR-AUC curve, and Confusion Matrix comparing performance before/after.
+        """
 
-            if self.uncal_val_probs is None or self.cal_val_probs is None or self.val_labels is None:
-                self.get_before_and_after_probs()
-            # Construct single layout canvas
-            fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
-    
-            # ==========================================
-            # 1. RELIABILITY DIAGRAM
-            # ==========================================
-            
-            # Calculate curve details
-            uncal_true, uncal_pred, uncal_bin_idx = calibration_curve(self.val_labels, self.uncal_val_probs, n_bins=n_bins, strategy='uniform')
-            cal_true, cal_pred, cal_bin_idx = calibration_curve(self.val_labels, self.cal_val_probs, n_bins=n_bins)
+        if self.uncal_val_probs is None or self.cal_val_probs is None or self.val_labels is None:
+            self.get_before_and_after_probs()
+        # Construct single layout canvas
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
 
-            # Calculate ECE 
+        # ==========================================
+        # 1. RELIABILITY DIAGRAM
+        # ==========================================
+        
+        # Calculate curve details
+        uncal_true, uncal_pred = calibration_curve(self.val_labels, self.uncal_val_probs, n_bins=n_bins, strategy='uniform')
+        cal_true, cal_pred = calibration_curve(self.val_labels, self.cal_val_probs, n_bins=n_bins, strategy='uniform')
 
-            bin_total_uncal = np.bincount(uncal_bin_idx, minlength=n_bins) 
-            bin_total_cal = np.bincount(cal_bin_idx, minlength=n_bins) 
+        bin_edges = np.linspace(0, 1, n_bins + 1)
+        
+        # np.digitize returns 1-indexed bins; subtract 1 to match 0-indexing
+        uncal_bin_idx = np.digitize(self.uncal_val_probs, bin_edges) - 1
+        cal_bin_idx = np.digitize(self.cal_val_probs, bin_edges) - 1
+        
+        # Clip upper outliers (like exactly 1.0) into the topmost bin
+        uncal_bin_idx = np.clip(uncal_bin_idx, 0, n_bins - 1)
+        cal_bin_idx = np.clip(cal_bin_idx, 0, n_bins - 1)
 
-            bin_total_uncal_filtered = bin_total_uncal[bin_total_uncal > 0]
-            bin_total_cal_filtered = bin_total_cal[bin_total_cal > 0]
+        # 3. Calculate sample sizes per bin
+        bin_total_uncal = np.bincount(uncal_bin_idx, minlength=n_bins) 
+        bin_total_cal = np.bincount(cal_bin_idx, minlength=n_bins) 
 
-            uncal_ece = np.sum(np.abs(uncal_true - uncal_pred) * bin_total_uncal_filtered) / np.sum(bin_total_uncal_filtered)
-            cal_ece = np.sum(np.abs(cal_true - cal_pred) * bin_total_cal_filtered) / np.sum(bin_total_cal_filtered)
-    
-            ax1.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
-            ax1.plot(uncal_pred, uncal_true, marker='s', color='tab:red', label='Before Calibration')
-            ax1.plot(cal_pred, cal_true, marker='o', color='tab:green', label='After Calibration')
-            
-            ax1.set_xlabel('Mean Predicted Probability')
-            ax1.set_ylabel('Fraction of Positives')
-            ax1.set_title('Reliability Diagram')
-            ax1.legend(loc='lower right')
-            ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
-                     verticalalignment='bottom', horizontalalignment='right',
-                     transform=ax1.transAxes,
-                     color='black', fontsize=10)
-            ax1.grid(True, linestyle=':')
-    
-            # ==========================================
-            # 2. PRECISION-RECALL AUC CURVE
-            # ==========================================
-            # Uncalibrated curve stats
-            uncal_prec, uncal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.uncal_val_probs)
-            uncal_auc = metrics.auc(uncal_rec, uncal_prec)
-    
-            # Calibrated curve stats
-            cal_prec, cal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.cal_val_probs)
-            cal_auc = metrics.auc(cal_rec, cal_prec)
-    
-            # Operational baseline (No skill model matches the positive class ratio)
-            no_skill = len(self.val_labels[self.val_labels == 1]) / len(self.val_labels)
-            ax2.plot([0, 1], [no_skill, no_skill], 'k--', label=f'No Skill (AUC = {no_skill:.2f})')
-            
-            ax2.plot(uncal_rec, uncal_prec, color='tab:red', label=f'Before (AUC = {uncal_auc:.4f})')
-            ax2.plot(cal_rec, cal_prec, color='tab:green', label=f'After (AUC = {cal_auc:.4f})')
-            
-            ax2.set_xlabel('Recall')
-            ax2.set_ylabel('Precision')
-            ax2.set_title('Precision-Recall Curve')
-            ax2.legend(loc='lower left')
-            ax2.grid(True, linestyle=':')
-    
-            # ==========================================
-            # 3. CONFUSION MATRIX (POST-CALIBRATION)
-            # ==========================================
-            # Assign classification flags using optimized threshold
-            preds = (self.cal_val_probs >= self.optimal_threshold).astype(int)
-            cm = metrics.confusion_matrix(self.val_labels, preds)
-            disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1])
-            # Render visual overlay context straight into third canvas slot
-            disp.plot(cmap=plt.cm.Blues, ax=ax3, values_format='d')
-            ax3.set_title(f'Confusion Matrix\n(Threshold: {self.optimal_threshold:.2f})')
-    
-            plt.tight_layout()
-            
-            # Archive tracking references back to wrapper
-            self.diagrams = fig
+        # 4. Filter missing bins to match scikit-learn's shortened output arrays
+        uncal_mask = bin_total_uncal > 0
+        cal_mask = bin_total_cal > 0
+
+        # 5. Compute accurate ECE weights
+        uncal_ece = np.sum(np.abs(uncal_true - uncal_pred) * bin_total_uncal[uncal_mask]) / len(self.val_labels)
+        cal_ece = np.sum(np.abs(cal_true - cal_pred) * bin_total_cal[cal_mask]) / len(self.val_labels)
+
+        ax1.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
+        ax1.plot(uncal_pred, uncal_true, marker='s', color='tab:red', label='Before Calibration')
+        ax1.plot(cal_pred, cal_true, marker='o', color='tab:green', label='After Calibration')
+        
+        ax1.set_xlabel('Mean Predicted Probability')
+        ax1.set_ylabel('Fraction of Positives')
+        ax1.set_title('Reliability Diagram')
+        ax1.legend(loc='upper left')
+        ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
+                    verticalalignment='bottom', horizontalalignment='right',
+                    transform=ax1.transAxes,
+                    color='black', fontsize=10)
+        ax1.grid(True, linestyle=':')
+
+        # ==========================================
+        # 2. PRECISION-RECALL AUC CURVE
+        # ==========================================
+        # Uncalibrated curve stats
+        uncal_prec, uncal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.uncal_val_probs)
+        uncal_auc = metrics.auc(uncal_rec, uncal_prec)
+
+        # Calibrated curve stats
+        cal_prec, cal_rec, _ = metrics.precision_recall_curve(self.val_labels, self.cal_val_probs)
+        cal_auc = metrics.auc(cal_rec, cal_prec)
+
+        # Operational baseline (No skill model matches the positive class ratio)
+        no_skill = len(self.val_labels[self.val_labels == 1]) / len(self.val_labels)
+        ax2.plot([0, 1], [no_skill, no_skill], 'k--', label=f'No Skill (AUC = {no_skill:.2f})')
+        
+        ax2.plot(uncal_rec, uncal_prec, color='tab:red', label=f'Before (AUC = {uncal_auc:.4f})')
+        ax2.plot(cal_rec, cal_prec, color='tab:green', label=f'After (AUC = {cal_auc:.4f})')
+        
+        ax2.set_xlabel('Recall')
+        ax2.set_ylabel('Precision')
+        ax2.set_title('Precision-Recall Curve')
+        ax2.legend(loc='lower left')
+        ax2.grid(True, linestyle=':')
+
+        # ==========================================
+        # 3. CONFUSION MATRIX (POST-CALIBRATION)
+        # ==========================================
+        # Assign classification flags using optimized threshold
+        preds = (self.cal_val_probs >= self.optimal_threshold).astype(int)
+        cm = metrics.confusion_matrix(self.val_labels, preds)
+        disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1])
+        # Render visual overlay context straight into third canvas slot
+        disp.plot(cmap=plt.cm.Blues, ax=ax3, values_format='d')
+        ax3.set_title(f'Confusion Matrix\n(Threshold: {self.optimal_threshold:.2f})')
+
+        plt.tight_layout()
+        
+        # Archive tracking references back to wrapper
+        self.diagrams = fig
 
     def run_calibration_pipeline(self, metric="f1", n_bins=10):
         self.calibrate()
