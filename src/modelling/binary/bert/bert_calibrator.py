@@ -14,7 +14,7 @@ class TemperatureScaler(nn.Module):
     def __init__(self):
         super(TemperatureScaler, self).__init__()
         # Initialise temperature parameter at 1.5
-        self.temperature = nn.Parameter(torch.tensor([10.0], dtype=torch.float32))
+        self.temperature = nn.Parameter(torch.tensor([1.0], dtype=torch.float32))
 
     def forward(self, logits):
         # Enforce a strict minimum temperature value to prevent division by zero
@@ -22,6 +22,7 @@ class TemperatureScaler(nn.Module):
         return logits / clamped_temp
 
     def fit(self, logits_list, labels_list, device):
+        self.requires_grad_(True)
         
         # Convert collected lists to tensors
         logits_tensor = torch.cat(logits_list, dim=0).to(device)
@@ -210,8 +211,19 @@ class BinaryBERTCalibrator:
             # ==========================================
             
             # Calculate curve details
-            uncal_true, uncal_pred = calibration_curve(self.val_labels, self.uncal_val_probs, n_bins=n_bins)
-            cal_true, cal_pred = calibration_curve(self.val_labels, self.cal_val_probs, n_bins=n_bins)
+            uncal_true, uncal_pred, uncal_bin_idx = calibration_curve(self.val_labels, self.uncal_val_probs, n_bins=n_bins, strategy='uniform')
+            cal_true, cal_pred, cal_bin_idx = calibration_curve(self.val_labels, self.cal_val_probs, n_bins=n_bins)
+
+            # Calculate ECE 
+
+            bin_total_uncal = np.bincount(uncal_bin_idx, minlength=n_bins) 
+            bin_total_cal = np.bincount(cal_bin_idx, minlength=n_bins) 
+
+            bin_total_uncal_filtered = bin_total_uncal[bin_total_uncal > 0]
+            bin_total_cal_filtered = bin_total_cal[bin_total_cal > 0]
+
+            uncal_ece = np.sum(np.abs(uncal_true - uncal_pred) * bin_total_uncal_filtered) / np.sum(bin_total_uncal_filtered)
+            cal_ece = np.sum(np.abs(cal_true - cal_pred) * bin_total_cal_filtered) / np.sum(bin_total_cal_filtered)
     
             ax1.plot([0, 1], [0, 1], 'k--', label='Perfectly Calibrated')
             ax1.plot(uncal_pred, uncal_true, marker='s', color='tab:red', label='Before Calibration')
@@ -221,6 +233,10 @@ class BinaryBERTCalibrator:
             ax1.set_ylabel('Fraction of Positives')
             ax1.set_title('Reliability Diagram')
             ax1.legend(loc='lower right')
+            ax1.text(0.95, 0.05, f'Before ECE = {uncal_ece:.4f}\nAfter ECE = {cal_ece:.4f}', 
+                     verticalalignment='bottom', horizontalalignment='right',
+                     transform=ax1.transAxes,
+                     color='black', fontsize=10)
             ax1.grid(True, linestyle=':')
     
             # ==========================================
