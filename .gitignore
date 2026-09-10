@@ -6,7 +6,7 @@ ENV/
 *.env
 .secrets
 
-models/binary/
+models/
 !models/binary/.gitkeep
 
 models/attributes/
