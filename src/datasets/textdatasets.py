@@ -58,20 +58,11 @@ class TextDataset(Dataset):
         print(f'Label encoder saved to {encoder_path}')
 
 class MultiLabelTextDataset(Dataset):
-    def __init__(self, dataset, mode, max_len, label_columns, encoder=None):
+    def __init__(self, dataset, mode, max_len, label_columns):
         self.texts = dataset['Full_Text'].values
         self.labels = dataset[label_columns].values
         self.tokenizer = AutoTokenizer.from_pretrained(mode)
         self.max_len = max_len
-        self.encoder = encoder if encoder is not None else LabelEncoder()
-
-    def preprocess_labels(self, training=True):
-        if training:
-            for i in range(self.labels.shape[1]):
-                self.labels[:, i] = self.encoder.fit_transform(self.labels[:, i])
-        else:
-            for i in range(self.labels.shape[1]):
-                self.labels[:, i] = self.encoder.transform(self.labels[:, i])
 
     def __len__(self):
         return len(self.texts)
