@@ -6,7 +6,7 @@ import json
 import matplotlib.pyplot as plt
 from sklearn import model_selection, preprocessing, metrics
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.multioutput import MultiOutputClassifier
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from scipy.optimize import minimize_scalar
@@ -19,8 +19,10 @@ class MultiLabelTFIDFModel:
         self.text_column = text_column
         self.label_columns = label_columns
         self.vectorizer = TfidfVectorizer()
-        self.label_encoder = LabelEncoder()
-        self.model = MultiOutputClassifier(LogisticRegression(max_iter=1000))
+        self.model = OneVsRestClassifier(LogisticRegression(max_iter=1000))
+
+        self.y_train = self.training_set[self.label_columns]
+        self.y_validation = self.validation_set[self.label_columns]
 
         self.metrics = {}
     
@@ -28,10 +30,6 @@ class MultiLabelTFIDFModel:
         # Fit the TF-IDF vectorizer on the training data and transform both training and validation data
         self.X_train = self.vectorizer.fit_transform(self.training_set[self.text_column])
         self.X_validation = self.vectorizer.transform(self.validation_set[self.text_column])
-
-        # Encode the labels for each label column
-        self.y_train = self.training_set[self.label_columns].apply(self.label_encoder.fit_transform)
-        self.y_validation = self.validation_set[self.label_columns].apply(self.label_encoder.transform)
 
     def train_model(self):
         # Train the multi-output logistic regression model
@@ -64,8 +62,7 @@ class MultiLabelTFIDFModel:
         os.makedirs(output_dir, exist_ok=True)
         artifacts = {
             'model': self.model,
-            'vectorizer': self.vectorizer,
-            'encoder': self.label_encoder
+            'vectorizer': self.vectorizer
         }
         joblib.dump(artifacts, os.path.join(output_dir, 'multi_label_model.pkl'))
 
