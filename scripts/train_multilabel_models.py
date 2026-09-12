@@ -1,13 +1,15 @@
 import gc
+from logging import config
 import sys
 import torch 
 import yaml
 from torch.nn import BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 import pandas as pd
-from src.datasets.textdatasets import TextDataset
+from src.datasets.textdatasets import MultiLabelTextDataset
 
 from src.modelling.multilabel.baseline.ml_baseline_model import MultiLabelTFIDFModel
+from src.modelling.multilabel.bert.ml_bert_model import MultiLabelBERTClassifier
 
 def main():
 
@@ -36,6 +38,39 @@ def main():
     model = MultiLabelTFIDFModel(training_set, validation_set, text_column, label_columns)
     model.run_pipeline()
 
+    
+    with open('config/technique_model.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+
+    batch_size = config['data']['batch_size']
+    tokenizer_name = config['data']['tokenizer_name']
+    max_len = config['data']['max_length']
+
+    training_data = MultiLabelTextDataset(training_set, mode=tokenizer_name, max_len=max_len, label_columns=label_columns)
+    validation_data = MultiLabelTextDataset(validation_set, mode=tokenizer_name, max_len=max_len, label_columns=label_columns)
+
+    training_loader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
+    validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=False)
+
+    learning_rate = float(config['bert_model']['learning_rate'])
+    n_classes = config['bert_model']['n_classes']
+    epochs = config['bert_model']['epochs']
+    optimizer = config['bert_model']['optimizer']
+    model_name = config['bert_model']['model_name']
+
+    multi_label_model = MultiLabelBERTClassifier(
+        n_labels=n_classes,
+        all_labels=label_columns,
+        train_loader=training_loader,
+        val_loader=validation_loader,
+        optimizer=optimizer,
+        epochs=epochs,
+        learning_rate=learning_rate,
+        pretrained_model_name=model_name
+    )
+
+    multi_label_model.run_pipeline(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+            
     save_model_path = "models/multilabel/baseline/uncalibrated"
     save_metrics_path = "experiments/multilabel/baseline/uncalibrated"
 
