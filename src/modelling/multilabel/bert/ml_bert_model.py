@@ -28,6 +28,10 @@ class MultiLabelBERTClassifier(nn.Module):
         self.eval_probs = []
         self.eval_true = []
 
+        self.accuracy = None
+        self.classification_report = None
+        self.diagrams = None
+
     def forward(self, input_ids, attention_mask):
 
         outputs = self.bert(
@@ -162,15 +166,54 @@ class MultiLabelBERTClassifier(nn.Module):
 
         preds = (self.eval_probs >= 0.5).astype(int)
         self.accuracy = metrics.accuracy_score(self.eval_true, preds)
-        class_names = [f"Label {i}" for i in range(len(self.all_labels))]
+        class_names = [f"Label {i}" for i in self.all_labels]
         self.classification_report = classification_report(self.eval_true, preds, target_names=class_names, zero_division=0)
 
         print(f"Validation Accuracy: {self.accuracy:.4f}")
         print("Classification Report:")
         print(self.classification_report)
+    
+    def plot_loss_curves(self):
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(self.training_losses, label='Training Loss')
+        ax.plot(self.validation_losses, label='Validation Loss')
+        ax.set_title('Loss Curves of Multi-Label BERT Classifier')
+        ax.set_xlabel('Epochs')
+        ax.set_ylabel('Loss')
+        ax.legend()
+        ax.grid()
+
+        fig.tight_layout()
+        self.diagrams = fig
 
     def run_pipeline(self, device):
         self.to(device)
         self.calculate_pos_weights(device)
         self.train_model(device)
         self.evaluate_model(device)
+        self.plot_loss_curves()
+
+    def save_model(self, save_path):
+        os.makedirs(save_path, exist_ok=True)
+        model_save_path = os.path.join(save_path, "multi_label_uncal_model.pt")
+        torch.save(self.state_dict(), model_save_path)
+
+    def save_metrics(self, save_path, output_format="txt"):
+        os.makedirs(save_path, exist_ok=True)
+        if output_format == "json":
+            metrics_save_path = os.path.join(save_path, "metrics.json")
+            metrics_data = {
+                "accuracy": self.accuracy,
+                "classification_report": self.classification_report
+            }
+            with open(metrics_save_path, 'w') as f:
+                json.dump(metrics_data, f, indent=4)
+
+        elif output_format == "txt":
+            metrics_save_path = os.path.join(save_path, "metrics.txt")
+            with open(metrics_save_path, 'w') as f:
+                f.write(f"Validation Accuracy: {self.accuracy:.4f}\n")
+                f.write("Classification Report:\n")
+                f.write(self.classification_report)
+
+        self.diagrams.savefig(os.path.join(save_path, "loss_curves.png"))

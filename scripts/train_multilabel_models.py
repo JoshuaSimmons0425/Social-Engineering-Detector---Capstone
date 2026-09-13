@@ -35,8 +35,8 @@ def main():
                      'personal_label'
                      ]
 
-    model = MultiLabelTFIDFModel(training_set, validation_set, text_column, label_columns)
-    model.run_pipeline()
+    baseline_model = MultiLabelTFIDFModel(training_set, validation_set, text_column, label_columns)
+    baseline_model.run_pipeline()
 
     
     with open('config/technique_model.yaml', 'r') as f:
@@ -71,11 +71,17 @@ def main():
 
     multi_label_model.run_pipeline(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
             
-    save_model_path = "models/multilabel/baseline/uncalibrated"
-    save_metrics_path = "experiments/multilabel/baseline/uncalibrated"
+    save_baseline_model_path = "models/multilabel/baseline/uncalibrated"
+    save_baseline_metrics_path = "experiments/multilabel/baseline/uncalibrated"
 
-    model.save_model(save_model_path)
-    model.save_metrics(save_metrics_path)
+    baseline_model.save_model(save_baseline_model_path)
+    baseline_model.save_metrics(save_baseline_metrics_path)
+
+    save_multilabel_bert_model_path = "models/multilabel/bert/uncalibrated"
+    save_multilabel_bert_metrics_path = "experiments/multilabel/bert/uncalibrated"
+
+    multi_label_model.save_model(save_multilabel_bert_model_path)
+    multi_label_model.save_metrics(save_multilabel_bert_metrics_path)
 
     sys.exit(0)
 

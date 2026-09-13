@@ -1,0 +1,19 @@
+Validation Accuracy: 0.2900
+Classification Report:
+                           precision    recall  f1-score   support
+
+      Label urgency_label       0.70      0.89      0.79       925
+         Label fear_label       0.64      0.88      0.74       437
+    Label authority_label       0.64      0.77      0.70       824
+  Label reciprocity_label       0.45      0.88      0.60       385
+    Label curiosity_label       0.41      0.77      0.54       664
+   Label pretexting_label       0.52      0.89      0.66       401
+  Label promotional_label       0.89      0.96      0.92      1573
+Label transactional_label       0.77      0.90      0.83      1510
+     Label reminder_label       0.30      0.80      0.44       203
+     Label personal_label       0.46      0.77      0.57       793
+
+                micro avg       0.62      0.87      0.72      7715
+                macro avg       0.58      0.85      0.68      7715
+             weighted avg       0.66      0.87      0.74      7715
+              samples avg       0.62      0.78      0.66      7715
