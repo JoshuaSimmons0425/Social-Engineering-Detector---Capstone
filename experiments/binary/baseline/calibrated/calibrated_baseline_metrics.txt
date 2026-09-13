@@ -1,3 +1,7 @@
+Platt Scaler Parameters:
+ A: 2.2958
+ B: -1.2927
+
 Validation Loss after calibration: 0.0825
 Validation Brier score after calibration: 0.0220
 Validation Accuracy after calibration: 0.9705

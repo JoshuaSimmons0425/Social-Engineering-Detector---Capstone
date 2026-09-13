@@ -57,75 +57,75 @@ class BinaryBERTCalibrator:
         self.scaler.fit(logits_list, labels_list, self.device)
 
     def get_probs_from_loader(self, data_loader):
-            """
-            Helper method to extract both raw and calibrated probabilities 
-            over the validation dataset for a fair visualization baseline.
-            """
-            self.model.eval()
-            self.scaler.to(self.device)
-            raw_probs_list = []
-            cal_probs_list = []
-            labels_list = []
-    
-            with torch.no_grad():
-                for batch in data_loader:
-                    input_ids = batch['input_ids'].to(self.device)
-                    attention_mask = batch['attention_mask'].to(self.device)
-                    labels = batch['labels'].numpy()
-    
-                    # 1. Fetch raw logit outputs on the active target hardware engine (e.g. cuda)
-                    raw_logits = self.model(input_ids=input_ids, attention_mask=attention_mask)
-                    
-                    # Compute raw uncalibrated probabilities on GPU, then extract to CPU NumPy array
-                    raw_probs = torch.sigmoid(raw_logits.squeeze(-1)).cpu().numpy()
+        """
+        Helper method to extract both raw and calibrated probabilities 
+        over the validation dataset for a fair visualization baseline.
+        """
+        self.model.eval()
+        self.scaler.to(self.device)
+        raw_probs_list = []
+        cal_probs_list = []
+        labels_list = []
 
-                    # 2. Compute calibrated logit outputs directly on the same hardware engine
-                    # Pass the raw GPU logits directly to your GPU-bound scaler
-                    cal_logits = self.scaler(raw_logits)
-                    
-                    # Compute calibrated probabilities on GPU, then extract to CPU NumPy array
-                    cal_probs = torch.sigmoid(cal_logits.squeeze(-1)).cpu().numpy()
+        with torch.no_grad():
+            for batch in data_loader:
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                labels = batch['labels'].numpy()
+
+                # 1. Fetch raw logit outputs on the active target hardware engine (e.g. cuda)
+                raw_logits = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                
+                # Compute raw uncalibrated probabilities on GPU, then extract to CPU NumPy array
+                raw_probs = torch.sigmoid(raw_logits.squeeze(-1)).cpu().numpy()
+
+                # 2. Compute calibrated logit outputs directly on the same hardware engine
+                # Pass the raw GPU logits directly to your GPU-bound scaler
+                cal_logits = self.scaler(raw_logits)
+                
+                # Compute calibrated probabilities on GPU, then extract to CPU NumPy array
+                cal_probs = torch.sigmoid(cal_logits.squeeze(-1)).cpu().numpy()
+
+                raw_probs_list.append(raw_probs)
+                cal_probs_list.append(cal_probs)
+                labels_list.append(labels)
+
+        # Force clean 1D tracking arrays 
+        raw_probs_flat = np.concatenate(raw_probs_list, axis=0).ravel()
+        cal_probs_flat = np.concatenate(cal_probs_list, axis=0).ravel()
+        labels_flat = np.concatenate(labels_list, axis=0).ravel()
     
-                    raw_probs_list.append(raw_probs)
-                    cal_probs_list.append(cal_probs)
-                    labels_list.append(labels)
-    
-            # Force clean 1D tracking arrays 
-            raw_probs_flat = np.concatenate(raw_probs_list, axis=0).ravel()
-            cal_probs_flat = np.concatenate(cal_probs_list, axis=0).ravel()
-            labels_flat = np.concatenate(labels_list, axis=0).ravel()
-        
-            return raw_probs_flat, cal_probs_flat, labels_flat
+        return raw_probs_flat, cal_probs_flat, labels_flat
 
     def get_before_and_after_probs(self):
         self.uncal_val_probs, self.cal_val_probs, self.val_labels = self.get_probs_from_loader(self.validation_loader)
 
     def dynamic_decision_threshold(self, metric = "f1"):
 
-            _, cal_cal_probs, cal_labels = self.get_probs_from_loader(self.calibration_loader)
-            
-            thresholds = np.linspace(0, 1, 101)
-            best_threshold = 0.5
-            best_metric_value = -np.inf
-    
-            for threshold in thresholds:
-                preds = (cal_cal_probs >= threshold).astype(int)
-                if metric == "f1":
-                    metric_value = metrics.f1_score(cal_labels, preds)
-                elif metric == "f2":
-                    metric_value = metrics.fbeta_score(cal_labels, preds, beta=2)
-                elif metric == "f0.5":
-                    metric_value = metrics.fbeta_score(cal_labels, preds, beta=0.5)
-                else:
-                    raise ValueError(f"Unsupported metric: {metric}")
-    
-                if metric_value > best_metric_value:
-                    best_metric_value = metric_value
-                    best_threshold = threshold
-    
-            print(f"Optimal decision threshold for {metric}: {best_threshold:.4f} with {metric} score: {best_metric_value:.4f}")
-            self.optimal_threshold = best_threshold
-    
+        _, cal_cal_probs, cal_labels = self.get_probs_from_loader(self.calibration_loader)
+        
+        thresholds = np.linspace(0, 1, 101)
+        best_threshold = 0.5
+        best_metric_value = -np.inf
+
+        for threshold in thresholds:
+            preds = (cal_cal_probs >= threshold).astype(int)
+            if metric == "f1":
+                metric_value = metrics.f1_score(cal_labels, preds)
+            elif metric == "f2":
+                metric_value = metrics.fbeta_score(cal_labels, preds, beta=2)
+            elif metric == "f0.5":
+                metric_value = metrics.fbeta_score(cal_labels, preds, beta=0.5)
+            else:
+                raise ValueError(f"Unsupported metric: {metric}")
+
+            if metric_value > best_metric_value:
+                best_metric_value = metric_value
+                best_threshold = threshold
+
+        print(f"Optimal decision threshold for {metric}: {best_threshold:.4f} with {metric} score: {best_metric_value:.4f}")
+        self.optimal_threshold = best_threshold
+
 
     def evaluate(self):
         if self.uncal_val_probs is None or self.cal_val_probs is None or self.val_labels is None:
@@ -134,12 +134,12 @@ class BinaryBERTCalibrator:
         self.calibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.cal_val_probs)
         self.calibrated_metrics['log_loss'] = log_loss(self.val_labels, self.cal_val_probs)
         self.calibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int))
-        self.calibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int), digits = 4,  output_dict=True)
+        self.calibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.cal_val_probs >= self.optimal_threshold).astype(int), digits = 4)
 
         self.uncalibrated_metrics['brier_score'] = brier_score_loss(self.val_labels, self.uncal_val_probs)
         self.uncalibrated_metrics['log_loss'] = log_loss(self.val_labels, self.uncal_val_probs)
         self.uncalibrated_metrics['accuracy'] = accuracy_score(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int))
-        self.uncalibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int), digits = 4, output_dict=True)
+        self.uncalibrated_metrics['classification_report'] = classification_report(self.val_labels, (self.uncal_val_probs >= 0.5).astype(int), digits = 4)
 
         print("\n --- Performance Comparison Before vs After Calibration ---")
         print(f"Brier Score -> Before: {self.uncalibrated_metrics['brier_score']:.4f} | After: {self.calibrated_metrics['brier_score']:.4f}")
@@ -294,6 +294,7 @@ class BinaryBERTCalibrator:
             calibrated_metrics_path = os.path.join(save_dir, f'calibrated_metrics.{output_format}')
             if output_format == 'txt':
                 with open(calibrated_metrics_path, 'w') as f:
+                    f.write(f"Platt Scaler Parameters:\n A: {self.scaler.A.item()}\n B: {self.scaler.B.item()}\n\n")
                     for key, value in self.calibrated_metrics.items():
                         f.write(f"{key}: {value}\n")
             elif output_format == 'json':

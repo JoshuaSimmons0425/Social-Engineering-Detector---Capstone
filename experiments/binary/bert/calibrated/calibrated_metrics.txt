@@ -1,4 +1,16 @@
+Platt Scaler Parameters:
+ A: 0.7421846389770508
+ B: -3.46415114402771
+
 brier_score: 0.007560668978840113
 log_loss: 0.03171205148100853
 accuracy: 0.991
-classification_report: {'0': {'precision': 0.9934497816593887, 'recall': 0.9953125, 'f1-score': 0.9943802684982829, 'support': 3200.0}, '1': {'precision': 0.9811083123425692, 'recall': 0.97375, 'f1-score': 0.9774153074027604, 'support': 800.0}, 'accuracy': 0.991, 'macro avg': {'precision': 0.9872790470009789, 'recall': 0.9845312500000001, 'f1-score': 0.9858977879505216, 'support': 4000.0}, 'weighted avg': {'precision': 0.9909814877960248, 'recall': 0.991, 'f1-score': 0.9909872762791784, 'support': 4000.0}}
+classification_report:               precision    recall  f1-score   support
+
+           0     0.9934    0.9953    0.9944      3200
+           1     0.9811    0.9738    0.9774       800
+
+    accuracy                         0.9910      4000
+   macro avg     0.9873    0.9845    0.9859      4000
+weighted avg     0.9910    0.9910    0.9910      4000
+

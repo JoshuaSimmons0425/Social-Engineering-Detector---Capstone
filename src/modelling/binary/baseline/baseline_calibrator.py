@@ -149,6 +149,7 @@ class TFIDFBaselineCalibrator:
         
         if output_format == 'txt':
             with open(os.path.join(output_dir, 'calibrated_baseline_metrics.txt'), 'w') as f:
+                f.write(f'Platt Scaler Parameters:\n A: {self.A:.4f}\n B: {self.B:.4f}\n\n')
                 f.write(f'Validation Loss after calibration: {self.calibrated_metrics["loss"]:.4f}\n')
                 f.write(f'Validation Brier score after calibration: {self.calibrated_metrics["brier_score"]:.4f}\n')
                 f.write(f'Validation Accuracy after calibration: {self.calibrated_metrics["accuracy"]:.4f}\n')
@@ -163,6 +164,7 @@ class TFIDFBaselineCalibrator:
         elif output_format == 'json':
             with open(os.path.join(output_dir, 'calibrated_baseline_metrics.json'), 'w') as f:
                 json.dump({
+                    'Platt Scaler Parameters': {'A': self.A, 'B': self.B},
                     'validation_loss': self.calibrated_metrics["loss"],
                     'validation_brier_score': self.calibrated_metrics["brier_score"],
                     'validation_accuracy': self.calibrated_metrics["accuracy"],
