@@ -25,7 +25,6 @@ class BaselineMultiCalibrator:
         self.y_validation = self.validation_set[self.all_labels]
         self.platt_parameters = {}
 
-        self.optimal_thresholds = {}
         self.calibrated_metrics = {}
         self.uncalibrated_metrics = {}
 
@@ -72,149 +71,104 @@ class BaselineMultiCalibrator:
                 "B": float(sigmoid_model.b_)
             }
 
-    def optimize_thresholds(self):
-        """
-        Finds and stores the decision threshold that maximizes the F1-score 
-        for each calibrated label estimator using the validation set.
-        """
-        # Get calibrated probabilities on validation set
-        y_cal_probs = np.column_stack([
-            calibrator.predict_proba(self.X_validation)[:, 1]
-            for calibrator in self.calibrated_estimators
-        ])
-        
-        print("--- Optimising Thresholds based on F1-Score ---")
+    def evaluate_calibration(self):
+        """Evaluates uncalibrated and calibrated quality profiles without using discrete thresholds."""
+        # 1. Gather predicted probabilities on validation set
+        y_uncal_probs = self.model.predict_proba(self.X_validation)
+        y_cal_probs = np.column_stack(
+            [
+                calibrator.predict_proba(self.X_validation)[:, 1]
+                for calibrator in self.calibrated_estimators
+            ]
+        )
+
+        # 2. Score metrics per label
         for i, label in enumerate(self.all_labels):
             true_labels = self.y_validation[label].values
-            label_probs = y_cal_probs[:, i]
-            
-            best_threshold = 0.5
-            best_f1 = 0.0
-            
-            # Grid search candidates from 0.01 to 0.99
-            thresholds = np.linspace(0.01, 0.99, 99)
-            
-            for t in thresholds:
-                preds = (label_probs >= t).astype(int)
-                # Using binary average since it evaluates each single label independently
-                current_f1 = metrics.fbeta_score(true_labels, preds, average='binary', zero_division=0, beta=2)
-                
-                if current_f1 > best_f1:
-                    best_f1 = current_f1
-                    best_threshold = t
-            
-            self.optimal_thresholds[label] = float(best_threshold)
-            print(f"Optimal Threshold for {label}: {best_threshold:.2f} (Validation F2: {best_f1:.4f})")
 
-    def evaluate_uncalibrated(self):
-        y_prob = self.model.predict_proba(self.X_validation)
-        y_pred = self.model.predict(self.X_validation)
+            # Uncalibrated processing
+            uncal_label_probs = y_uncal_probs[:, i]
+            self.uncalibrated_metrics[label] = {
+                "brier_score": float(
+                    brier_score_loss(true_labels, uncal_label_probs)
+                ),
+                "log_loss": float(log_loss(true_labels, uncal_label_probs)),
+                "ece": float(self._calculate_ece(true_labels, uncal_label_probs)),
+            }
 
-        for i, label in enumerate(self.all_labels):
-            self.uncalibrated_metrics[label] = {}
-            label_probs = y_prob[:, i]
-            label_preds = y_pred[:, i]
-            true_labels = self.y_validation[label].values
-
-            log_loss = metrics.log_loss(true_labels, label_probs)
-            brier_score = metrics.brier_score_loss(true_labels, label_probs)
-            accuracy = metrics.accuracy_score(true_labels, label_preds)
-            ece = self._calculate_ece(true_labels, label_probs)
-            self.uncalibrated_metrics[label]['log_loss'] = log_loss
-            self.uncalibrated_metrics[label]['brier_score'] = brier_score
-            self.uncalibrated_metrics[label]['accuracy'] = accuracy
-            self.uncalibrated_metrics[label]['ECE Before'] = ece
-            self.uncalibrated_metrics[label]['classification_report'] = metrics.classification_report(self.y_validation[label], y_pred[:, i], digits=4)
-            print(f'Validation Accuracy for {label}: {accuracy:.4f}')
-            print(f"Negative Log Loss for {label}: {log_loss:.4f}")
-            print(f"Brier Score for {label}: {brier_score:.4f}")
-            print(f"Expected Calibration Error (Before): {ece:.4f}")
-            print(f'Classification Report for {label}: \n{self.uncalibrated_metrics[label]["classification_report"]}')
-
-        macro_f1_score = metrics.f1_score(self.y_validation, y_pred, average='macro')
-        self.uncalibrated_metrics['macro_f1_score'] = macro_f1_score
-
-    def evaluate_calibrated(self):
-        y_cal_probs = np.column_stack([
-            calibrator.predict_proba(self.X_validation)[:, 1]
-            for calibrator in self.calibrated_estimators
-        ])
-
-        y_cal_preds = np.zeros_like(y_cal_probs, dtype=int)
-        for i, label in enumerate(self.all_labels):
-            t = self.optimal_thresholds.get(label, 0.5)
-            y_cal_preds[:, i] = (y_cal_probs[:, i] >= t).astype(int)
-
-        for i, label in enumerate(self.all_labels):
-            self.calibrated_metrics[label] = {}
-            label_probs = y_cal_probs[:, i]
-            label_preds = y_cal_preds[:, i]
-            true_labels = self.y_validation[label].values
-
-            log_loss = metrics.log_loss(true_labels, label_probs)
-            brier_score = metrics.brier_score_loss(true_labels, label_probs)
-            accuracy = metrics.accuracy_score(true_labels, label_preds)
-            ece = self._calculate_ece(true_labels, label_probs)
-            self.calibrated_metrics[label]['log_loss'] = log_loss
-            self.calibrated_metrics[label]['brier_score'] = brier_score
-            self.calibrated_metrics[label]['accuracy'] = accuracy
-            self.calibrated_metrics[label]['ECE After'] = ece
-            self.calibrated_metrics[label]['classification_report'] = metrics.classification_report(true_labels, label_preds, digits=4)
-            print(f'Validation Accuracy for {label}: {accuracy:.4f}')
-            print(f"Negative Log Loss for {label}: {log_loss:.4f}")
-            print(f"Brier Score for {label}: {brier_score:.4f}")
-            print(f"Expected Calibration Error (After): {ece:.4f}")
-            print(f'Classification Report for {label}: \n{self.calibrated_metrics[label]["classification_report"]}')
-
-        macro_f1_score = metrics.f1_score(self.y_validation, y_cal_preds, average='macro')
-        self.calibrated_metrics['macro_f1_score'] = macro_f1_score
+            # Calibrated processing
+            cal_label_probs = y_cal_probs[:, i]
+            self.calibrated_metrics[label] = {
+                "brier_score": float(
+                    brier_score_loss(true_labels, cal_label_probs)
+                ),
+                "log_loss": float(log_loss(true_labels, cal_label_probs)),
+                "ece": float(self._calculate_ece(true_labels, cal_label_probs)),
+            }
+            print(f"Evaluated continuous metrics for baseline label: {label}")
 
     def run_pipeline(self):
         self.preprocess_data()
         self.calibrate()
-        self.evaluate_uncalibrated()
-        self.optimize_thresholds()
-        self.evaluate_calibrated()
+        self.evaluate_calibration()
 
     def save_calibration_artifacts(self, save_path):
         os.makedirs(save_path, exist_ok=True)
-        artifact_path = os.path.join(save_path, "ml_calibrated_pipeline")
+        # Save weights
+        with open(os.path.join(save_path, "calibrated_estimators.pkl"), "wb") as f:
+            pickle.dump(self.calibrated_estimators, f)
 
-        pipeline_artifact = {
-            "calibrated_estimators": self.calibrated_estimators,
-            "optimal_thresholds": self.optimal_thresholds,
-            "all_labels": self.all_labels,
-            "vectorizer": self.vectorizer
-        }
-
-        with open(artifact_path, "wb") as f:
-            pickle.dump(pipeline_artifact, f)
+        # Save parameters extracted
+        with open(os.path.join(save_path, "platt_parameters.json"), "w") as f:
+            json.dump(self.platt_parameters, f, indent=4)
             
-        print(f"\n[INFO] Successfully serialized calibrated pipeline components to: {artifact_path}")
+        print(f"\n[INFO] Successfully serialized calibrated pipeline components to: {save_path}")
 
     def save_metrics(self, save_path, output_format='txt'):
+        """Saves baseline evaluation metrics cleanly to disk"""
         os.makedirs(save_path, exist_ok=True)
-        
-        if output_format == 'json':
-            # Recommended approach for programmatic parsing later
-            with open(os.path.join(save_path, 'uncalibrated_metrics.json'), 'w') as f:
-                json.dump(self.uncalibrated_metrics, f, indent=4)
-            with open(os.path.join(save_path, 'calibrated_metrics.json'), 'w') as f:
-                json.dump(self.calibrated_metrics, f, indent=4)
-                
-        elif output_format == 'txt':
-            # Human-readable formatting with fixed indentation scopes
-            for filename, metrics_data in [('uncalibrated_metrics.txt', self.uncalibrated_metrics), 
-                                           ('calibrated_metrics.txt', self.calibrated_metrics)]:
-                with open(os.path.join(save_path, filename), 'w') as f:
-                    for key, val in metrics_data.items():
-                        if isinstance(val, dict):
-                            f.write(f'=== Metrics for {key} ===\n')
-                            for metric_name, metric_value in val.items():
-                                if metric_name == 'classification_report':
-                                    f.write(f'{metric_name}:\n{metric_value}\n')
-                                else:
-                                    f.write(f'{metric_name}: {metric_value}\n')
-                            f.write('\n')  # FIXED: Correct loop wrapping separation
-                        else:
-                            f.write(f'{key}: {val:.4f}\n\n')
+
+        if output_format == "json":
+            results = {
+                "uncalibrated_metrics": self.uncalibrated_metrics,
+                "calibrated_metrics": self.calibrated_metrics,
+            }
+            with open(os.path.join(save_path, "results.json"), "w") as f:
+                json.dump(results, f, indent=4)
+
+        elif output_format == "txt":
+            with open(os.path.join(save_path, "results.txt"), "w") as f:
+                f.write(
+                    "==================================================\n"
+                )
+                f.write("BASELINE LAYER PROBABILITY EVALUATIONS\n")
+                f.write(
+                    "==================================================\n\n"
+                )
+
+                for label in self.all_labels:
+                    f.write(f"Label: {label}\n")
+                    f.write("  [Uncalibrated Profile]\n")
+                    f.write(
+                        f"    Brier Score : {self.uncalibrated_metrics[label]['brier_score']:.5f}\n"
+                    )
+                    f.write(
+                        f"    Log Loss    : {self.uncalibrated_metrics[label]['log_loss']:.5f}\n"
+                    )
+                    f.write(
+                        f"    ECE         : {self.uncalibrated_metrics[label]['ece']:.5f}\n"
+                    )
+
+                    f.write("  [Calibrated Profile]\n")
+                    f.write(
+                        f"    Brier Score : {self.calibrated_metrics[label]['brier_score']:.5f}\n"
+                    )
+                    f.write(
+                        f"    Log Loss    : {self.calibrated_metrics[label]['log_loss']:.5f}\n"
+                    )
+                    f.write(
+                        f"    ECE         : {self.calibrated_metrics[label]['ece']:.5f}\n"
+                    )
+                    f.write("-" * 50 + "\n\n")
+
+        print(f"Baseline calibration results saved to {save_path}")
