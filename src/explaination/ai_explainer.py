@@ -1,32 +1,45 @@
 import os
-from pathlib import Path
-from google import genai
-from google.genai import types
-from dotenv import load_dotenv
+import numpy as np  
+from openai import OpenAI
 
-load_dotenv()  # Loads the environment variables from .env
+class AIRiskAssessor:
+    def __init__(self, model_id, input_text, api_key, user_prompt_path, system_prompt_path, evidence='no evidence'):
+        self.model_id = model_id
+        self.input_text = input_text
+        self.client = OpenAI(api_key=api_key)
+        self.user_prompt = user_prompt_path
+        self.system_prompt = system_prompt_path
+        self.evidence = evidence
 
-# Initialize the client (ensure GEMINI_API_KEY is set in your environment)
-client = genai.Client(api_key=os.environ.get("GEMINI_EXPLAINER_API_KEY"))
+    def load_prompts(self):
+        with open(self.user_prompt, "r", encoding="utf-8") as prompt:
+            self.user_prompt_content = prompt.read()
 
-# Read example prompts from md files
+        with open(self.system_prompt, "r", encoding="utf-8") as system:
+            self.system_prompt_content = system.read()
 
-prompt_path = Path("prompts/explainer/explainer_prompt.md")
-system_path = Path("prompts/explainer/system_prompt.md")
+    def inject_evidence_and_input(self):
+        if hasattr(self, "user_prompt_content"):
+            self.user_prompt_content = self.user_prompt_content.replace("{evidence}", self.evidence)
+        if hasattr(self, "system_prompt_content"):
+            self.system_prompt_content = self.system_prompt_content.replace("{message}", self.input_text)
 
-with open(prompt_path, "r", encoding="utf-8") as prompt:
-    user_content = prompt.read()
+    def process_prompts(self):
+        self.load_prompts()
+        self.inject_evidence_and_input()
 
-with open(system_path, "r", encoding="utf-8") as system:
-    system_prompt = system.read()
+    def get_processed_prompts(self):
+        self.process_prompts()
+        return self.user_prompt_content, self.system_prompt_content
 
-# Generate content with 
-response = client.models.generate_content(
-    model='gemini-2.5-flash', 
-    contents=user_content,
-    config=types.GenerateContentConfig(
-        system_instruction=system_prompt
-    )
-)
-
-print(response.text)
+    def call_chat_model(self):
+        user_prompt_content, system_prompt_content = self.get_processed_prompts()
+        response = self.client.chat.completions.create(
+            model=self.model_id,
+            messages=[
+                {"role": "system", "content": system_prompt_content},
+                {"role": "user", "content": user_prompt_content}
+            ],
+            max_tokens=500
+        )
+        return response
