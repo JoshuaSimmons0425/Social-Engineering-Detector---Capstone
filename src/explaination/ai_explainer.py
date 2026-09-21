@@ -21,7 +21,7 @@ class AIRiskAssessor:
     def inject_evidence_and_input(self):
         if hasattr(self, "user_prompt_content"):
             self.user_prompt_content = self.user_prompt_content.replace("{evidence}", self.evidence)
-        if hasattr(self, "system_prompt_content"):
+        if hasattr(self, "user_prompt_content"):
             self.system_prompt_content = self.system_prompt_content.replace("{message}", self.input_text)
 
     def process_prompts(self):
