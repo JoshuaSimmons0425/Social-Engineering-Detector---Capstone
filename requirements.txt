@@ -14,3 +14,4 @@ transformers==4.53.2
 shap==0.52.0
 lime==0.2.0.1
 transformers-interpret==0.10.0
+openai==3.16.2
