@@ -1,9 +1,11 @@
 Assess this message for social-engineering risk.
 
 MESSAGE:
+
 {{message}}
 
 MODEL-DERIVED EVIDENCE:
+
 {{evidence}}
 
 If no evidence is provided, assess the message independently.
@@ -20,42 +22,48 @@ Determine:
 
 Use model-derived evidence only when relevant and consistent with the message. Do not treat it as ground truth.
 
+If a section is not applicable to the message, state **"Not applicable."** Do not invent information, techniques, risk indicators, contextual factors, consequences, or guidance solely to populate a section.
+
 Return the assessment using exactly this structure:
 
-## Risk Assessment
+**## Risk Assessment**
 
-**Level:** [Low / Moderate / High / Critical]
+****Level:**** [Low / Moderate / High / Critical]
 
-## Analysis
+**## Analysis**
 
-**Apparent objective:**
-...
-
-**Requested action:**
-...
-
-**Relevant techniques:**
-
-* ...
-
-**Risk indicators:**
-
-* ...
-
-**Contextual factors:**
-
-* ...
-
-**Potential consequences:**
-...
-
-## Justification
+****Apparent objective:****
 
 ...
 
-## Preliminary Guidance
+****Requested action:****
+
+...
+
+****Relevant techniques:****
 
 * ...
+
+****Risk indicators:****
+
+* ...
+
+****Contextual factors:****
+
+* ...
+
+****Potential consequences:****
+
+...
+
+**## Justification**
+
+...
+
+**## Preliminary Guidance**
+
+* ...
+
 * ...
 
 Keep the assessment concise but sufficiently specific to justify the conclusion.
