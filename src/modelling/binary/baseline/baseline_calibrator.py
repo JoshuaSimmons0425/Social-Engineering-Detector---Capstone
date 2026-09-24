@@ -78,8 +78,25 @@ class TFIDFBaselineCalibrator:
         probs = 1 / (1 + np.exp(-raw_logits))
         return np.vstack([1 - probs, probs]).T  # Return as a 2D array with shape (n_samples, 2)
 
+    def dynamic_threshold(self, base_threshold=0.5, criterion='f1'):
+        # Adjust the decision threshold dynamically based on the calibrated probabilities
+        probs = self.predict_proba(self.X_calibration)[:, 1]
+        if criterion == 'f1':
+            best_threshold = base_threshold
+            best_f1 = 0
+            for threshold in np.linspace(0, 1, 101):
+                preds = (probs >= threshold).astype(int)
+                f1 = metrics.f1_score(self.y_calibration, preds)
+                if f1 > best_f1:
+                    best_f1 = f1
+                    best_threshold = threshold
+            base_threshold = best_threshold
+
+        self.calibrated_threshold = base_threshold
+
     def evaluate_calibration(self):
         # Evaluate the calibrated model on the validation set
+
         scaled_logits = self.predict_proba(self.X_validation)
         loss = log_loss(self.y_validation, scaled_logits)
         brier = brier_score_loss(self.y_validation, scaled_logits[:, 1])
@@ -134,7 +151,8 @@ class TFIDFBaselineCalibrator:
             'A': self.A,
             'B': self.B,
             'vectorizer': self.vectorizer,
-            'encoder': self.label_encoder
+            'encoder': self.label_encoder,
+            'threshold': self.calibrated_threshold
         }
         
         filepath = os.path.join(output_dir, 'calibrated_baseline_meta.pkl')
