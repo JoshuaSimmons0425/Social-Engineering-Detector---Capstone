@@ -1,7 +1,9 @@
 import os
-from envs.nanogpt_env.Lib import re
+import re
 import numpy as np  
 from openai import OpenAI
+import pandas
+from src.datasets.dataengine import DataEngine
 
 class AIRiskAssessor:
     def __init__(self, model_id, input_text, api_key, base_url, user_prompt_path, system_prompt_path, temperature = 0.0, evidence='no evidence'):
@@ -22,6 +24,16 @@ class AIRiskAssessor:
         with open(self.system_prompt, "r", encoding="utf-8") as system:
             self.system_prompt_content = system.read()
 
+    def mask_piis(self):
+
+        engine = DataEngine()
+        temp_df = pandas.DataFrame({'text': [self.input_text]})
+
+        temp_df = engine.mask_money(temp_df, 'text')
+        temp_df = engine.anonymize_data(temp_df, 'text')
+
+        self.input_text = temp_df['text'].iloc[0]
+
     def inject_evidence_and_input(self):
         if hasattr(self, "user_prompt_content"):
             self.user_prompt_content = self.user_prompt_content.replace("{evidence}", self.evidence)
@@ -29,6 +41,7 @@ class AIRiskAssessor:
             self.user_prompt_content = self.user_prompt_content.replace("{message}", self.input_text)
 
     def process_prompts(self):
+        self.mask_piis()
         self.load_prompts()
         self.inject_evidence_and_input()
 
