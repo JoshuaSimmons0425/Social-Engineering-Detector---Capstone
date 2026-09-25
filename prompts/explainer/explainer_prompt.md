@@ -24,8 +24,6 @@ Use model-derived evidence only when relevant and consistent with the message. D
 
 If a section is not applicable to the message, state **"Not applicable."** Do not invent information, techniques, risk indicators, contextual factors, consequences, or guidance solely to populate a section.
 
-**Important Note**: The text may contain masked placeholders (e.g., <EMAIL_ADDRESS>, <PHONE_NUMBER>, <URL>). Focus heavily on the linguistic structure, tone, syntactic patterns, and formatting cues around these placeholders when conducting your assessment. DO NOT repeat any sensitive information that has not been masked in your assessment.
-
 Return the assessment using exactly this structure:
 
 **## Risk Assessment**
