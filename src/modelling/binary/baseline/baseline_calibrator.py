@@ -26,6 +26,7 @@ class TFIDFBaselineCalibrator:
 
         self.uncalibrated_metrics = None
         self.calibrated_metrics = None
+        self.calibrated_threshold = 0.5
 
     def preprocess_data(self):
         # Fit the TF-IDF vectorizer on the calibration data and transform both calibration and validation data
@@ -93,15 +94,17 @@ class TFIDFBaselineCalibrator:
             base_threshold = best_threshold
 
         self.calibrated_threshold = base_threshold
+        print(f"Calibrated threshold set to: {self.calibrated_threshold}")
 
     def evaluate_calibration(self):
         # Evaluate the calibrated model on the validation set
 
         scaled_logits = self.predict_proba(self.X_validation)
+        preds = (scaled_logits[:, 1] >= self.calibrated_threshold).astype(int)
         loss = log_loss(self.y_validation, scaled_logits)
         brier = brier_score_loss(self.y_validation, scaled_logits[:, 1])
-        accuracy = np.mean(np.argmax(scaled_logits, axis=1) == self.y_validation)
-        classification_report = metrics.classification_report(self.y_validation, np.argmax(scaled_logits, axis=1), target_names=self.label_encoder.classes_)
+        accuracy = metrics.accuracy_score(self.y_validation, preds)
+        classification_report = metrics.classification_report(self.y_validation, preds, target_names=self.label_encoder.classes_)
 
         print(f'Validation Loss after calibration: {loss:.4f}')
         print(f'Validation Brier score after calibration: {brier:.4f}')
@@ -141,6 +144,7 @@ class TFIDFBaselineCalibrator:
     def run_calibration_pipeline(self):
         self.preprocess_data()
         self.calibrate()
+        self.dynamic_threshold()
         self.evaluate_calibration()
         self.evaluate_uncalibrated_model()
 
