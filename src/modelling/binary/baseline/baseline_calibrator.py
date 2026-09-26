@@ -203,7 +203,7 @@ class TFIDFBaselineCalibrator:
         probs_after = self.predict_proba(self.X_validation)[:, 1]
         
         preds_before = np.argmax(self.predict_uncalibrated_proba(self.X_validation), axis=1)
-        preds_after = np.argmax(self.predict_proba(self.X_validation), axis=1)
+        preds_after = np.argmax(self.predict_proba(self.X_validation) >= self.calibrated_threshold, axis=1)
 
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(24, 5))
 
@@ -218,7 +218,7 @@ class TFIDFBaselineCalibrator:
         cm_after = metrics.confusion_matrix(self.y_validation, preds_after)
         disp_after = metrics.ConfusionMatrixDisplay(confusion_matrix=cm_after, display_labels=self.label_encoder.classes_)
         disp_after.plot(ax=ax2, cmap=plt.cm.Blues)
-        ax2.set_title('Confusion Matrix (After Calibration)')
+        ax2.set_title(f'Confusion Matrix (After Calibration) with Threshold = {self.calibrated_threshold}')
         ax2.set_xlabel('Predicted Labels')
         ax2.set_ylabel('True Labels')
 
