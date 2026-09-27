@@ -11,12 +11,13 @@ from sklearn.metrics import log_loss, brier_score_loss
 from sklearn import metrics
 
 class BaselineEvaluator:
-    def __init__(self, model, encoder, vectorizer, A, B, test_set_50_50, test_set_80_20, text_column, label_column): 
+    def __init__(self, model, encoder, vectorizer, A, B, threshold,test_set_50_50, test_set_80_20, text_column, label_column): 
         self.model = model
         self.encoder = encoder
         self.vectorizer = vectorizer
         self.A = A
         self.B = B
+        self.threshold = threshold
         self.test_set_50_50 = test_set_50_50
         self.test_set_80_20 = test_set_80_20
         self.text_column = text_column
@@ -96,7 +97,7 @@ class BaselineEvaluator:
         X_test_80_20, y_test_80_20 = self.get_test_data(self.test_set_80_20)
 
         y_pred_proba = self.predict_proba_temp_scaled(X_test_80_20)
-        y_pred = np.argmax(y_pred_proba, axis=1)
+        y_pred = (y_pred_proba[:, 1] >= self.threshold).astype(int)
         brier = metrics.brier_score_loss(y_test_80_20, y_pred_proba[:, 1])
         log_loss = metrics.log_loss(y_test_80_20, y_pred_proba)
         accuracy = metrics.accuracy_score(y_test_80_20, y_pred)
@@ -151,8 +152,8 @@ class BaselineEvaluator:
         
         y_uncal_proba = self.predict_proba_uncalibrated(X_test_80_20)[:, 1]
         y_scaled_proba = self.predict_proba_temp_scaled(X_test_80_20)
-        y_cal_proba_pos = y_scaled_proba[:, 1]
-        y_pred_cal = np.argmax(y_scaled_proba, axis=1)
+        y_cal_proba_pos = y_scaled_proba[:, 1] 
+        y_pred_cal = np.argmax((y_scaled_proba >= self.threshold).astype(int), axis=1)
 
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
 
