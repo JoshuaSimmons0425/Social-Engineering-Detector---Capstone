@@ -6,6 +6,10 @@ import joblib
 import pandas as pd
 import json
 import pickle
+from torch.utils.data import DataLoader
+from transformers import AutoModelForSequenceClassification
+from src.datasets.textdatasets import MultiLabelTextDataset
+from src.evaluation.multilabel.ml_bert_evaluator import MLBertEvaluator
 from src.evaluation.multilabel.ml_baseline_evaluator import MLBaselineEvaluator
 
 
@@ -65,10 +69,56 @@ def main():
         label_columns=label_columns,
     )
 
-    baseline_evaluator.run_evaluation()
+    ml_bert_artifacts_path = "models/multilabel/bert/calibrated"
 
-    baseline_results_save_path = "results/multilabel/baseline/baseline_evaluation_results"
+    with open(os.path.join(ml_bert_artifacts_path, "calibrators.pkl"), "rb") as f:
+        platt_parameters = pickle.load(f)
+
+    with open(os.path.join(ml_bert_artifacts_path, "model_state_dict.pt"), "rb") as f:
+        model_state_dict = torch.load(f)
+
+    mode = 'answerdotai/ModernBERT-base'
+
+    model = AutoModelForSequenceClassification.from_pretrained(mode, num_labels=len(label_columns))
+    model.load_state_dict(model_state_dict)
+
+    test_50_50_dataset = MultiLabelTextDataset(
+        dataset=test_50_50_df,
+        mode=mode,
+        max_len = 1024,
+        label_columns=label_columns
+    )
+
+    test_80_20_dataset = MultiLabelTextDataset(
+        dataset=test_80_20_df,
+        mode=mode,
+        max_len = 1024,
+        label_columns=label_columns
+    )
+
+    test_loader_50_50 = DataLoader(test_50_50_dataset, batch_size=8, shuffle=False)
+    test_loader_80_20 = DataLoader(test_80_20_dataset, batch_size=8, shuffle=False)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    ml_bert_evaluator = MLBertEvaluator(
+        model=model,
+        device=device,
+        platt_scalers=platt_parameters,
+        test_loader_50_50=test_loader_50_50,
+        test_loader_80_20=test_loader_80_20,
+        all_labels=label_columns
+    )
+
+    baseline_evaluator.run_evaluation()
+    ml_bert_evaluator.run_pipeline(device=device)
+
+    baseline_results_save_path = "results/multilabel/baseline"
     baseline_evaluator.save_results(baseline_results_save_path)
+
+    bert_results_save_path = "results/multilabel/bert"
+    ml_bert_evaluator.save_results(bert_results_save_path)
 
     sys.exit(0)
 
