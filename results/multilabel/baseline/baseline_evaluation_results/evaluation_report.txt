@@ -1,0 +1,243 @@
+==================================================
+       MULTILABEL BASELINE EVALUATION REPORT      
+==================================================
+
+--------------------------------------------------
+1. DISCRIMINATION RESULTS (50:50 Balanced Test Set)
+--------------------------------------------------
+Macro F1 Score: 0.60534
+
+Label Name: urgency_label
+Accuracy  : 0.87750
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.8828    0.9710    0.9248      3104
+        True     0.8464    0.5536    0.6694       896
+
+    accuracy                         0.8775      4000
+   macro avg     0.8646    0.7623    0.7971      4000
+weighted avg     0.8747    0.8775    0.8676      4000
+
+----------------------------------------
+Label Name: fear_label
+Accuracy  : 0.95450
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.9534    0.9972    0.9748      3532
+        True     0.9673    0.6325    0.7649       468
+
+    accuracy                         0.9545      4000
+   macro avg     0.9604    0.8148    0.8698      4000
+weighted avg     0.9551    0.9545    0.9502      4000
+
+----------------------------------------
+Label Name: authority_label
+Accuracy  : 0.88475
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.8870    0.9809    0.9316      3200
+        True     0.8677    0.5000    0.6344       800
+
+    accuracy                         0.8848      4000
+   macro avg     0.8773    0.7405    0.7830      4000
+weighted avg     0.8831    0.8848    0.8722      4000
+
+----------------------------------------
+Label Name: reciprocity_label
+Accuracy  : 0.94325
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.9447    0.9956    0.9695      3619
+        True     0.9140    0.4462    0.5996       381
+
+    accuracy                         0.9433      4000
+   macro avg     0.9293    0.7209    0.7846      4000
+weighted avg     0.9418    0.9433    0.9342      4000
+
+----------------------------------------
+Label Name: curiosity_label
+Accuracy  : 0.85875
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.8715    0.9752    0.9205      3352
+        True     0.6667    0.2562    0.3701       648
+
+    accuracy                         0.8588      4000
+   macro avg     0.7691    0.6157    0.6453      4000
+weighted avg     0.8383    0.8588    0.8313      4000
+
+----------------------------------------
+Label Name: pretexting_label
+Accuracy  : 0.92450
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.9422    0.9758    0.9587      3590
+        True     0.6915    0.4756    0.5636       410
+
+    accuracy                         0.9245      4000
+   macro avg     0.8168    0.7257    0.7611      4000
+weighted avg     0.9165    0.9245    0.9182      4000
+
+----------------------------------------
+Label Name: promotional_label
+Accuracy  : 0.92825
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.9274    0.9580    0.9425      2455
+        True     0.9296    0.8809    0.9046      1545
+
+    accuracy                         0.9283      4000
+   macro avg     0.9285    0.9195    0.9236      4000
+weighted avg     0.9283    0.9283    0.9279      4000
+
+----------------------------------------
+Label Name: transactional_label
+Accuracy  : 0.87550
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.8812    0.9208    0.9005      2448
+        True     0.8655    0.8041    0.8337      1552
+
+    accuracy                         0.8755      4000
+   macro avg     0.8733    0.8624    0.8671      4000
+weighted avg     0.8751    0.8755    0.8746      4000
+
+----------------------------------------
+Label Name: reminder_label
+Accuracy  : 0.95750
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.9574    0.9997    0.9781      3796
+        True     0.9722    0.1716    0.2917       204
+
+    accuracy                         0.9575      4000
+   macro avg     0.9648    0.5857    0.6349      4000
+weighted avg     0.9581    0.9575    0.9431      4000
+
+----------------------------------------
+Label Name: personal_label
+Accuracy  : 0.83800
+Classification Matrix Profile:
+              precision    recall  f1-score   support
+
+       False     0.8481    0.9719    0.9058      3206
+        True     0.7239    0.2972    0.4214       794
+
+    accuracy                         0.8380      4000
+   macro avg     0.7860    0.6346    0.6636      4000
+weighted avg     0.8235    0.8380    0.8097      4000
+
+----------------------------------------
+
+--------------------------------------------------
+2. PROBABILITY CALIBRATION RESULTS (80:20 Test Set)
+--------------------------------------------------
+Label Name: urgency_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.06680
+    Log Loss    : 0.23765
+    ECE         : 0.04032
+  [Calibrated Metrics]
+    Brier Score : 0.06481
+    Log Loss    : 0.22512
+    ECE         : 0.00645
+----------------------------------------
+Label Name: fear_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.03164
+    Log Loss    : 0.13171
+    ECE         : 0.01695
+  [Calibrated Metrics]
+    Brier Score : 0.03178
+    Log Loss    : 0.12742
+    ECE         : 0.00727
+----------------------------------------
+Label Name: authority_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.08387
+    Log Loss    : 0.28649
+    ECE         : 0.04143
+  [Calibrated Metrics]
+    Brier Score : 0.08214
+    Log Loss    : 0.27675
+    ECE         : 0.01159
+----------------------------------------
+Label Name: reciprocity_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.02615
+    Log Loss    : 0.11206
+    ECE         : 0.02446
+  [Calibrated Metrics]
+    Brier Score : 0.02523
+    Log Loss    : 0.10129
+    ECE         : 0.00370
+----------------------------------------
+Label Name: curiosity_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.07880
+    Log Loss    : 0.27410
+    ECE         : 0.02578
+  [Calibrated Metrics]
+    Brier Score : 0.07917
+    Log Loss    : 0.27286
+    ECE         : 0.01553
+----------------------------------------
+Label Name: pretexting_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.02398
+    Log Loss    : 0.09495
+    ECE         : 0.02564
+  [Calibrated Metrics]
+    Brier Score : 0.02406
+    Log Loss    : 0.08625
+    ECE         : 0.01089
+----------------------------------------
+Label Name: promotional_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.05716
+    Log Loss    : 0.21697
+    ECE         : 0.07226
+  [Calibrated Metrics]
+    Brier Score : 0.05045
+    Log Loss    : 0.18161
+    ECE         : 0.01223
+----------------------------------------
+Label Name: transactional_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.11637
+    Log Loss    : 0.37465
+    ECE         : 0.05182
+  [Calibrated Metrics]
+    Brier Score : 0.11382
+    Log Loss    : 0.36273
+    ECE         : 0.02187
+----------------------------------------
+Label Name: reminder_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.04012
+    Log Loss    : 0.15230
+    ECE         : 0.01240
+  [Calibrated Metrics]
+    Brier Score : 0.03882
+    Log Loss    : 0.14604
+    ECE         : 0.00452
+----------------------------------------
+Label Name: personal_label
+  [Uncalibrated Metrics]
+    Brier Score : 0.15387
+    Log Loss    : 0.46464
+    ECE         : 0.04650
+  [Calibrated Metrics]
+    Brier Score : 0.15130
+    Log Loss    : 0.45917
+    ECE         : 0.02186
+----------------------------------------
