@@ -35,6 +35,7 @@ def main():
     baseline_A = baseline_artifacts["A"]
     baseline_B = baseline_artifacts["B"]
     baseline_encoder = baseline_artifacts["encoder"]
+    baseline_threshold = baseline_artifacts["threshold"]
 
     text_column, label_column = "Full_Text", "Label"
 
@@ -44,6 +45,7 @@ def main():
         A=baseline_A,
         B=baseline_B,
         encoder=baseline_encoder,
+        threshold=baseline_threshold,
         test_set_50_50=test_50_50_df,
         test_set_80_20=test_80_20_df,
         text_column=text_column,
