@@ -10,19 +10,20 @@ from transformers_interpret import SequenceClassificationExplainer
 from src.datasets.dataengine import DataEngine
 
 class ExplainableBert:
-    def __init__(self, binary_model, multilabel_model, binary_calibrators, multilabel_calibrators, tokenizer, input_text, multi_label_names, device='cpu'):
+    def __init__(self, binary_model, multilabel_model, binary_calibrators, multilabel_calibrators, tokenizer, decision_threshold, input_text, multi_label_names, device='cpu'):
         self.binary_model = binary_model
         self.multilabel_model = multilabel_model
         self.binary_calibrators = binary_calibrators
         self.multilabel_calibrators = multilabel_calibrators
         self.tokenizer = tokenizer
+        self.decision_threshold = decision_threshold
         self.input_text = input_text
         self.device = device
 
         self.binary_model.to(self.device).eval()
         self.multilabel_model.to(self.device).eval()
 
-        self.binary_class_names = ['malicious', 'benign']
+        self.binary_class_names = ['benign', 'malicious']
         self.multilabel_label_names = multi_label_names
 
         self.binary_information = {}
@@ -83,7 +84,6 @@ class ExplainableBert:
         tensors = {k: v.to(self.device) for k, v in self.processed_tensors.items()}
         with torch.no_grad():
             output = self.binary_model(**tensors)
-            # Safe extraction regardless of direct tensor vs structured model output dict object
             logits = output.logits if hasattr(output, 'logits') else output
             raw_logits = logits.cpu().numpy()
 
@@ -91,15 +91,25 @@ class ExplainableBert:
         A, B = self._get_binary_platt_params()
         calibrated_logits = raw_logits * A + B
         
-        # Softmax over the calibrated pair
-        exp_logits = np.exp(calibrated_logits - np.max(calibrated_logits, axis=-1, keepdims=True))
-        probabilities = (exp_logits / exp_logits.sum(axis=-1, keepdims=True)).flatten()
+        # Calculate raw array probabilities via Sigmoid
+        raw_malicious_prob = 1 / (1 + np.exp(-calibrated_logits))
+        raw_benign_prob = 1.0 - raw_malicious_prob
         
-        pred_idx = int(np.argmax(probabilities))
+        # FIX: Extract the values as pure Python floats using .item() to prevent TypeError
+        malicious_prob = float(raw_malicious_prob.item()) if hasattr(raw_malicious_prob, 'item') else float(raw_malicious_prob[0])
+        benign_prob = float(raw_benign_prob.item()) if hasattr(raw_benign_prob, 'item') else float(raw_benign_prob[0])
+        
+         # Evaluate calibrated malicious probability against your decision threshold
+        pred_idx = 1 if malicious_prob >= self.decision_threshold else 0
+        
+        # Store the prediction results in the binary_information dictionary
         self.binary_information['prediction'] = {
             'predicted_class': self.binary_class_names[pred_idx],
-            'confidence': float(probabilities[pred_idx]),
-            'probabilities': {self.binary_class_names[i]: float(p) for i, p in enumerate(probabilities)}
+            'confidence': float(malicious_prob if pred_idx == 1 else benign_prob),
+            'probabilities': {
+                'benign': float(benign_prob),
+                'malicious': float(malicious_prob)
+            }
         }
         return self.binary_information['prediction']
 
@@ -178,8 +188,10 @@ class ExplainableBert:
                 
                 cal_logits = logits * A + B
                 
+                # If your model outputs a single logit head configuration, convert it safely to a binary probability pair
                 if cal_logits.shape[-1] == 1:
                     malicious_probs = 1 / (1 + np.exp(-cal_logits))
+                    # Axis structure maps: Index 0 = Benign (1 - p), Index 1 = Malicious (p)
                     batch_probs = np.hstack([1.0 - malicious_probs, malicious_probs])
                 else:
                     exp_l = np.exp(cal_logits - np.max(cal_logits, axis=-1, keepdims=True))
@@ -231,22 +243,41 @@ class ExplainableBert:
 
         torch.cuda.empty_cache()
 
-        # Execute LIME
+        # 1. LIME Fix: Target labels=[1] to explicitly isolate word weights driving 'malicious' contributions
         lime_explainer = LimeTextExplainer(class_names=self.binary_class_names)
-        lime_exp = lime_explainer.explain_instance(self.clean_text, calibrated_binary_probs, num_features=10)
+        lime_exp = lime_explainer.explain_instance(
+            self.clean_text, 
+            calibrated_binary_probs, 
+            num_features=10,
+            labels=[1]
+        )
         
-        # Execute SHAP
+        # 2. SHAP Fix: Force explain_row calculations directly to target logits map index 
         shap_explainer = shap.Explainer(calibrated_binary_logits, self.tokenizer)
         shap_values = shap_explainer([self.clean_text])
         
-        # Safely index target dim whether binary calibration outputs 1D or 2D array
+        # Pull output slice index 1 (malicious) regardless of dimensions
         target_idx = 1 if len(shap_values.shape) > 2 and shap_values.shape[-1] > 1 else 0
-        shap_slice = shap_values[0, :, target_idx]
+        if len(shap_values.shape) == 3 and shap_values.shape[-1] > 1:
+            shap_slice = shap_values[0, :, 1]
+        else:
+            shap_slice = shap_values[0, :]
 
-        # Execute Transformers-Interpret wrapped in an architectural safety block
+        # --- FIX: Ensure SHAP values are unwrapped to 0-dimensional scalars ---
+        cleaned_shap_list = []
+        for t, v in zip(shap_slice.data, shap_slice.values):
+            # Check if token is whitespace/empty
+            if t.strip():
+                # Extract scalar if v is an array (e.g., array([0.042]) -> 0.042)
+                scalar_val = v.item() if hasattr(v, 'item') else float(v)
+                cleaned_shap_list.append({
+                    'token': t,
+                    'val': scalar_val
+                })
+
+        # 3. Transformers-Interpret Fix: Route class_index target to index position 1
         ti_attributions = "Skipped: Architecture hook mismatch"
         try:
-            # Re-map target to your wrapper's inner huggingface module (adjust attribute name like .model or .bert if different)
             hf_binary_module = self.binary_model.bert if hasattr(self.binary_model, 'bert') else self.binary_model.model
             
             orig_forward = hf_binary_module.forward
@@ -259,16 +290,16 @@ class ExplainableBert:
             
             hf_binary_module.forward = patched_forward
             
-            # Explicitly instruct Captum how to find ModernBERT's unique embedding footprint
             ti_explainer = SequenceClassificationExplainer(
                 model=hf_binary_module, 
                 tokenizer=self.tokenizer,
                 custom_labels=self.binary_class_names
             )
             
-            # Use the explicit layer tracking parameter mapping for ModernBERT
+            # Directing the index to 1 guarantees tracking maps to the 'malicious' logit transformation
             ti_attributions = ti_explainer(
                 self.clean_text, 
+                class_index=1,
                 embedding_name="model.embeddings.tok_embeddings"
             )[:15]
             
@@ -277,8 +308,8 @@ class ExplainableBert:
             ti_attributions = f"Skipped: Gradient graph tracing error ({str(e)})"
 
         self.binary_information['explanations'] = {
-            'lime': lime_exp.as_list(),
-            'shap': [{'token': t, 'val': float(v)} for t, v in zip(shap_slice.data, shap_slice.values) if t.strip()],
+            'lime': lime_exp.as_list(label=1), # Ensure we export the specific malicious weight mapping list
+            'shap': cleaned_shap_list,
             'transformers_interpret': ti_attributions
         }
 
@@ -491,11 +522,13 @@ class ExplainableBert:
         return valid_words
 
     def save_explanations(self, file_path):
-        """Compiles explanation artifacts into a cleaned, readable plaintext file (.txt)."""
+        """Compiles explanation artifacts into your exact multi-layered scannable plaintext schema (.txt)."""
+        # --- 1. RESOLVE BINARY PROFILE ---
         binary_probs = self.binary_information.get('prediction', {}).get('probabilities', {})
         malicious_probability = float(binary_probs.get('malicious', 0.0))
+        predicted_class = str(self.binary_information.get('prediction', {}).get('predicted_class', 'benign')).capitalize()
         
-        # Keep your custom "Critical" risk level assignment
+        # Classifier risk level boundary logic
         if malicious_probability >= 0.90:
             risk_level = "Critical"
         elif malicious_probability >= 0.75:
@@ -505,44 +538,69 @@ class ExplainableBert:
         else:
             risk_level = "Low"
 
-        # --- 2. CLEAN CLASSIFICATION EVIDENCE ---
-        # Collect and feed raw SHAP tokens straight into our type-safe de-noiser
-        shap_binary = self.binary_information.get('explanations', {}).get('shap', [])
-        classification_evidence_list = self._extract_clean_words(shap_binary, top_k=5)
-        classification_evidence_str = ", ".join(classification_evidence_list) if classification_evidence_list else "no prominent evidence"
+        # --- 2. AGGREGATE BINARY KEY ATTRIBUTES ---
+        classification_evidence = set()
+        binary_exps = self.binary_information.get('explanations', {})
+        
+        # Parse positive SHAP tokens driving the decision
+        shap_binary = binary_exps.get('shap', [])
+        for item in shap_binary:
+            if item.get('val', 0.0) > 0.001:
+                classification_evidence.add(item['token'])
+                
+        # Run tokens through our subtoken stitching & mask-tag preserving helper
+        clean_binary_list = self._extract_clean_words(shap_binary, top_k=5)
+        key_attributes_str = ", ".join(clean_binary_list) if clean_binary_list else "no prominent evidence"
 
+        # --- 3. CONSTRUCT PLAINTEXT HEADER LINES ---
         lines = [
             "Classification:",
-            f"Malicious probability: {malicious_probability:.2f}",
-            f"Risk level: {risk_level}",
-            f"Evidence: {classification_evidence_str}",
+            f"- Malicious probability: {malicious_probability:.2f}",
+            f"- Classifier risk level: {risk_level}",
+            f"- Key Attributes: {key_attributes_str}",
+            f"- Overall Classification: {predicted_class}",
             "",
-            "Detected techniques:"
+            "Technique associations:"
         ]
 
-        # --- 3. CLEAN MULTI-LABEL TECHNIQUE EVIDENCE ---
-        tech_probs = self.multilabel_information.get('prediction', {}).get('probabilities', {})
-        tech_explanations = self.multilabel_information.get('explanations', {}).get('attributions', {})
+        # --- 4. COMPILE SORTED TECHNIQUE ASSOCIATIONS ---
+        multilabel_preds = self.multilabel_information.get('prediction', {})
+        tech_probs = multilabel_preds.get('probabilities', {})
         active_techniques = self.multilabel_information.get('explanations', {}).get('active_labels_explained', [])
+        tech_explanations = self.multilabel_information.get('explanations', {}).get('attributions', {})
 
+        # Create pairs of (clean_name, raw_label, prob_value)
+        tech_list_data = []
         for label in self.multilabel_label_names:
             prob = float(tech_probs.get(label, 0.0))
-            prob_percent = prob * 100
             clean_tech_name = label.replace('_label', '').replace('_', ' ').capitalize()
-            
+            tech_list_data.append((clean_tech_name, label, prob))
+
+        # Sort the technique rankings list in descending order by probability score
+        tech_list_data_sorted = sorted(tech_list_data, key=lambda x: x[2], reverse=True)
+
+        for clean_name, label, prob in tech_list_data_sorted:
+            prob_percent = prob * 100
+            lines.append(f"- {clean_name}: {prob_percent:.1f}%")
+
+        lines.append("") # Spacer block
+        lines.append("XAI features:")
+
+        # --- 5. PARSE TECHNIQUE SPECIFIC FEATURE RECOGNITIONS ---
+        # Keep this loop aligned to the sorted technique order for structural clean tracking
+        for clean_name, label, prob in tech_list_data_sorted:
+            # If active past 10% threshold boundaries, extract word proof arrays
             if label in active_techniques or prob >= 0.10:
                 attributions = tech_explanations.get(label, {})
                 shap_tech = attributions.get('shap', [])
                 
-                # Clean and stitch tokens for this individual vector channel
                 evidence_keywords = self._extract_clean_words(shap_tech, top_k=5)
-                evidence_str = ", ".join(evidence_keywords) if evidence_keywords else "no prominent evidence"
-                
-                lines.append(f"- {clean_tech_name} ({prob_percent:.1f}%): {evidence_str}")
+                evidence_str = ", ".join(evidence_keywords) if evidence_keywords else "no prominent features"
+                lines.append(f"- {clean_name}: {evidence_str}")
             else:
-                lines.append(f"- {clean_tech_name} ({prob_percent:.1f}%): no prominent evidence")
+                lines.append(f"- {clean_name}: no prominent features")
 
-        # Save logic stays identical
+        # --- 6. WRITE GENERATED CONTENT TO DISK ---
         if file_path.endswith('.json'):
             file_path = file_path.rsplit('.json', 1)[0] + '.txt'
             
@@ -550,8 +608,13 @@ class ExplainableBert:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write("\n".join(lines))
             
-        print(f"Successfully compiled clean text explanation summary directly to: {file_path}")
+        print(f"Successfully compiled plain text explanation summary directly to: {file_path}")
+
+    def save_input(self, file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(self.clean_text)
     
-        
+        print(f"Successfully saved input text to: {file_path}")
 
 
