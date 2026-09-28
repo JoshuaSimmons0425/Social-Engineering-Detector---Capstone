@@ -3,8 +3,10 @@ import json
 import pickle
 import torch
 import gc
+import joblib
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from src.inference.explainable_bert import ExplainableBert
+from src.inference.explanable_baseline import ExplainableBaseline
 from src.modelling.binary.bert.bert_calibrator import BinaryBERTCalibrator
 from src.modelling.binary.bert.bert_model import BERTClassifier
 
@@ -13,27 +15,12 @@ def main():
     gc.collect()
     torch.cuda.empty_cache()
 
-    calibrated_artifacts_path = "models/binary/bert/calibrated"
-    model_state_dict_path = "models/binary/bert/calibrated/model_state_dict.pt"
-    bert_encoder_path = "models/binary/bert/uncalibrated/label_encoder.pkl"
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    with open(bert_encoder_path, "rb") as f:
-        bert_encoder = pickle.load(f)
-
-    architecture = 'answerdotai/ModernBERT-base'
-
-    binrary_model = BERTClassifier.load_model(
-        path=model_state_dict_path,
-        n_classes=1,
-        device=device
-    )
-
-    scaler, optimal_threshold = BinaryBERTCalibrator.load_calibration_artifacts(
-        path=calibrated_artifacts_path,
-        device=device
-    )
+    input_text = """
+    NZ Post Alert: Your parcel with tracking ID NZ-8492-KL has arrived at our sorting hub but cannot be delivered due to an incomplete delivery address.
+    Please update your correct delivery information and confirm your address within 24 hours to schedule redelivery:
+    http://nzpost-redelivery-tracking.com
+    Failure to update will result in the package being returned to sender.
+    """
 
     multi_label_names = [
         'urgency_label', 
@@ -47,6 +34,61 @@ def main():
         'reminder_label',
         'personal_label'               
     ]
+    
+
+    baseline_binary_artifacts_path = "models/binary/baseline/calibrated"
+    with open(os.path.join(baseline_binary_artifacts_path, "calibrated_baseline_meta.pkl"), "rb") as f:
+        baseline_meta = pickle.load(f)
+
+    binary_baseline_model = baseline_meta['model']
+    baseline_binary_A = baseline_meta['A']
+    baseline_binary_B = baseline_meta['B']
+    baseline_vectorizer = baseline_meta['vectorizer']
+    baseline_binary_threshold = baseline_meta['threshold']
+
+    binary_platt_scalers = {'A': baseline_binary_A, 'B': baseline_binary_B}
+
+    baseline_multilabel_artifacts_path = "models/multilabel/baseline/calibrated"
+    baseline_multilabel_model_path = "models/multilabel/baseline/uncalibrated"
+
+    with open(os.path.join(baseline_multilabel_model_path, "multi_label_model.pkl"), "rb") as f:
+        baseline_multilabel_model = joblib.load(f)
+
+    with open(os.path.join(baseline_multilabel_artifacts_path, "calibrated_estimators.pkl"), "rb") as f:
+        baseline_multilabel_estimators = pickle.load(f)
+
+    with open(os.path.join(baseline_multilabel_artifacts_path, "platt_parameters.json"), "r") as f:
+        ml_platt_scalers = json.load(f)
+
+    baseline_explainer = ExplainableBaseline(
+        binary_model=binary_baseline_model,
+        multi_label_model=baseline_multilabel_model,
+        estimators=baseline_multilabel_estimators,
+        binary_calibrators=binary_platt_scalers,
+        multilabel_calibrators=ml_platt_scalers,
+        vectorizer=baseline_vectorizer,
+        decision_threshold=baseline_binary_threshold,
+        input_text=input_text,
+        multi_label_names=multi_label_names,
+    )
+
+    calibrated_artifacts_path = "models/binary/bert/calibrated"
+    model_state_dict_path = "models/binary/bert/calibrated/model_state_dict.pt"
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    architecture = 'answerdotai/ModernBERT-base'
+
+    binary_model = BERTClassifier.load_model(
+        path=model_state_dict_path,
+        n_classes=1,
+        device=device
+    )
+
+    scaler, optimal_threshold = BinaryBERTCalibrator.load_calibration_artifacts(
+        path=calibrated_artifacts_path,
+        device=device
+    )
 
     multi_label_model = AutoModelForSequenceClassification.from_pretrained(architecture, num_labels=len(multi_label_names))
 
@@ -54,29 +96,28 @@ def main():
     with open(os.path.join(multi_label_calibrator_path, "calibrators.pkl"), "rb") as f:
         multi_label_calibrators = pickle.load(f)
 
-    input_text = """Buck up, your troubles caused by small dimension will soon be over!
-Become a lover no woman will be able to resist!
-http://whitedone.com/
-
-
-come. Even as Nazi tanks were rolling down the streets, the dreamersphilosopher or a journalist. He was still not sure.I do the same."""
-
-    explainer = ExplainableBert(
-        binary_model=binrary_model,
+    bert_explainer = ExplainableBert(
+        binary_model=binary_model,
         multilabel_model=multi_label_model,
         binary_calibrators=scaler,
         multilabel_calibrators=multi_label_calibrators,  
         tokenizer=AutoTokenizer.from_pretrained(architecture),
+        decision_threshold=optimal_threshold,  # Add a default decision threshold for binary classification
         input_text=input_text,
         multi_label_names=multi_label_names,
         device=device
     )
     # Add any additional code to load data, make predictions, and generate explanations here
 
-    explainer.run_explanations()
+    baseline_explainer.run_explanations()
+    bert_explainer.run_explanations()
 
+    baseline_output_path = "xAI_outputs/baseline"
     bert_output_path = "xAI_outputs/bert"
-    explainer.save_explanations(os.path.join(bert_output_path, "explanations.txt"))
+    cleaned_text_path = "xAI_outputs/input_text"
+    baseline_explainer.save_explanations(os.path.join(baseline_output_path, "explanations.txt"))
+    bert_explainer.save_explanations(os.path.join(bert_output_path, "explanations.txt"))
+    bert_explainer.save_input(os.path.join(cleaned_text_path, "cleaned_input.txt"))
 
 if __name__ == "__main__":
     main()
