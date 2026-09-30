@@ -1,4 +1,5 @@
 import re
+import os
 from openai import OpenAI
 import pandas
 
@@ -52,4 +53,12 @@ class AIRiskAssessor:
         if "<think>" in reply:
             reply = re.sub(r"<think>.*?</think>", "", reply, flags=re.DOTALL).strip()
 
-        return reply
+        self.reply = reply
+
+        return self.reply
+
+    def save_reply_to_file(self, file_path):
+        if hasattr(self, "reply"):
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(self.reply)
