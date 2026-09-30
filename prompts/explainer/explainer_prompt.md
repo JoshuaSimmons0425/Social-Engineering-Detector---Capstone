@@ -11,7 +11,9 @@ MODEL-DERIVED EVIDENCE:
 """
 
 ## Task Instructions
-Develop a holistic risk assessment of the message. Consider both the message itself and any supplied model-derived evidence simultaneously. If the "MODEL-DERIVED EVIDENCE" block is empty, assess the input message independently.
+Develop a holistic risk assessment of the message. Consider both the message itself and any supplied model-derived evidence simultaneously. If the "MODEL-DERIVED EVIDENCE" block is empty, assess the input message independently. 
+
+If model-derived evidence is provided, do not explictly state it's relevance in the risk assessment e.g. "The model-derived evidence states that...". Only weave in the evidence it provides you without stating where it came from.
 
 Ensure your assessment explicitly addresses:
 * What the sender appears to want.
