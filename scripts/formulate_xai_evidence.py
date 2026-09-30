@@ -90,11 +90,17 @@ def main():
         device=device
     )
 
-    multi_label_model = AutoModelForSequenceClassification.from_pretrained(architecture, num_labels=len(multi_label_names))
-
     multi_label_calibrator_path = "models/multilabel/bert/calibrated"
     with open(os.path.join(multi_label_calibrator_path, "calibrators.pkl"), "rb") as f:
         multi_label_calibrators = pickle.load(f)
+
+    multi_label_state_dict_path = "models/multilabel/bert/calibrated/model_state_dict.pt"
+
+    with open(multi_label_state_dict_path, "rb") as f:
+        state_dict = torch.load(f, map_location=device)
+        
+    multi_label_model = AutoModelForSequenceClassification.from_pretrained(architecture, num_labels=len(multi_label_names))
+    multi_label_model.load_state_dict(state_dict)
 
     bert_explainer = ExplainableBert(
         binary_model=binary_model,
