@@ -3,6 +3,7 @@ import json
 import pickle
 import torch
 import gc
+import yaml
 import joblib
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from src.inference.explainable_bert import ExplainableBert
@@ -15,12 +16,10 @@ def main():
     gc.collect()
     torch.cuda.empty_cache()
 
-    input_text = """
-    NZ Post Alert: Your parcel with tracking ID NZ-8492-KL has arrived at our sorting hub but cannot be delivered due to an incomplete delivery address.
-    Please update your correct delivery information and confirm your address within 24 hours to schedule redelivery:
-    http://nzpost-redelivery-tracking.com
-    Failure to update will result in the package being returned to sender.
-    """
+    config_file_path = "config/risk_assessment.yaml"
+    with open(config_file_path, "r") as f:
+        config = yaml.safe_load(f) 
+    input_text = config["xAI_input"]["input_text"]
 
     multi_label_names = [
         'urgency_label', 

@@ -1,0 +1,24 @@
+xAI_input:
+  input_text: "
+    From: Dr. Ibrahim Al-Mansoor <ibrahim_mansoor1@yahoo.com>I am contacting you under strict conditions of confidentiality regarding a dormant capital sum of $24,500,000 USD currently held at a major financial institution in Lagos. Due to corporate oversight limitations, we require a foreign partner to act as the primary beneficiary for immediate wire remittance. Please supply your direct facsimile number and bank routing instructions to http://transfer-agent-portal.tk to secure your 30% allocation.
+    "
+  save_path: "xAI_outputs/input_text"
+
+baseline:
+  baseline_binary_model_artifacts: "models/binary/baseline/calibrated"
+  baseline_multilabel_artifacts: "models/multilabel/baseline/calibrated"
+  baseline_multilabel_model: "models/multilabel/baseline/uncalibrated"
+  baseline_save_path: "xAI_outputs/baseline"
+
+bert:
+  architecture: 'answerdotai/ModernBERT-base'
+  binary_calibration_artifacts: "models/binary/bert/calibrated"
+  binary_model_state_dict_path: "models/binary/bert/calibrated/model_state_dict.pt"
+  multilabel_model_state_dict_path: "models/multilabel/bert/calibrated/model_state_dict.pt"
+  multilabel_calibration_artifacts: "models/multilabel/bert/calibrated"
+  bert_save_path: "xAI_outputs/bert"
+
+
+
+
+
