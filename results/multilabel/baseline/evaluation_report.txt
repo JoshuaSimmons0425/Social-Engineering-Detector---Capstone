@@ -5,136 +5,136 @@
 --------------------------------------------------
 1. DISCRIMINATION RESULTS (50:50 Balanced Test Set)
 --------------------------------------------------
-Macro F1 Score: 0.60534
+Macro F1 Score: 0.67447
 
 Label Name: urgency_label
-Accuracy  : 0.87750
+Accuracy  : 0.88000
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.8828    0.9710    0.9248      3104
-        True     0.8464    0.5536    0.6694       896
+       False     0.9392    0.9042    0.9214      3110
+        True     0.7038    0.7955    0.7468       890
 
-    accuracy                         0.8775      4000
-   macro avg     0.8646    0.7623    0.7971      4000
-weighted avg     0.8747    0.8775    0.8676      4000
+    accuracy                         0.8800      4000
+   macro avg     0.8215    0.8498    0.8341      4000
+weighted avg     0.8868    0.8800    0.8825      4000
 
 ----------------------------------------
 Label Name: fear_label
-Accuracy  : 0.95450
+Accuracy  : 0.94375
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.9534    0.9972    0.9748      3532
-        True     0.9673    0.6325    0.7649       468
+       False     0.9708    0.9657    0.9682      3552
+        True     0.7388    0.7701    0.7541       448
 
-    accuracy                         0.9545      4000
-   macro avg     0.9604    0.8148    0.8698      4000
-weighted avg     0.9551    0.9545    0.9502      4000
+    accuracy                         0.9437      4000
+   macro avg     0.8548    0.8679    0.8612      4000
+weighted avg     0.9449    0.9437    0.9443      4000
 
 ----------------------------------------
 Label Name: authority_label
-Accuracy  : 0.88475
+Accuracy  : 0.85275
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.8870    0.9809    0.9316      3200
-        True     0.8677    0.5000    0.6344       800
+       False     0.9347    0.8787    0.9058      3224
+        True     0.5965    0.7448    0.6625       776
 
-    accuracy                         0.8848      4000
-   macro avg     0.8773    0.7405    0.7830      4000
-weighted avg     0.8831    0.8848    0.8722      4000
+    accuracy                         0.8528      4000
+   macro avg     0.7656    0.8118    0.7841      4000
+weighted avg     0.8691    0.8528    0.8586      4000
 
 ----------------------------------------
 Label Name: reciprocity_label
-Accuracy  : 0.94325
+Accuracy  : 0.91550
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.9447    0.9956    0.9695      3619
-        True     0.9140    0.4462    0.5996       381
+       False     0.9754    0.9303    0.9523      3628
+        True     0.5315    0.7715    0.6294       372
 
-    accuracy                         0.9433      4000
-   macro avg     0.9293    0.7209    0.7846      4000
-weighted avg     0.9418    0.9433    0.9342      4000
+    accuracy                         0.9155      4000
+   macro avg     0.7535    0.8509    0.7908      4000
+weighted avg     0.9341    0.9155    0.9223      4000
 
 ----------------------------------------
 Label Name: curiosity_label
-Accuracy  : 0.85875
+Accuracy  : 0.78750
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.8715    0.9752    0.9205      3352
-        True     0.6667    0.2562    0.3701       648
+       False     0.9281    0.8080    0.8639      3338
+        True     0.4141    0.6843    0.5159       662
 
-    accuracy                         0.8588      4000
-   macro avg     0.7691    0.6157    0.6453      4000
-weighted avg     0.8383    0.8588    0.8313      4000
+    accuracy                         0.7875      4000
+   macro avg     0.6711    0.7461    0.6899      4000
+weighted avg     0.8430    0.7875    0.8063      4000
 
 ----------------------------------------
 Label Name: pretexting_label
-Accuracy  : 0.92450
+Accuracy  : 0.92075
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.9422    0.9758    0.9587      3590
-        True     0.6915    0.4756    0.5636       410
+       False     0.9823    0.9284    0.9546      3589
+        True     0.5773    0.8540    0.6889       411
 
-    accuracy                         0.9245      4000
-   macro avg     0.8168    0.7257    0.7611      4000
-weighted avg     0.9165    0.9245    0.9182      4000
+    accuracy                         0.9207      4000
+   macro avg     0.7798    0.8912    0.8218      4000
+weighted avg     0.9407    0.9207    0.9273      4000
 
 ----------------------------------------
 Label Name: promotional_label
-Accuracy  : 0.92825
+Accuracy  : 0.92925
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.9274    0.9580    0.9425      2455
-        True     0.9296    0.8809    0.9046      1545
+       False     0.9509    0.9326    0.9417      2449
+        True     0.8967    0.9239    0.9101      1551
 
-    accuracy                         0.9283      4000
-   macro avg     0.9285    0.9195    0.9236      4000
-weighted avg     0.9283    0.9283    0.9279      4000
+    accuracy                         0.9293      4000
+   macro avg     0.9238    0.9283    0.9259      4000
+weighted avg     0.9299    0.9293    0.9294      4000
 
 ----------------------------------------
 Label Name: transactional_label
-Accuracy  : 0.87550
+Accuracy  : 0.85725
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.8812    0.9208    0.9005      2448
-        True     0.8655    0.8041    0.8337      1552
+       False     0.8813    0.8852    0.8833      2440
+        True     0.8192    0.8135    0.8163      1560
 
-    accuracy                         0.8755      4000
-   macro avg     0.8733    0.8624    0.8671      4000
-weighted avg     0.8751    0.8755    0.8746      4000
+    accuracy                         0.8572      4000
+   macro avg     0.8503    0.8494    0.8498      4000
+weighted avg     0.8571    0.8572    0.8572      4000
 
 ----------------------------------------
 Label Name: reminder_label
-Accuracy  : 0.95750
+Accuracy  : 0.91525
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.9574    0.9997    0.9781      3796
-        True     0.9722    0.1716    0.2917       204
+       False     0.9841    0.9258    0.9541      3803
+        True     0.3318    0.7107    0.4523       197
 
-    accuracy                         0.9575      4000
-   macro avg     0.9648    0.5857    0.6349      4000
-weighted avg     0.9581    0.9575    0.9431      4000
+    accuracy                         0.9153      4000
+   macro avg     0.6579    0.8183    0.7032      4000
+weighted avg     0.9519    0.9153    0.9294      4000
 
 ----------------------------------------
 Label Name: personal_label
-Accuracy  : 0.83800
+Accuracy  : 0.77700
 Classification Matrix Profile:
               precision    recall  f1-score   support
 
-       False     0.8481    0.9719    0.9058      3206
-        True     0.7239    0.2972    0.4214       794
+       False     0.9241    0.7863    0.8497      3206
+        True     0.4615    0.7393    0.5682       794
 
-    accuracy                         0.8380      4000
-   macro avg     0.7860    0.6346    0.6636      4000
-weighted avg     0.8235    0.8380    0.8097      4000
+    accuracy                         0.7770      4000
+   macro avg     0.6928    0.7628    0.7090      4000
+weighted avg     0.8323    0.7770    0.7938      4000
 
 ----------------------------------------
 
@@ -143,101 +143,101 @@ weighted avg     0.8235    0.8380    0.8097      4000
 --------------------------------------------------
 Label Name: urgency_label
   [Uncalibrated Metrics]
-    Brier Score : 0.06680
-    Log Loss    : 0.23765
-    ECE         : 0.04032
+    Brier Score : 0.08414
+    Log Loss    : 0.29967
+    ECE         : 0.12504
   [Calibrated Metrics]
-    Brier Score : 0.06481
-    Log Loss    : 0.22512
-    ECE         : 0.00645
+    Brier Score : 0.06682
+    Log Loss    : 0.22475
+    ECE         : 0.02639
 ----------------------------------------
 Label Name: fear_label
   [Uncalibrated Metrics]
-    Brier Score : 0.03164
-    Log Loss    : 0.13171
-    ECE         : 0.01695
+    Brier Score : 0.05117
+    Log Loss    : 0.21071
+    ECE         : 0.11665
   [Calibrated Metrics]
-    Brier Score : 0.03178
-    Log Loss    : 0.12742
-    ECE         : 0.00727
+    Brier Score : 0.03275
+    Log Loss    : 0.12843
+    ECE         : 0.00865
 ----------------------------------------
 Label Name: authority_label
   [Uncalibrated Metrics]
-    Brier Score : 0.08387
-    Log Loss    : 0.28649
-    ECE         : 0.04143
+    Brier Score : 0.10760
+    Log Loss    : 0.36044
+    ECE         : 0.14826
   [Calibrated Metrics]
-    Brier Score : 0.08214
-    Log Loss    : 0.27675
-    ECE         : 0.01159
+    Brier Score : 0.08179
+    Log Loss    : 0.27396
+    ECE         : 0.01317
 ----------------------------------------
 Label Name: reciprocity_label
   [Uncalibrated Metrics]
-    Brier Score : 0.02615
-    Log Loss    : 0.11206
-    ECE         : 0.02446
+    Brier Score : 0.05479
+    Log Loss    : 0.21934
+    ECE         : 0.11922
   [Calibrated Metrics]
-    Brier Score : 0.02523
-    Log Loss    : 0.10129
-    ECE         : 0.00370
+    Brier Score : 0.03463
+    Log Loss    : 0.13799
+    ECE         : 0.01328
 ----------------------------------------
 Label Name: curiosity_label
   [Uncalibrated Metrics]
-    Brier Score : 0.07880
-    Log Loss    : 0.27410
-    ECE         : 0.02578
+    Brier Score : 0.12069
+    Log Loss    : 0.39505
+    ECE         : 0.18175
   [Calibrated Metrics]
-    Brier Score : 0.07917
-    Log Loss    : 0.27286
-    ECE         : 0.01553
+    Brier Score : 0.07911
+    Log Loss    : 0.27314
+    ECE         : 0.01370
 ----------------------------------------
 Label Name: pretexting_label
   [Uncalibrated Metrics]
-    Brier Score : 0.02398
-    Log Loss    : 0.09495
-    ECE         : 0.02564
+    Brier Score : 0.04230
+    Log Loss    : 0.18133
+    ECE         : 0.10550
   [Calibrated Metrics]
-    Brier Score : 0.02406
-    Log Loss    : 0.08625
-    ECE         : 0.01089
+    Brier Score : 0.02581
+    Log Loss    : 0.09561
+    ECE         : 0.01060
 ----------------------------------------
 Label Name: promotional_label
   [Uncalibrated Metrics]
-    Brier Score : 0.05716
-    Log Loss    : 0.21697
-    ECE         : 0.07226
+    Brier Score : 0.06824
+    Log Loss    : 0.25046
+    ECE         : 0.09843
   [Calibrated Metrics]
-    Brier Score : 0.05045
-    Log Loss    : 0.18161
-    ECE         : 0.01223
+    Brier Score : 0.05452
+    Log Loss    : 0.19194
+    ECE         : 0.00729
 ----------------------------------------
 Label Name: transactional_label
   [Uncalibrated Metrics]
-    Brier Score : 0.11637
-    Log Loss    : 0.37465
-    ECE         : 0.05182
+    Brier Score : 0.11890
+    Log Loss    : 0.38208
+    ECE         : 0.05446
   [Calibrated Metrics]
-    Brier Score : 0.11382
-    Log Loss    : 0.36273
-    ECE         : 0.02187
+    Brier Score : 0.11518
+    Log Loss    : 0.36794
+    ECE         : 0.01882
 ----------------------------------------
 Label Name: reminder_label
   [Uncalibrated Metrics]
-    Brier Score : 0.04012
-    Log Loss    : 0.15230
-    ECE         : 0.01240
+    Brier Score : 0.08015
+    Log Loss    : 0.27995
+    ECE         : 0.15276
   [Calibrated Metrics]
-    Brier Score : 0.03882
-    Log Loss    : 0.14604
-    ECE         : 0.00452
+    Brier Score : 0.04133
+    Log Loss    : 0.15653
+    ECE         : 0.00874
 ----------------------------------------
 Label Name: personal_label
   [Uncalibrated Metrics]
-    Brier Score : 0.15387
-    Log Loss    : 0.46464
-    ECE         : 0.04650
+    Brier Score : 0.19119
+    Log Loss    : 0.56033
+    ECE         : 0.18985
   [Calibrated Metrics]
-    Brier Score : 0.15130
-    Log Loss    : 0.45917
-    ECE         : 0.02186
+    Brier Score : 0.15323
+    Log Loss    : 0.46078
+    ECE         : 0.02945
 ----------------------------------------

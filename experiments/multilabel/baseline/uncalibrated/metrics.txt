@@ -1,113 +1,113 @@
 Metrics for urgency_label:
-accuracy: 0.8715
+accuracy: 0.881
 classification_report:               precision    recall  f1-score   support
 
-       False     0.8721    0.9759    0.9211      3075
-        True     0.8676    0.5243    0.6536       925
+       False     0.9362    0.9055    0.9206      3048
+        True     0.7262    0.8025    0.7625       952
 
-    accuracy                         0.8715      4000
-   macro avg     0.8699    0.7501    0.7874      4000
-weighted avg     0.8711    0.8715    0.8593      4000
+    accuracy                         0.8810      4000
+   macro avg     0.8312    0.8540    0.8415      4000
+weighted avg     0.8862    0.8810    0.8830      4000
 
 Metrics for fear_label:
-accuracy: 0.9555
+accuracy: 0.939
 classification_report:               precision    recall  f1-score   support
 
-       False     0.9544    0.9978    0.9756      3563
-        True     0.9709    0.6110    0.7500       437
+       False     0.9707    0.9596    0.9651      3517
+        True     0.7285    0.7888    0.7575       483
 
-    accuracy                         0.9555      4000
-   macro avg     0.9626    0.8044    0.8628      4000
-weighted avg     0.9562    0.9555    0.9509      4000
+    accuracy                         0.9390      4000
+   macro avg     0.8496    0.8742    0.8613      4000
+weighted avg     0.9414    0.9390    0.9400      4000
 
 Metrics for authority_label:
-accuracy: 0.872
+accuracy: 0.86175
 classification_report:               precision    recall  f1-score   support
 
-       False     0.8752    0.9783    0.9239      3176
-        True     0.8467    0.4624    0.5981       824
+       False     0.9397    0.8834    0.9107      3191
+        True     0.6280    0.7763    0.6943       809
 
-    accuracy                         0.8720      4000
-   macro avg     0.8609    0.7203    0.7610      4000
-weighted avg     0.8693    0.8720    0.8568      4000
+    accuracy                         0.8618      4000
+   macro avg     0.7838    0.8298    0.8025      4000
+weighted avg     0.8766    0.8618    0.8669      4000
 
 Metrics for reciprocity_label:
-accuracy: 0.94825
+accuracy: 0.9235
 classification_report:               precision    recall  f1-score   support
 
-       False     0.9510    0.9939    0.9720      3615
-        True     0.9009    0.5195    0.6590       385
+       False     0.9747    0.9396    0.9568      3609
+        True     0.5816    0.7749    0.6645       391
 
-    accuracy                         0.9483      4000
-   macro avg     0.9260    0.7567    0.8155      4000
-weighted avg     0.9462    0.9483    0.9419      4000
+    accuracy                         0.9235      4000
+   macro avg     0.7781    0.8573    0.8107      4000
+weighted avg     0.9363    0.9235    0.9283      4000
 
 Metrics for curiosity_label:
-accuracy: 0.85075
+accuracy: 0.806
 classification_report:               precision    recall  f1-score   support
 
-       False     0.8665    0.9706    0.9156      3336
-        True     0.6274    0.2485    0.3560       664
+       False     0.9390    0.8230    0.8772      3368
+        True     0.4313    0.7152    0.5381       632
 
-    accuracy                         0.8508      4000
-   macro avg     0.7469    0.6096    0.6358      4000
-weighted avg     0.8268    0.8508    0.8227      4000
+    accuracy                         0.8060      4000
+   macro avg     0.6852    0.7691    0.7077      4000
+weighted avg     0.8588    0.8060    0.8236      4000
 
 Metrics for pretexting_label:
-accuracy: 0.929
+accuracy: 0.917
 classification_report:               precision    recall  f1-score   support
 
-       False     0.9481    0.9744    0.9611      3599
-        True     0.6944    0.5212    0.5954       401
+       False     0.9811    0.9254    0.9525      3594
+        True     0.5607    0.8424    0.6732       406
 
-    accuracy                         0.9290      4000
-   macro avg     0.8212    0.7478    0.7783      4000
-weighted avg     0.9227    0.9290    0.9244      4000
+    accuracy                         0.9170      4000
+   macro avg     0.7709    0.8839    0.8128      4000
+weighted avg     0.9384    0.9170    0.9241      4000
 
 Metrics for promotional_label:
-accuracy: 0.91875
+accuracy: 0.92725
 classification_report:               precision    recall  f1-score   support
 
-       False     0.9207    0.9477    0.9340      2427
-        True     0.9154    0.8741    0.8943      1573
+       False     0.9446    0.9357    0.9401      2441
+        True     0.9008    0.9140    0.9074      1559
 
-    accuracy                         0.9187      4000
-   macro avg     0.9181    0.9109    0.9142      4000
-weighted avg     0.9187    0.9187    0.9184      4000
+    accuracy                         0.9273      4000
+   macro avg     0.9227    0.9249    0.9237      4000
+weighted avg     0.9275    0.9273    0.9273      4000
 
 Metrics for transactional_label:
-accuracy: 0.863
+accuracy: 0.86725
 classification_report:               precision    recall  f1-score   support
 
-       False     0.8766    0.9076    0.8919      2490
-        True     0.8383    0.7894    0.8131      1510
+       False     0.9071    0.8752    0.8909      2476
+        True     0.8082    0.8543    0.8306      1524
 
-    accuracy                         0.8630      4000
-   macro avg     0.8575    0.8485    0.8525      4000
-weighted avg     0.8622    0.8630    0.8621      4000
+    accuracy                         0.8672      4000
+   macro avg     0.8576    0.8648    0.8607      4000
+weighted avg     0.8694    0.8672    0.8679      4000
 
 Metrics for reminder_label:
-accuracy: 0.959
+accuracy: 0.91575
 classification_report:               precision    recall  f1-score   support
 
-       False     0.9588    0.9997    0.9789      3797
-        True     0.9756    0.1970    0.3279       203
+       False     0.9860    0.9246    0.9543      3804
+        True     0.3372    0.7449    0.4642       196
 
-    accuracy                         0.9590      4000
-   macro avg     0.9672    0.5984    0.6534      4000
-weighted avg     0.9597    0.9590    0.9458      4000
+    accuracy                         0.9157      4000
+   macro avg     0.6616    0.8347    0.7093      4000
+weighted avg     0.9542    0.9157    0.9303      4000
 
 Metrics for personal_label:
-accuracy: 0.83025
+accuracy: 0.7785
 classification_report:               precision    recall  f1-score   support
 
-       False     0.8427    0.9691    0.9015      3207
-        True     0.6827    0.2686    0.3855       793
+       False     0.9295    0.7871    0.8524      3250
+        True     0.4455    0.7413    0.5566       750
 
-    accuracy                         0.8303      4000
-   macro avg     0.7627    0.6189    0.6435      4000
-weighted avg     0.8110    0.8303    0.7992      4000
+    accuracy                         0.7785      4000
+   macro avg     0.6875    0.7642    0.7045      4000
+weighted avg     0.8388    0.7785    0.7969      4000
 
 Metrics for macro_f1_score:
-0.6033
+0.6849
 

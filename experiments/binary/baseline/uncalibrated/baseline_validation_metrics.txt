@@ -1,11 +1,11 @@
-Validation Accuracy: 0.9573
+Validation Accuracy: 0.9625
 Classification Report: 
               precision    recall  f1-score   support
 
-      Benign     0.9534    0.9615    0.9574      2000
-   Malicious     0.9612    0.9530    0.9571      2000
+      Benign     0.9579    0.9675    0.9627      2000
+   Malicious     0.9672    0.9575    0.9623      2000
 
-    accuracy                         0.9573      4000
-   macro avg     0.9573    0.9572    0.9572      4000
-weighted avg     0.9573    0.9573    0.9572      4000
+    accuracy                         0.9625      4000
+   macro avg     0.9625    0.9625    0.9625      4000
+weighted avg     0.9625    0.9625    0.9625      4000
 

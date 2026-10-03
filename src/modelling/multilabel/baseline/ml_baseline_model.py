@@ -19,7 +19,7 @@ class MultiLabelTFIDFModel:
         self.text_column = text_column
         self.label_columns = label_columns
         self.vectorizer = TfidfVectorizer()
-        self.model = OneVsRestClassifier(LogisticRegression(max_iter=1000))
+        self.model = OneVsRestClassifier(LogisticRegression(max_iter=1000, class_weight='balanced'))
 
         self.y_train = self.training_set[self.label_columns]
         self.y_validation = self.validation_set[self.label_columns]

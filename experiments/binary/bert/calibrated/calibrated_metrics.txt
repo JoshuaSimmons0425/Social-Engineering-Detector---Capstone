@@ -1,16 +1,16 @@
 Platt Scaler Parameters:
- A: 0.7421846389770508
- B: -3.46415114402771
+ A: 1.1315537691116333
+ B: -6.622868061065674
 
-brier_score: 0.007560668978840113
-log_loss: 0.03171205148100853
-accuracy: 0.991
+brier_score: 0.004289888311177492
+log_loss: 0.018518896773457527
+accuracy: 0.995
 classification_report:               precision    recall  f1-score   support
 
-           0     0.9934    0.9953    0.9944      3200
-           1     0.9811    0.9738    0.9774       800
+           0     0.9963    0.9975    0.9969      3200
+           1     0.9899    0.9850    0.9875       800
 
-    accuracy                         0.9910      4000
-   macro avg     0.9873    0.9845    0.9859      4000
-weighted avg     0.9910    0.9910    0.9910      4000
+    accuracy                         0.9950      4000
+   macro avg     0.9931    0.9912    0.9922      4000
+weighted avg     0.9950    0.9950    0.9950      4000
 

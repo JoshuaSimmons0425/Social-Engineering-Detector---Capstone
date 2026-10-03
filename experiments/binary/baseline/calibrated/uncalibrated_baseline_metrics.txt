@@ -1,13 +1,13 @@
-Validation Loss before calibration: 0.1660
-Validation Brier score before calibration: 0.0395
-Validation Accuracy before calibration: 0.9675
+Validation Loss before calibration: 0.1667
+Validation Brier score before calibration: 0.0398
+Validation Accuracy before calibration: 0.9587
 Classification Report before calibration: 
               precision    recall  f1-score   support
 
-      Benign       0.99      0.97      0.98      3200
-   Malicious       0.89      0.96      0.92       800
+      Benign       0.99      0.96      0.97      3200
+   Malicious       0.85      0.96      0.90       800
 
-    accuracy                           0.97      4000
-   macro avg       0.94      0.97      0.95      4000
-weighted avg       0.97      0.97      0.97      4000
+    accuracy                           0.96      4000
+   macro avg       0.92      0.96      0.94      4000
+weighted avg       0.96      0.96      0.96      4000
 

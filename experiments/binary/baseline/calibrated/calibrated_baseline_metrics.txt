@@ -1,17 +1,17 @@
 Platt Scaler Parameters:
- A: 2.2958
- B: -1.2927
+ A: 2.2666
+ B: -1.5266
 
-Validation Loss after calibration: 0.0825
-Validation Brier score after calibration: 0.0220
-Validation Accuracy after calibration: 0.9718
+Validation Loss after calibration: 0.0833
+Validation Brier score after calibration: 0.0228
+Validation Accuracy after calibration: 0.9708
 Classification Report after calibration: 
               precision    recall  f1-score   support
 
-      Benign       0.98      0.98      0.98      3200
-   Malicious       0.93      0.93      0.93       800
+      Benign       0.98      0.99      0.98      3200
+   Malicious       0.94      0.91      0.93       800
 
     accuracy                           0.97      4000
-   macro avg       0.96      0.96      0.96      4000
+   macro avg       0.96      0.95      0.95      4000
 weighted avg       0.97      0.97      0.97      4000
 

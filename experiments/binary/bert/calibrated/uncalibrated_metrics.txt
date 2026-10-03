@@ -1,12 +1,12 @@
-brier_score: 0.01764734834432602
-log_loss: 0.08491916954517365
-accuracy: 0.97925
+brier_score: 0.011379190720617771
+log_loss: 0.052668966352939606
+accuracy: 0.986
 classification_report:               precision    recall  f1-score   support
 
-           0     0.9984    0.9756    0.9869      3200
-           1     0.9107    0.9938    0.9504       800
+           0     0.9994    0.9831    0.9912      3200
+           1     0.9366    0.9975    0.9661       800
 
-    accuracy                         0.9792      4000
-   macro avg     0.9545    0.9847    0.9686      4000
-weighted avg     0.9809    0.9792    0.9796      4000
+    accuracy                         0.9860      4000
+   macro avg     0.9680    0.9903    0.9786      4000
+weighted avg     0.9868    0.9860    0.9862      4000
 

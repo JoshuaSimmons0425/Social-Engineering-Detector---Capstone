@@ -4,111 +4,111 @@ BASELINE LAYER PROBABILITY EVALUATIONS
 
 Label: urgency_label
   [Uncalibrated Profile]
-    Brier Score : 0.06718
-    Log Loss    : 0.23859
-    ECE         : 0.04113
+    Brier Score : 0.08020
+    Log Loss    : 0.28914
+    ECE         : 0.11959
   [Calibrated Profile]
-    Brier Score : 0.06554
-    Log Loss    : 0.22568
-    ECE         : 0.01099
+    Brier Score : 0.06374
+    Log Loss    : 0.21916
+    ECE         : 0.01612
 --------------------------------------------------
 
 Label: fear_label
   [Uncalibrated Profile]
-    Brier Score : 0.03176
-    Log Loss    : 0.13186
-    ECE         : 0.01935
+    Brier Score : 0.04618
+    Log Loss    : 0.19743
+    ECE         : 0.11934
   [Calibrated Profile]
-    Brier Score : 0.03031
-    Log Loss    : 0.12363
-    ECE         : 0.00539
+    Brier Score : 0.02642
+    Log Loss    : 0.10652
+    ECE         : 0.00579
 --------------------------------------------------
 
 Label: authority_label
   [Uncalibrated Profile]
-    Brier Score : 0.08430
-    Log Loss    : 0.28849
-    ECE         : 0.03884
+    Brier Score : 0.10127
+    Log Loss    : 0.34575
+    ECE         : 0.14564
   [Calibrated Profile]
-    Brier Score : 0.08209
-    Log Loss    : 0.27833
-    ECE         : 0.00966
+    Brier Score : 0.07677
+    Log Loss    : 0.25963
+    ECE         : 0.01383
 --------------------------------------------------
 
 Label: reciprocity_label
   [Uncalibrated Profile]
-    Brier Score : 0.03249
-    Log Loss    : 0.13236
-    ECE         : 0.02261
+    Brier Score : 0.05229
+    Log Loss    : 0.21304
+    ECE         : 0.12059
   [Calibrated Profile]
-    Brier Score : 0.03226
-    Log Loss    : 0.12677
-    ECE         : 0.00929
+    Brier Score : 0.03167
+    Log Loss    : 0.12505
+    ECE         : 0.01082
 --------------------------------------------------
 
 Label: curiosity_label
   [Uncalibrated Profile]
-    Brier Score : 0.07994
-    Log Loss    : 0.27956
-    ECE         : 0.03129
+    Brier Score : 0.12272
+    Log Loss    : 0.39806
+    ECE         : 0.17665
   [Calibrated Profile]
-    Brier Score : 0.07935
-    Log Loss    : 0.27657
-    ECE         : 0.01543
+    Brier Score : 0.08382
+    Log Loss    : 0.28439
+    ECE         : 0.01773
 --------------------------------------------------
 
 Label: pretexting_label
   [Uncalibrated Profile]
-    Brier Score : 0.02691
-    Log Loss    : 0.10624
-    ECE         : 0.02202
+    Brier Score : 0.04209
+    Log Loss    : 0.18004
+    ECE         : 0.11155
   [Calibrated Profile]
-    Brier Score : 0.02675
-    Log Loss    : 0.10045
-    ECE         : 0.01029
+    Brier Score : 0.02050
+    Log Loss    : 0.07610
+    ECE         : 0.00552
 --------------------------------------------------
 
 Label: promotional_label
   [Uncalibrated Profile]
-    Brier Score : 0.06110
-    Log Loss    : 0.22880
-    ECE         : 0.07126
+    Brier Score : 0.06909
+    Log Loss    : 0.25366
+    ECE         : 0.08694
   [Calibrated Profile]
-    Brier Score : 0.05406
-    Log Loss    : 0.19665
-    ECE         : 0.00978
+    Brier Score : 0.05769
+    Log Loss    : 0.20732
+    ECE         : 0.01364
 --------------------------------------------------
 
 Label: transactional_label
   [Uncalibrated Profile]
-    Brier Score : 0.12142
-    Log Loss    : 0.38850
-    ECE         : 0.04835
+    Brier Score : 0.11751
+    Log Loss    : 0.37805
+    ECE         : 0.05230
   [Calibrated Profile]
-    Brier Score : 0.11903
-    Log Loss    : 0.37774
-    ECE         : 0.01638
+    Brier Score : 0.11417
+    Log Loss    : 0.36425
+    ECE         : 0.01974
 --------------------------------------------------
 
 Label: reminder_label
   [Uncalibrated Profile]
-    Brier Score : 0.03595
-    Log Loss    : 0.13924
-    ECE         : 0.01725
+    Brier Score : 0.07700
+    Log Loss    : 0.27275
+    ECE         : 0.15667
   [Calibrated Profile]
-    Brier Score : 0.03551
-    Log Loss    : 0.13379
-    ECE         : 0.00967
+    Brier Score : 0.03606
+    Log Loss    : 0.13667
+    ECE         : 0.00711
 --------------------------------------------------
 
 Label: personal_label
   [Uncalibrated Profile]
-    Brier Score : 0.16106
-    Log Loss    : 0.48031
-    ECE         : 0.05188
+    Brier Score : 0.18517
+    Log Loss    : 0.54441
+    ECE         : 0.18413
   [Calibrated Profile]
-    Brier Score : 0.15824
-    Log Loss    : 0.47368
-    ECE         : 0.02881
+    Brier Score : 0.14833
+    Log Loss    : 0.44828
+    ECE         : 0.01886
 --------------------------------------------------
 
