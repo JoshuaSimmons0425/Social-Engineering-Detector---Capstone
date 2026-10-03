@@ -35,7 +35,7 @@ def main():
     BENIGN_LABEL = "Benign"
     MALICIOUS_LABEL = "Malicious"
 
-    RANDOM_SEED = 42
+    RANDOM_SEED = 82
 
     # Training
     TRAIN_SIZE = 11_900
