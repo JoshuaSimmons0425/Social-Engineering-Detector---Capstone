@@ -434,6 +434,13 @@ def main():
         test_80_malicious.index
     )
 
+    # ============================================================
+    # REMAINING DATA
+    # ============================================================
+
+    unused = pd.concat(
+        [benign_remaining, malicious_remaining]
+    )
 
     # ============================================================
     # SAVE DATASETS
@@ -471,6 +478,11 @@ def main():
     save_split(
         test_80,
         "test_80_20.csv"
+    )
+
+    save_split(
+        unused,
+        "unused_data.csv"
     )
 
 
