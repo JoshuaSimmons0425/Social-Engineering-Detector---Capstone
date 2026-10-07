@@ -2,14 +2,9 @@ import os
 import json
 import re
 import sys
-from dotenv import load_dotenv
-from typing import Optional
-from pydantic import BaseModel
 # Import DeepEval core infrastructure
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 from deepeval.metrics import GEval
-from deepeval.models.base_model import DeepEvalBaseLLM
-from langchain_community.llms import Ollama
 
 from src.LLM_judgment.ollamajudge import LocalOllamaJudge
 
@@ -23,7 +18,6 @@ def load_file_content(path: str) -> str:
         return f.read().strip()
 
 def main():
-    load_dotenv()
 
     # 2. Base folders
     base_results_dir = "results/risk_assessments"
@@ -46,26 +40,51 @@ def main():
         print("No experiment folders found inside results/risk_assessments.")
         sys.exit(0)
 
-    # 4. Define metrics configurations mapped to custom rubric text instructions
+    # 4. Define metrics configurations mapped to explicit, step-by-step auditing pathways
     metrics_config = {
         "relevance": {
-            "criteria": "Focusing on characteristics that actually matter over generic security commentary.",
+            "evaluation_steps": [
+                "Step 1: Check the original input message to understand its true intent (whether benign or malicious).",
+                "Step 2: Read the candidate risk assessment output carefully.",
+                "Step 3: Evaluate whether the assessment focuses directly on characteristics and triggers native to this specific message text.",
+                "Step 4: Penalize the score if the assessment relies on copy-pasted, generic security commentary or platitudes that do not directly apply to this message content."
+            ],
             "direct_file": "prompts/LLM-Judge/direct_rubrics/relevance.md"
         },
         "justification_soundness": {
-            "criteria": "Logical reasoning chains that strongly support the final risk conclusions.",
+            "evaluation_steps": [
+                "Step 1: Parse the original message context to determine the grounding baseline.",
+                "Step 2: Examine the logical reasoning chains presented inside the candidate risk assessment.",
+                "Step 3: Verify if the leaps from language observation to final risk determination are mathematically or logically sound, rather than speculative.",
+                "Step 4: Confirm that the final risk decision is fully supported by concrete textual evidence referenced directly from the target message."
+            ],
             "direct_file": "prompts/LLM-Judge/direct_rubrics/justification.md"
         },
         "contextual_awareness": {
-            "criteria": "Understanding complex social engineering situations and the interaction of subtle cues.",
+            "evaluation_steps": [
+                "Step 1: Classify the original reference message text as either malicious, suspicious, or completely benign.",
+                "Step 2: Check if the candidate risk assessment evaluates the message as an integrated whole rather than isolating single keywords.",
+                "Step 3: Determine if the assessment accurately balances explicit textual statements against implicit psychological triggers.",
+                "Step 4: Check if the model correctly maintains a benign baseline configuration when evaluating clean corporate/personal communications, actively avoiding false-positive paranoia."
+            ],
             "direct_file": "prompts/LLM-Judge/direct_rubrics/contextual_awareness.md"
         },
         "accuracy": {
-            "criteria": "Appropriateness and accuracy of the final risk judgment.",
+            "evaluation_steps": [
+                "Step 1: Analyze the original ground-truth input message to establish the objectively correct security risk level.",
+                "Step 2: Isolate the core threat verdict and classified risk parameters within the candidate assessment.",
+                "Step 3: Rate the objective accuracy and safety profiles of the assessment's final security judgment.",
+                "Step 4: Strictly penalize critical analytical errors, such as misclassifying highly dangerous vectors as safe, or flagging standard benign text as high-risk malicious attacks."
+            ],
             "direct_file": "prompts/LLM-Judge/direct_rubrics/accuracy.md"
         },
         "guidance_appropriateness": {
-            "criteria": "Practicality, safety, and operational sense of the recommended mitigations.",
+            "evaluation_steps": [
+                "Step 1: Evaluate the operational environment and context implied by the original message context.",
+                "Step 2: Review all actionable mitigations, instructions, or recommendations supplied by the candidate assessment.",
+                "Step 3: Assess whether these action items are practical, protective, and contextually appropriate for the target scenario.",
+                "Step 4: Penalize defensive suggestions if they introduce unnecessary operational friction for a benign email, or if they lack the defensive depth required to block an active security exploit."
+            ],
             "direct_file": "prompts/LLM-Judge/direct_rubrics/guidance.md"
         }
     }
@@ -104,10 +123,12 @@ def main():
             print(f"  Evaluating Metric: {metric_name.upper()}...")
             detailed_rubric = load_file_content(cfg["direct_file"])
 
-            # 7. Instantiate the dynamic DeepEval G-Eval Metric object pointing to local judge
+            # 7. Instantiate the dynamic DeepEval G-Eval Metric object with locked execution steps
+            # DeepEval will now skip generation steps and inject these arrays directly into the evaluation prompt template
             geval_metric = GEval(
                 name=metric_name,
-                criteria=f"{cfg['criteria']}\nDetailed Scale Guidelines:\n{detailed_rubric}",
+                evaluation_steps=cfg["evaluation_steps"],
+                criteria=f"Detailed Scale Guidelines:\n{detailed_rubric}",
                 evaluation_params=[SingleTurnParams.INPUT, SingleTurnParams.ACTUAL_OUTPUT],
                 model=local_judge,
                 threshold=0.5

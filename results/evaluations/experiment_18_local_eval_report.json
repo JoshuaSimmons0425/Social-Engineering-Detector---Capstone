@@ -1,72 +1,72 @@
 {
     "relevance": {
         "no_evidence": {
-            "score": 4.5,
-            "reasoning": "The Actual Output is highly focused on critical risk factors and relevant social-engineering techniques that matter to the specific organization or message profile, and it lists relevant techniques or details without introducing filler text or inventing facts."
+            "score": 5.0,
+            "reasoning": "The Actual Output provides a detailed and relevant analysis of the Input message, identifying specific social-engineering techniques and risk indicators, and offering clear guidance on potential consequences and preliminary actions to take. The response is concise and focused on the key aspects of the Input, demonstrating a strong alignment with the evaluation steps."
         },
         "baseline_evidence": {
             "score": 5.0,
-            "reasoning": "The Actual Output provides a detailed risk assessment, listing relevant techniques and risk indicators, and offering preliminary guidance on how to handle the message. It also identifies the potential consequences of responding to the message, making it a strong alignment with the evaluation steps."
+            "reasoning": "The Actual Output provides a detailed and relevant risk assessment, mapping threat vectors directly to the provided text context, and isolating critical risk factors and relevant social-engineering techniques. The output is concise and informative, avoiding generic commentary and filler text."
         },
         "bert_evidence": {
-            "score": 4.0,
-            "reasoning": "The Actual Output provides a detailed risk assessment, listing relevant techniques and identifying potential consequences, but it could be more focused on critical risk factors and relevant social-engineering techniques specific to the organization or message profile."
+            "score": 5.0,
+            "reasoning": "The Actual Output provides a detailed risk assessment, isolating critical risk factors and relevant social-engineering techniques, and avoids generic commentary and filler text. The analysis is specific to the Input text, considering the taxonomy and model-derived evidence used. The output's precision in mapping threat vectors directly to the provided text context is strong, adhering to the allowed taxonomy."
         }
     },
     "justification_soundness": {
         "no_evidence": {
             "score": 4.0,
-            "reasoning": "The logical steps leading to the final risk level are explicit and well-explained, properly distinguishing between stated facts and inferred context. The link between the parsed message features and the final risk level is transparent and directly justifies the chosen risk level. However, the logical chain is not airtight, as new facts are introduced in the conclusion, specifically the potential consequences of the recipient's actions."
+            "reasoning": "The response is well-structured and clearly justifies the chosen risk level, but it could be improved by explicitly stating the logical steps leading to the final risk level and providing more direct links between the parsed message features and the final risk level."
         },
         "baseline_evidence": {
-            "score": 4.0,
-            "reasoning": "The logical steps leading to the final risk level are explicit and well-explained, properly distinguishing between stated facts and inferred context. The link between the parsed message features and the final risk level is transparent and directly justifies the chosen risk level. However, the logical chain is not airtight, as it relies on inferred context and assumptions about the recipient's behavior."
+            "score": 3.5,
+            "reasoning": "The logical steps leading to the final risk level are explicit and well-explained, properly distinguishing between stated facts and inferred context. The link between the parsed message features and the final risk level is transparent and directly justifies the chosen risk level. However, the logical chain is not airtight, as new facts are introduced in the conclusion, and the final risk level does not flow seamlessly from the reasoning chain."
         },
         "bert_evidence": {
-            "score": 4.0,
-            "reasoning": "The logical steps leading to the final risk level are explicit and well-explained, with a clear distinction between stated facts and inferred context. The link between the parsed message features and the final risk level is transparent and directly justifies the chosen risk level. However, the logical chain is not airtight, as new facts are introduced in the conclusion, specifically the model-derived evidence, which is not explicitly mentioned in the analysis."
+            "score": 3.5,
+            "reasoning": "The logical steps leading to the final risk level are explicit and well-explained, properly distinguishing between stated facts and inferred context. The link between the parsed message features and the final risk level is transparent and directly justifies the chosen risk level. However, the logical chain is not airtight, as new facts are introduced in the conclusion, and the final risk level does not flow seamlessly from the reasoning chain."
         }
     },
     "contextual_awareness": {
         "no_evidence": {
-            "score": 5.0,
-            "reasoning": "The response demonstrates strong contextual awareness and integrates XAI features by providing a detailed analysis of the message's techniques, risk indicators, and contextual factors, as well as a clear justification for the risk assessment and preliminary guidance. The response also effectively uses model-derived evidence to support its conclusions."
+            "score": 4.0,
+            "reasoning": "The Actual Output accurately pinpoints specific persuasion mechanics and subtle threat vectors within the text, demonstrating strong contextual awareness, and provides a standard contextual overview, but fails to actively dig beneath the surface text to identify hidden, implicit, or subtle psychological hooks and persuasive tactics."
         },
         "baseline_evidence": {
-            "score": 4.5,
-            "reasoning": "The response demonstrates strong contextual awareness and integrates XAI features, providing a clear and detailed analysis of the message's intent and potential consequences. It also effectively uses model-derived evidence to support its conclusions, such as identifying the message's use of urgency, promotional language, and reciprocity techniques. Additionally, the response provides a standard contextual overview, including relevant techniques, risk indicators, and contextual factors. The only area for improvement is in the evaluation steps, as the response does not explicitly mention the use of model-derived evidence in the evaluation steps, but it is still a strong response."
+            "score": 4.0,
+            "reasoning": "The Actual Output accurately pinpoints specific persuasion mechanics and subtle threat vectors within the text, demonstrating strong contextual awareness. It also seamlessly maps out hidden social-engineering sub-intents, explicitly acknowledges textual uncertainties without forcing a conclusion. However, it fails to actively dig beneath the surface text to identify hidden, implicit, or subtle psychological hooks and persuasive tactics, which is a key aspect of strong contextual awareness."
         },
         "bert_evidence": {
-            "score": 5.0,
-            "reasoning": "The response demonstrates strong contextual awareness and integrates XAI features, providing a detailed risk assessment, analysis, and justification for the conclusion. It also offers preliminary guidance for the recipient to avoid potential consequences. The model-derived evidence is used effectively to support the assessment, and the response is concise and clear in its explanation."
+            "score": 4.0,
+            "reasoning": "The Actual Output accurately pinpoints specific persuasion mechanics and subtle threat vectors within the text, demonstrating strong contextual awareness. It also seamlessly maps out hidden social-engineering sub-intents, explicitly acknowledges textual uncertainties without forcing a conclusion. However, it fails to actively dig beneath the surface text to identify hidden, implicit, or subtle psychological hooks and persuasive tactics."
         }
     },
     "accuracy": {
         "no_evidence": {
             "score": 4.0,
-            "reasoning": "The Actual Output accurately maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately reflects the overall gravity of the message. However, it relies on a simplistic, additive approach to evaluate the techniques in the context of the overall message."
+            "reasoning": "The Actual Output correctly maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately weighs the combination, severity, and credibility of all identified indicators. However, it relies on a simplistic, additive approach to assign a high risk level, which may not perfectly separate benign communications from genuine concerns."
         },
         "baseline_evidence": {
             "score": 5.0,
-            "reasoning": "The Actual Output accurately maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately reflects the overall gravity of the message. The response is detailed and informative, providing a clear justification for the risk level assignment."
+            "reasoning": "The Actual Output correctly maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately weighs the combination, severity, and credibility of all identified indicators. The risk level assignment is appropriate and accurate, and the output is well-calibrated, flawlessly separating benign communications from genuine concerns and assigning risk levels accurately based on explicit harm and immediate context rules."
         },
         "bert_evidence": {
             "score": 5.0,
-            "reasoning": "The Actual Output accurately maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately reflects the overall gravity of the message. The risk assessment is thorough and provides clear justification for the assigned risk level."
+            "reasoning": "The Actual Output correctly maps the combination, severity, and credibility of the identified indicators according to the defined risk tiers, and it accurately weighs the combination, severity, and credibility of all identified indicators. The risk level assignment is appropriate and accurate, and the output is well-calibrated, flawlessly separating benign communications from genuine concerns and assigning risk levels accurately based on explicit harm and immediate context rules."
         }
     },
     "guidance_appropriateness": {
         "no_evidence": {
-            "score": 4.0,
-            "reasoning": "The Actual Output provides a clear and detailed risk assessment, including specific techniques used by the social engineer, relevant indicators of risk, and contextual factors. The analysis is well-structured and supported by the original message context. The conclusions drawn are also clearly justified and aligned with the input. However, the response could be improved by providing more practical and actionable advice for the recipient, rather than simply stating what not to do."
+            "score": 4.5,
+            "reasoning": "The Actual Output provides a clear, structured view of the requested action and specific technique functions, and the conclusions drawn are supported by the original message context. The risk assessment is thorough and identifies multiple indicators of social engineering, including urgency and authority techniques. However, the justification could be more detailed in explaining the potential consequences of the recipient's actions."
         },
         "baseline_evidence": {
             "score": 5.0,
-            "reasoning": "The Actual Output provides a thorough analysis of the social-engineering techniques used in the message, including urgency, promotional language, and reciprocity. The risk indicators and contextual factors are also accurately identified, and the potential consequences of responding to the message are clearly explained. The response is well-structured and easy to follow, making it a strong assessment."
+            "reasoning": "The Actual Output provides a clear, structured view of the requested action and specific technique functions, and the conclusions drawn are supported by the original message context. The risk assessment is thorough and includes relevant details about the message's language, claims, and potential consequences."
         },
         "bert_evidence": {
             "score": 5.0,
-            "reasoning": "The Actual Output provides a clear and detailed risk assessment, including specific techniques used and contextual factors. The analysis is well-structured, and the conclusions drawn are supported by the original message context. The recommended mitigations are practical, safe, and operationally sensible, and the utility of the assessment is high due to its clarity, structure, and reliability."
+            "reasoning": "The Actual Output provides a clear, structured view of the requested action and specific technique functions, including a detailed analysis of the message's content and potential consequences. The risk assessment is well-supported by the original message context, and the recommended mitigations are practical and safe."
         }
     }
 }
