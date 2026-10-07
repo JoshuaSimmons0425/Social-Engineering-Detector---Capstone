@@ -305,7 +305,7 @@ class ExplainableBert:
             ti_attributions = ti_explainer(
                 self.clean_text, 
                 class_index=1,
-                embedding_name="bert.embeddings.word_embeddings" if hasattr(self.binary_model, 'bert') else "model.embeddings.word_embeddings"
+                embedding_name="bert.embeddings" 
             )[:15]
             
             # Restore original state immediately after execution
@@ -452,7 +452,7 @@ class ExplainableBert:
                     ti_attributions = ti_explainer(
                         self.clean_text, 
                         class_index=target_idx,
-                        embedding_name="model.embeddings.tok_embeddings"
+                        embedding_name="model.embeddings"
                     )[:15]
                 except Exception as e:
                     ti_attributions = f"Skipped: Architecture gradient hook error ({str(e)})"
