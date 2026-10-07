@@ -2,8 +2,18 @@ import os
 import json
 import re
 import sys
-# Import the new Gemini judge class instead
-from src.LLM_judgment.gemini_flash_judge import GeminiEvalJudge
+from dotenv import load_dotenv
+from typing import Optional
+from pydantic import BaseModel
+# Import DeepEval core infrastructure
+from deepeval.test_case import LLMTestCase, SingleTurnParams
+from deepeval.metrics import GEval
+from deepeval.models.base_model import DeepEvalBaseLLM
+from langchain_community.llms import Ollama
+
+from src.LLM_judgment.ollamajudge import LocalOllamaJudge
+
+# 1. Create a custom wrapper class so DeepEval can talk to local Ollama
 
 def load_file_content(path: str) -> str:
     """Safely loads file content as string."""
@@ -13,13 +23,9 @@ def load_file_content(path: str) -> str:
         return f.read().strip()
 
 def main():
-    # Enforce API Key verification before initiating execution
-    if not os.environ.get("GEMINI_API_KEY"):
-        print("Error: GEMINI_API_KEY environment variable is missing.")
-        print("Please export it via terminal: export GEMINI_API_KEY='your_key'")
-        sys.exit(1)
+    load_dotenv()
 
-    # 1. Base folders
+    # 2. Base folders
     base_results_dir = "results/risk_assessments"
     base_xai_dir = "xAI_outputs"
     evaluation_output_dir = "results/evaluations"
@@ -29,7 +35,7 @@ def main():
         print(f"Error: Risk assessments directory '{base_results_dir}' not found.")
         sys.exit(1)
 
-    # 2. Locate and naturally sort all experiment directories
+    # 3. Locate and naturally sort all experiment directories
     experiment_folders = [
         d for d in os.listdir(base_results_dir)
         if os.path.isdir(os.path.join(base_results_dir, d)) and d.startswith("experiment_")
@@ -40,133 +46,101 @@ def main():
         print("No experiment folders found inside results/risk_assessments.")
         sys.exit(0)
 
-    # 3. Define metrics configuration mapping to custom rubric markdown criteria files
-    metrics = {
+    # 4. Define metrics configurations mapped to custom rubric text instructions
+    metrics_config = {
         "relevance": {
-            "task_description": "Evaluating the focus and specificity of a social engineering risk assessment.",
-            "criterion": "Focusing on characteristics that actually matter over generic security commentary.",
-            "direct_file": "prompts/LLM-Judge/direct_rubrics/relevance.md",
-            "pairwise_file": "prompts/LLM-Judge/pairwise_rubrics/relevance.md"
+            "criteria": "Focusing on characteristics that actually matter over generic security commentary.",
+            "direct_file": "prompts/LLM-Judge/direct_rubrics/relevance.md"
         },
         "justification_soundness": {
-            "task_description": "Evaluating the explanation quality and analytical faithfulness of a risk assessment.",
-            "criterion": "Logical reasoning chains that strongly support the final risk conclusions.",
-            "direct_file": "prompts/LLM-Judge/direct_rubrics/justification.md",
-            "pairwise_file": "prompts/LLM-Judge/pairwise_rubrics/justification.md"
+            "criteria": "Logical reasoning chains that strongly support the final risk conclusions.",
+            "direct_file": "prompts/LLM-Judge/direct_rubrics/justification.md"
         },
         "contextual_awareness": {
-            "task_description": "Evaluating a small language model's ability to synthesize nuanced contextual data.",
-            "criterion": "Understanding complex social engineering situations and the interaction of subtle cues.",
-            "direct_file": "prompts/LLM-Judge/direct_rubrics/contextual_awareness.md",
-            "pairwise_file": "prompts/LLM-Judge/pairwise_rubrics/contextual_awareness.md"
+            "criteria": "Understanding complex social engineering situations and the interaction of subtle cues.",
+            "direct_file": "prompts/LLM-Judge/direct_rubrics/contextual_awareness.md"
         },
         "accuracy": {
-            "task_description": "Evaluating the objective validity of a security risk decision.",
-            "criterion": "Appropriateness and accuracy of the final risk judgment.",
-            "direct_file": "prompts/LLM-Judge/direct_rubrics/accuracy.md",
-            "pairwise_file": "prompts/LLM-Judge/pairwise_rubrics/accuracy.md"
+            "criteria": "Appropriateness and accuracy of the final risk judgment.",
+            "direct_file": "prompts/LLM-Judge/direct_rubrics/accuracy.md"
         },
         "guidance_appropriateness": {
-            "task_description": "Evaluating the real-world utility of security recommendations.",
-            "criterion": "Practicality, safety, and operational sense of the recommended mitigations.",
-            "direct_file": "prompts/LLM-Judge/direct_rubrics/guidance.md",
-            "pairwise_file": "prompts/LLM-Judge/pairwise_rubrics/guidance.md"
+            "criteria": "Practicality, safety, and operational sense of the recommended mitigations.",
+            "direct_file": "prompts/LLM-Judge/direct_rubrics/guidance.md"
         }
     }
 
-    # 4. Instantiate the Gemini Judge class cloud context
-    judge = GeminiEvalJudge()
+    # 5. Instantiate our custom Local Ollama model judge
+    local_judge = LocalOllamaJudge(model_name="llama3.1:8b")
 
-    # 5. Master loop across all discovered experiments
+    # 6. Master loop across all discovered experiments
     for exp_folder in experiment_folders:
         print(f"\n=======================================================")
-        print(f"RUNNING GEMINI 2.5 FLASH EVALUATION FOR: {exp_folder.upper()}")
+        print(f"DEEPEVAL LOCAL G-EVAL RUNNING FOR: {exp_folder.upper()}")
         print(f"=======================================================")
         
         exp_results_path = os.path.join(base_results_dir, exp_folder)
         exp_xai_path = os.path.join(base_xai_dir, exp_folder)
 
+        input_text_file = os.path.join(exp_xai_path, "input_text", "cleaned_input.txt")
         no_evidence_file = os.path.join(exp_results_path, "no_evidence", "no_evidence_reply.md")
         baseline_evidence_file = os.path.join(exp_results_path, "baseline_evidence", "baseline_evidence_reply.md")
         bert_evidence_file = os.path.join(exp_results_path, "bert_evidence", "bert_evidence_reply.md")
-        input_text_file = os.path.join(exp_xai_path, "input_text", "cleaned_input.txt")
 
-        # Verify execution files exist for this experiment block
-        required_files = [no_evidence_file, baseline_evidence_file, bert_evidence_file, input_text_file]
-        if not all(os.path.exists(f) for f in required_files):
-            print(f"Skipping {exp_folder}: Missing target assessment outputs or source files.")
+        if not all(os.path.exists(f) for f in [input_text_file, no_evidence_file, baseline_evidence_file, bert_evidence_file]):
+            print(f"Skipping {exp_folder}: Incomplete records.")
             continue
 
         original_message = load_file_content(input_text_file)
-        
         model_outputs = {
             "no_evidence": load_file_content(no_evidence_file),
             "baseline_evidence": load_file_content(baseline_evidence_file),
             "bert_evidence": load_file_content(bert_evidence_file)
         }
 
-        # Contextual ground-truth reference sequence text
-        full_instruction = (
-            f"Original Input Message (Reference Context):\n\"\"\"\n{original_message}\n\"\"\"\n\n"
-            f"Task Instruction:\nEvaluate the security risks present inside the target text above, "
-            f"validating indicators of deception or persuasion techniques."
-        )
-
         experiment_report = {}
 
-        # Loop through every metric configuration to build this experiment's evaluation matrix
-        for metric_name, cfg in metrics.items():
-            print(f"\n  Evaluating Metric: {metric_name.upper()}")
-            
-            try:
-                direct_rubric_text = load_file_content(cfg["direct_file"])
-                pairwise_rubric_text = load_file_content(cfg["pairwise_file"])
-            except FileNotFoundError as e:
-                print(f"    Skipping metric {metric_name}: {e}")
-                continue
+        for metric_name, cfg in metrics_config.items():
+            print(f"  Evaluating Metric: {metric_name.upper()}...")
+            detailed_rubric = load_file_content(cfg["direct_file"])
 
-            rubrics_pack = {
-                "task_description": cfg["task_description"],
-                "criterion": cfg["criterion"],
-                "direct_rubric": direct_rubric_text,
-                "pairwise_rubric": pairwise_rubric_text
-            }
+            # 7. Instantiate the dynamic DeepEval G-Eval Metric object pointing to local judge
+            geval_metric = GEval(
+                name=metric_name,
+                criteria=f"{cfg['criteria']}\nDetailed Scale Guidelines:\n{detailed_rubric}",
+                evaluation_params=[SingleTurnParams.INPUT, SingleTurnParams.ACTUAL_OUTPUT],
+                model=local_judge,
+                threshold=0.5
+            )
 
-            experiment_report[metric_name] = {"direct": {}, "pairwise": {}}
+            experiment_report[metric_name] = {}
 
-            # --- Phase A: Run Direct Appraisals ---
+            # 8. Build and execute test cases for each risk evaluation variant
             for model_name, output_content in model_outputs.items():
-                res = judge.evaluate_direct(full_instruction, output_content, rubrics_pack)
-                experiment_report[metric_name]["direct"][model_name] = res
-                print(f"    Direct Score [{model_name}]: {res['parsed_score']}/5")
+                test_case = LLMTestCase(
+                    input=f"Analyze risks for this message: {original_message}",
+                    actual_output=output_content
+                )
 
-            # --- Phase B: Run Pairwise Combos ---
-            combos = [
-                ("no_evidence", "baseline_evidence"),
-                ("no_evidence", "bert_evidence"),
-                ("baseline_evidence", "bert_evidence")
-            ]
-            
-            for model_a, model_b in combos:
-                res = judge.evaluate_pairwise(full_instruction, model_outputs[model_a], model_outputs[model_b], rubrics_pack)
-                
-                winner_label = res["parsed_decision"]
-                resolved_winner = model_a if winner_label == "A" else (model_b if winner_label == "B" else winner_label)
-                
-                experiment_report[metric_name]["pairwise"][f"{model_a}_vs_{model_b}"] = {
-                    "winner": resolved_winner,
-                    "feedback": res["feedback"]
+                # Execute local evaluation call
+                geval_metric.measure(test_case)
+
+                # Convert DeepEval's native 0.0-1.0 float back to your legacy 1-5 scale mapping
+                scaled_score = round(geval_metric.score * 5, 2)
+                reasoning = geval_metric.reason
+
+                experiment_report[metric_name][model_name] = {
+                    "score": scaled_score,
+                    "reasoning": reasoning
                 }
-                print(f"    Pairwise Win [{model_a} vs {model_b}]: {resolved_winner}")
+                print(f"    [{model_name}] Score: {scaled_score}/5")
 
-        # 6. Export an individual JSON matrix for this unique experiment tracking row
-        output_report_path = os.path.join(evaluation_output_dir, f"{exp_folder}_eval_report.json")
+        # Export report matrix for this experiment run
+        output_report_path = os.path.join(evaluation_output_dir, f"{exp_folder}_local_eval_report.json")
         with open(output_report_path, 'w', encoding='utf-8') as f:
             json.dump(experiment_report, f, indent=4, ensure_ascii=False)
             
-        print(f"\nSaved clean JSON metrics report for {exp_folder} -> {output_report_path}")
-
-    print("\nAll experiment evaluations successfully compiled via Gemini Flash.")
+        print(f"Saved local JSON metrics report for {exp_folder} -> {output_report_path}")
 
 if __name__ == "__main__":
     main()
