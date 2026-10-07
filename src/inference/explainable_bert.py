@@ -8,6 +8,7 @@ import shap
 from lime.lime_text import LimeTextExplainer
 from transformers_interpret import SequenceClassificationExplainer
 from src.datasets.dataengine import DataEngine
+from transformers.modeling_outputs import BaseModelOutput
 
 class ExplainableBert:
     def __init__(self, binary_model, multilabel_model, binary_calibrators, multilabel_calibrators, tokenizer, decision_threshold, input_text, multi_label_names, device='cpu'):
@@ -17,7 +18,6 @@ class ExplainableBert:
         self.multilabel_calibrators = multilabel_calibrators
         self.tokenizer = tokenizer
         self.decision_threshold = decision_threshold
-        self.input_text = input_text
         self.device = device
 
         self.binary_model.to(self.device).eval()
@@ -30,18 +30,18 @@ class ExplainableBert:
         self.multilabel_information = {}
         self.overall_information = {}
 
-        self.clean_text = ""
+        self.clean_text = input_text
         self.processed_tensors = None
 
     def preprocess_input(self):
 
-        engine = DataEngine()
-        temp_df = pd.DataFrame({'text': [self.input_text]})
+        # engine = DataEngine()
+        # temp_df = pd.DataFrame({'text': [self.input_text]})
 
-        temp_df = engine.mask_money(temp_df, 'text')
-        temp_df = engine.anonymize_data(temp_df, 'text')
+        # temp_df = engine.mask_money(temp_df, 'text')
+        # temp_df = engine.anonymize_data(temp_df, 'text')
 
-        self.clean_text = temp_df['text'].iloc[0]
+        # self.clean_text = temp_df['text'].iloc[0]
 
         self.processed_tensors = self.tokenizer.encode_plus(
             self.clean_text, 
@@ -275,36 +275,45 @@ class ExplainableBert:
                     'val': scalar_val
                 })
 
-        # 3. Transformers-Interpret Fix: Route class_index target to index position 1
+         # 3. Transformers-Interpret Fix: Route class_index target to index position 1
         ti_attributions = "Skipped: Architecture hook mismatch"
         try:
-            hf_binary_module = self.binary_model.bert if hasattr(self.binary_model, 'bert') else self.binary_model.model
+            # Patch the top-level binary classifier model instead of the base transformer backbone
+            orig_forward = self.binary_model.forward
             
-            orig_forward = hf_binary_module.forward
             def patched_forward(*args, **kwargs):
                 out = orig_forward(*args, **kwargs)
+                # Apply Platt scaling directly to the output logits container
                 if hasattr(out, 'logits'):
                     out.logits = (out.logits * A) + B
                     return out
-                return (out * A) + B
+                elif isinstance(out, torch.Tensor):
+                    return (out * A) + B
+                return out
             
-            hf_binary_module.forward = patched_forward
+            self.binary_model.forward = patched_forward
             
+            # Pass the patched top-level model to the explainer
             ti_explainer = SequenceClassificationExplainer(
-                model=hf_binary_module, 
+                model=self.binary_model, 
                 tokenizer=self.tokenizer,
                 custom_labels=self.binary_class_names
             )
             
             # Directing the index to 1 guarantees tracking maps to the 'malicious' logit transformation
+            # Note: adjusted embedding_name to the standard huggingface path if you hit target layers errors
             ti_attributions = ti_explainer(
                 self.clean_text, 
                 class_index=1,
-                embedding_name="model.embeddings.tok_embeddings"
+                embedding_name="bert.embeddings.word_embeddings" if hasattr(self.binary_model, 'bert') else "model.embeddings.word_embeddings"
             )[:15]
             
-            hf_binary_module.forward = orig_forward
+            # Restore original state immediately after execution
+            self.binary_model.forward = orig_forward
         except Exception as e:
+            # Safely restore original forward pass even if execution breaks
+            if 'orig_forward' in locals():
+                self.binary_model.forward = orig_forward
             ti_attributions = f"Skipped: Gradient graph tracing error ({str(e)})"
 
         self.binary_information['explanations'] = {
@@ -388,63 +397,74 @@ class ExplainableBert:
         # Dictionary to store the multi-label attributions
         explanations_per_active_label = {}
 
-        # Loop through each active technique above 10% to compute individual token attributions
-        for target_label in active_labels:
-            target_idx = self.multilabel_label_names.index(target_label)
-            
-            # Extract target label's SHAP attributions from the pre-computed array
-            label_shap = [{
-                'token': t, 
-                'val': float(v)
-            } for t, v in zip(shap_values[0, :, target_idx].data, shap_values[0, :, target_idx].values) if t.strip()]
+        # --- FIX 1: Move patching completely OUTSIDE the loop and protect against recursion ---
+        if not hasattr(self.multilabel_model, '_true_forward'):
+            self.multilabel_model._true_forward = self.multilabel_model.forward
 
-            # Compute Transformers-Interpret with native structural safety fallbacks
-            # Compute Transformers-Interpret with native structural safety fallbacks
-            ti_attributions = "Skipped: ModernBERT internal layer tracing unmapped"
-            try:
-                orig_forward = self.multilabel_model.forward
-                def patched_forward(*args, **kwargs):
-                    out = orig_forward(*args, **kwargs)
-                    for idx, label in enumerate(self.multilabel_label_names):
-                        cal_scaler = self.multilabel_calibrators.get(idx, self.multilabel_calibrators.get(label))
+        orig_forward = self.multilabel_model._true_forward
+
+        def patched_forward(*args, **kwargs):
+            out = orig_forward(*args, **kwargs)
+            if hasattr(out, 'logits'):
+                # FIX 2: Create a clone of the tensor to prevent out-of-place/in-place tracking mutation errors
+                cal_logits = out.logits.clone()
+                for idx, label in enumerate(self.multilabel_label_names):
+                    cal_scaler = self.multilabel_calibrators.get(idx, self.multilabel_calibrators.get(label))
+                    
+                    if cal_scaler is not None and hasattr(cal_scaler, 'A') and hasattr(cal_scaler, 'B'):
+                        A = cal_scaler.A.item() if hasattr(cal_scaler.A, 'item') else float(cal_scaler.A)
+                        B = cal_scaler.B.item() if hasattr(cal_scaler.B, 'item') else float(cal_scaler.B)
+                    elif isinstance(cal_scaler, dict):
+                        A = cal_scaler.get('A', cal_scaler.get('slope', 1.0))
+                        B = cal_scaler.get('B', cal_scaler.get('intercept', 0.0))
+                    else:
+                        A, B = 1.0, 0.0
                         
-                        if cal_scaler is not None and hasattr(cal_scaler, 'A') and hasattr(cal_scaler, 'B'):
-                            A = cal_scaler.A.item() if hasattr(cal_scaler.A, 'item') else float(cal_scaler.A)
-                            B = cal_scaler.B.item() if hasattr(cal_scaler.B, 'item') else float(cal_scaler.B)
-                        elif isinstance(cal_scaler, dict):
-                            A = cal_scaler.get('A', cal_scaler.get('slope', 1.0))
-                            B = cal_scaler.get('B', cal_scaler.get('intercept', 0.0))
-                        else:
-                            A, B = 1.0, 0.0
-                            
-                        out.logits[:, idx] = out.logits[:, idx] * A + B
-                    return out
-                
-                self.multilabel_model.forward = patched_forward
-                
-                # Instantiating the explainer targeting the multi-label head
-                ti_explainer = SequenceClassificationExplainer(
-                    model=self.multilabel_model, 
-                    tokenizer=self.tokenizer,
-                    custom_labels=self.multilabel_label_names
-                )
-                
-                # Explicit layer definition enables Integrated Gradients execution over ModernBERT
-                ti_attributions = ti_explainer(
-                    self.clean_text, 
-                    class_index=target_idx,
-                    embedding_name="model.embeddings.tok_embeddings"
-                )[:15]
-                
-                self.multilabel_model.forward = orig_forward
-            except Exception as e:
-                ti_attributions = f"Skipped: Architecture gradient hook error ({str(e)})"
+                    cal_logits[:, idx] = cal_logits[:, idx] * A + B
+                out.logits = cal_logits
+            return out
 
-            # Save the pair of local feature explanations for this label
-            explanations_per_active_label[target_label] = {
-                'shap': label_shap,
-                'transformers_interpret': ti_attributions
-            }
+        # Apply the safe patch once
+        self.multilabel_model.forward = patched_forward
+
+        try:
+            # Loop through each active technique above 10% to compute individual token attributions
+            for target_label in active_labels:
+                target_idx = self.multilabel_label_names.index(target_label)
+                
+                # Extract target label's SHAP attributions from the pre-computed array
+                label_shap = [{
+                    'token': t, 
+                    'val': float(v)
+                } for t, v in zip(shap_values[0, :, target_idx].data, shap_values[0, :, target_idx].values) if t.strip()]
+
+                # Compute Transformers-Interpret with native structural safety fallbacks
+                ti_attributions = "Skipped: ModernBERT internal layer tracing unmapped"
+                try:
+                    # Instantiating the explainer targeting the multi-label head
+                    ti_explainer = SequenceClassificationExplainer(
+                        model=self.multilabel_model, 
+                        tokenizer=self.tokenizer,
+                        custom_labels=self.multilabel_label_names
+                    )
+                    
+                    # Explicit layer definition enables Integrated Gradients execution over ModernBERT
+                    ti_attributions = ti_explainer(
+                        self.clean_text, 
+                        class_index=target_idx,
+                        embedding_name="model.embeddings.tok_embeddings"
+                    )[:15]
+                except Exception as e:
+                    ti_attributions = f"Skipped: Architecture gradient hook error ({str(e)})"
+
+                # Save the pair of local feature explanations for this label
+                explanations_per_active_label[target_label] = {
+                    'shap': label_shap,
+                    'transformers_interpret': ti_attributions
+                }
+        finally:
+            # --- FIX 3: Always cleanly restore the original state in a finally block ---
+            self.multilabel_model.forward = self.multilabel_model._true_forward
 
         # Build the structured metadata summary for your output logs
         self.multilabel_information['explanations'] = {

@@ -17,7 +17,6 @@ class ExplainableBaseline:
         self.multilabel_calibrators = multilabel_calibrators
         self.vectorizer = vectorizer
         self.decision_threshold = decision_threshold
-        self.input_text = input_text
         self.multi_label_names = multi_label_names
 
         self.binary_class_names = ['benign', 'malicious']
@@ -27,17 +26,17 @@ class ExplainableBaseline:
         self.multilabel_information = {}
         self.overall_information = {}
 
-        self.clean_text = ""
+        self.clean_text = input_text
 
-    def clean_input_text(self):
+    # def clean_input_text(self):
 
-        engine = DataEngine()
-        temp_df = pd.DataFrame([self.input_text], columns=['text'])
+    #     engine = DataEngine()
+    #     temp_df = pd.DataFrame([self.input_text], columns=['text'])
 
-        temp_df = engine.mask_money(temp_df, 'text')
-        temp_df = engine.anonymize_data(temp_df, 'text')
+    #     temp_df = engine.mask_money(temp_df, 'text')
+    #     temp_df = engine.anonymize_data(temp_df, 'text')
 
-        self.clean_text = temp_df['text'].iloc[0]
+    #     self.clean_text = temp_df['text'].iloc[0]
 
     def _get_binary_platt_params(self):
         """Helper to safely resolve calibration parameters from objects or dictionaries."""
@@ -236,7 +235,7 @@ class ExplainableBaseline:
 
     def run_explanations(self):
         """Pipeline orchestration runner."""
-        self.clean_input_text()
+        # self.clean_input_text()
         self.predict_binary()
         self.predict_multilabel()
         self.explain_binary()
