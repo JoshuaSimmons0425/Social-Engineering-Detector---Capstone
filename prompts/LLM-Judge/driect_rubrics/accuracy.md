@@ -1,0 +1,6 @@
+[Is the final risk level judgment appropriate, and does it correctly map the combination, severity, and credibility of the identified indicators according to the defined risk tiers?]
+Score 1: The risk level assignment is completely inappropriate for the text provided (e.g., grading an obviously benign transactional message as Critical), or it completely fails to output one of the 4 valid risk tiers.
+Score 2: The risk level is poorly calibrated because the model assumed that any ambiguous content is inherently malicious, or it defaulted to a high tier simply because a single technique was present.
+Score 3: The risk judgment is acceptable but relies on a simplistic, additive approach (e.g., counting the number of techniques) rather than evaluating how those techniques function together within the overall message context.
+Score 4: The risk level assignment is highly accurate and appropriate, cleanly reflecting the overall gravity of the message by weighing the combination, severity, and credibility of all identified indicators.
+Score 5: The risk judgment is perfectly calibrated. It flawlessly separates benign promotional/transactional communications from genuine concern, assigning Low, Medium, High, or Critical accurately based on explicit harm and immediate context rules.

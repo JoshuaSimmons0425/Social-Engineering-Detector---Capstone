@@ -1,0 +1,6 @@
+[Does the reasoning logically support the final risk level conclusion, demonstrating explicit assessment consistency and analytical faithfulness?]
+Score 1: The final risk level completely contradicts the analysis text, or the justification introduces critical new facts and conclusions that were never mentioned in the core body of the analysis.
+Score 2: The response leaps to a final risk level with weak, fragmented, or poorly explained logical steps, or it incorrectly treats a single phrase or formatting element as determinative for the entire assessment.
+Score 3: The response provides a sound explanation, but the link between the parsed message features and the final risk level is generic. It fails to properly distinguish between explicitly stated facts and inferred context.
+Score 4: The response builds a strong, transparent logical chain, explicitly showing how the severity, credibility, and combination of indicators directly justify the chosen risk level (Low, Medium, High, Critical).
+Score 5: The response delivers an airtight, flawless logical argument showing strict internal consistency. The final risk level flows seamlessly from a balanced reasoning chain where no new facts are suddenly introduced in the conclusion.

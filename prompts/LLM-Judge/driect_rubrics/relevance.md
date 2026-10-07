@@ -1,0 +1,6 @@
+[Does the risk assessment focus on the characteristics, taxonomy, and model-derived evidence that actually matter for the specific input text, or does it produce generic commentary?]
+Score 1: The response relies entirely on generic security platitudes, ignores the specific message characteristics, or uses a taxonomy completely outside the provided guidelines.
+Score 2: The response lists a few relevant techniques or details but introduces severe filler text, generic commentary, or invents facts, hidden motives, and scenarios not supported by the message.
+Score 3: The response identifies a standard set of relevant techniques from the taxonomy, but handles them superficially, misses the direct relevance to the provided context, or infers meaning unnecessarily from placeholder tokens like <PERSON> or <URL>.
+Score 4: The response is highly focused, isolating critical risk factors and relevant social-engineering techniques that matter to the specific organization or message profile while avoiding generic commentary.
+Score 5: The response is exceptionally precise, mapping threat vectors directly and exclusively to the provided text context, adhering strictly to the allowed taxonomy, and ignoring or capturing anomalies exactly as instructed.

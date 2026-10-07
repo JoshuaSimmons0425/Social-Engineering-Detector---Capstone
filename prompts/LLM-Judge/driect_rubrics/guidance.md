@@ -1,0 +1,6 @@
+[Does the response provide practical, safe, and actionable risk conclusions that cleanly match the operational realities of the social-engineering scenario?]
+Score 1: The response fails to follow the requested output format entirely, or it provides an evaluation that is so detached from the text content that it could result in unsafe real-world actions.
+Score 2: The assessment provides confusing or highly speculative guidance, relying on invented scenarios or specific requests that were never supported by the original message context.
+Score 3: The response delivers standard, safe, and formatted output, but the practical utility of the assessment is low due to superficial analysis of the social-engineering characteristics.
+Score 4: The assessment is highly practical and well-reasoned, giving security teams a clear, structured view of the requested action, apparent objectives, and specific technique functions without introducing hallucinations.
+Score 5: The response delivers an exceptionally reliable, high-utility risk assessment using the exact formatting specified. It successfully translates complex textual cues and upstream XAI data into an actionable security conclusion that can be safely trusted in operations.
