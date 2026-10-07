@@ -3,10 +3,82 @@ import json
 import re
 import pandas as pd
 import scipy.stats as stats
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def load_json_file(path: str) -> dict:
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+def generate_box_plot(df: pd.DataFrame, output_dir: str):
+    """Generates a publication-quality box plot showing performance shifts and means."""
+    # 1. Melt the DataFrame from wide to long format for Seaborn compatibility
+    plot_df = df.melt(
+        id_vars=["Experiment_ID"], 
+        value_vars=["Control_No_Evidence", "Tier1_Baseline_Evidence", "Tier2_BERT_Evidence"],
+        var_name="Experimental_Tier", 
+        value_name="Overall_Average_Score"
+    )
+    
+    # Clean up labels for presentation presentation
+    tier_mapping = {
+        "Control_No_Evidence": "Control\n(No Evidence)",
+        "Tier1_Baseline_Evidence": "Tier 1 Treatment\n(Baseline Heuristics)",
+        "Tier2_BERT_Evidence": "Tier 2 Treatment\n(BERT xAI)"
+    }
+    plot_df["Experimental_Tier"] = plot_df["Experimental_Tier"].map(tier_mapping)
+
+    # 2. Configure academic figure styles via Seaborn
+    sns.set_theme(style="whitegrid", font="sans-serif", font_scale=1.1)
+    
+    plt.figure(figsize=(9, 6.5))
+    
+    # 3. Plot the Box and Whisker elements with muted scholarly palette
+    # showmeans=True injects a distinct indicator calculating mathematical expectations
+    ax = sns.boxplot(
+        x="Experimental_Tier", 
+        y="Overall_Average_Score", 
+        data=plot_df,
+        palette="muted",
+        width=0.45,
+        showmeans=True,
+        meanprops={"marker": "D", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": 8}
+    )
+    
+    # 4. Lay down jittered raw data points over boxes to display group size density (N=20)
+    sns.stripplot(
+        x="Experimental_Tier", 
+        y="Overall_Average_Score", 
+        data=plot_df,
+        color="black",
+        size=5,
+        alpha=0.4,
+        jitter=0.15
+    )
+
+    # 5. Fine-tune axis ranges and styling elements
+    plt.title("Distribution of Overall Quality Scores Across Experimental Framework Tiers", pad=20, weight='bold')
+    plt.xlabel("Evaluation Assessment Configurations", labelpad=15, weight='semibold')
+    plt.ylabel("Overall Mean Score (Scale 1 - 5)", labelpad=15, weight='semibold')
+    
+    # Force Y-Axis boundaries to tightly frame your 1-5 evaluation limits
+    plt.ylim(1.0, 5.2)
+    plt.yticks([1.0, 2.0, 3.0, 4.0, 5.0])
+
+    # Add a subtitle anchor note describing visual elements
+    plt.figtext(
+        0.15, 0.005, 
+        "Note: Boxes bound the IQR (middle 50%); horizontal bars indicate medians; white diamonds (◆) represent means.", 
+        alpha=0.75, style='italic', fontsize=10
+    )
+
+    plt.tight_layout()
+    
+    # 6. Save the figure as a print-ready vector graphic asset
+    plot_save_path = os.path.join(output_dir, "evaluation_distribution_plot.png")
+    plt.savefig(plot_save_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Publication-ready distribution figure successfully rendered to: {plot_save_path}")
 
 def main():
     eval_dir = "results/evaluations"
@@ -17,7 +89,7 @@ def main():
         print(f"Error: Evaluation directory '{eval_dir}' not found.")
         return
 
-    # 1. Gather and naturally sort all report targets
+    # Gather and naturally sort all report targets
     report_files = [
         f for f in os.listdir(eval_dir) 
         if f.startswith("experiment_") and f.endswith("_local_eval_report.json")
@@ -30,16 +102,14 @@ def main():
 
     print(f"Aggregating data across {len(report_files)} experimental observations...")
 
-    # Lists to stack the overall average metric vector for each experiment instance
     no_evidence_samples = []
     baseline_evidence_samples = []
     bert_evidence_samples = []
     
-    # 2. Extract metrics and compile composite averages row by row
+    # Extract metrics and compile composite averages row by row
     for file_name in report_files:
         data = load_json_file(os.path.join(eval_dir, file_name))
         
-        # Accumulators for this specific experiment instance
         scores_no = []
         scores_base = []
         scores_bert = []
@@ -52,13 +122,12 @@ def main():
             if "bert_evidence" in configs and "score" in configs["bert_evidence"]:
                 scores_bert.append(configs["bert_evidence"]["score"])
                 
-        # Calculate the overall mean across all 5 evaluation criteria
         if scores_no and scores_base and scores_bert:
             no_evidence_samples.append(sum(scores_no) / len(scores_no))
             baseline_evidence_samples.append(sum(scores_base) / len(scores_base))
             bert_evidence_samples.append(sum(scores_bert) / len(scores_bert))
 
-    # Construct clean tabular snapshot for tracking rows
+    # Construct tracking frame row
     experiments_df = pd.DataFrame({
         "Experiment_ID": [f"Experiment_{i}" for i in range(len(no_evidence_samples))],
         "Control_No_Evidence": no_evidence_samples,
@@ -67,21 +136,22 @@ def main():
     })
     experiments_df.to_csv(os.path.join(output_dir, "aggregated_experiments_scores.csv"), index=False)
 
-    # 3. Execute Omnibus Test: Friedman's ANOVA by Ranks
-    # Null Hypothesis (H0): The distributions of overall scores are equal across all tiers.
+    # Trigger distribution chart compilation step
+    generate_box_plot(experiments_df, output_dir)
+
+    # Execute Omnibus Test: Friedman's ANOVA by Ranks
     friedman_stat, friedman_p = stats.friedmanchisquare(
         no_evidence_samples, 
         baseline_evidence_samples, 
         bert_evidence_samples
     )
 
-    # Define standard significance bar parameters
     initial_alpha = 0.05
     num_comparisons = 3
-    bonferroni_alpha = initial_alpha / num_comparisons  # Adjusted Alpha threshold = 0.0167
+    bonferroni_alpha = initial_alpha / num_comparisons 
 
     text_output = []
-    text_output.append("=========================================================================")
+    text_output.append("\n=========================================================================")
     text_output.append("            NON-PARAMETRIC WITHIN-SUBJECTS STATISTICAL REPORT            ")
     text_output.append("=========================================================================\n")
     text_output.append(f"Number of Independent Experiment Blocks (N): {len(no_evidence_samples)}")
@@ -96,7 +166,6 @@ def main():
     omnibus_significant = friedman_p < initial_alpha
     text_output.append(f"Omnibus Statistical Effect?   {'[SUCCESS] Significant Difference Detected' if omnibus_significant else '[FAIL] No Significant Effect Found'}\n")
 
-    # 4. Stage 2: Execute Post-Hoc Pairwise Matched Wilcoxon Signed-Rank Tests
     text_output.append("-------------------------------------------------------------------------")
     text_output.append("STAGE 2: POST-HOC PAIRWISE COMPARISONS (Wilcoxon Signed-Rank Tests)")
     text_output.append("-------------------------------------------------------------------------")
@@ -109,7 +178,6 @@ def main():
         ]
         
         for name_a, name_b, data_a, data_b in matchups:
-            # Execute Wilcoxon two-tailed test routine
             w_stat, p_val = stats.wilcoxon(data_a, data_b)
             is_pairwise_sig = p_val < bonferroni_alpha
             
@@ -124,14 +192,12 @@ def main():
     else:
         text_output.append("Post-Hoc tests bypassed. Omnibus test did not reject the null hypothesis.")
 
-    # Print report summary back out to shell terminal interface
     report_string = "\n".join(text_output)
     print(report_string)
 
-    # 5. Document logs directly to disk text records
     with open(os.path.join(output_dir, "statistical_test_results.txt"), "w", encoding='utf-8') as f:
         f.write(report_string)
-    print(f"Comprehensive statistical text reports successfully saved inside the '{output_dir}/' folder.")
+    print(f"Comprehensive reports and data logs saved inside the '{output_dir}/' folder.")
 
 if __name__ == "__main__":
     main()
