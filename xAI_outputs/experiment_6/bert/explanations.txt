@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: com, reliantenergy, enron, escapenumber, could
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 46.8%
+- Personal: 28.5%
+- Promotional: 17.2%
+- Urgency: 15.4%
+- Authority: 14.6%
+- Curiosity: 9.2%
+- Reminder: 6.9%
+- Fear: 6.2%
+- Reciprocity: 4.4%
+- Pretexting: 4.2%
+
+XAI features:
+- Transactional: forwarded, xls, cc, enron, noms
+- Personal: no prominent features
+- Promotional: xls, cc, forwarded, subject, escapenumber
+- Urgency: xls, escapenumber, enron, chokshi, corp
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

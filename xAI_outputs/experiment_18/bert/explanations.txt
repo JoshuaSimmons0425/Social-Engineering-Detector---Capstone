@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: !, <URL>, our, claim, free
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 45.0%
+- Personal: 28.5%
+- Promotional: 19.1%
+- Urgency: 14.8%
+- Authority: 14.6%
+- Curiosity: 10.2%
+- Fear: 6.4%
+- Reminder: 6.3%
+- Reciprocity: 4.4%
+- Pretexting: 3.8%
+
+XAI features:
+- Transactional: !, word, :, 81010, week
+- Personal: no prominent features
+- Promotional: free, membership, our, &, jackpot
+- Urgency: £, <PERSON>, <URL>, membership, <MONEY>
+- Authority: no prominent features
+- Curiosity: jackpot, claim, lccltd, txt, prize
+- Fear: no prominent features
+- Reminder: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

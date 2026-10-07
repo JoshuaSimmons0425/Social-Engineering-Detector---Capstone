@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: <URL>, here!!! ... <, dream, reach, ge.
+- Overall Classification: Malicious
+
+Technique associations:
+- Promotional: 99.9%
+- Urgency: 45.0%
+- Fear: 28.8%
+- Authority: 12.2%
+- Transactional: 7.8%
+- Personal: 4.0%
+- Curiosity: 3.0%
+- Reciprocity: 0.1%
+- Reminder: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Promotional: <URL>, here!!! ... <, reach, dream, person><
+- Urgency: don', miss, out, ren <, <PERSON>
+- Fear: don', dream, t, performance! <, ren <
+- Authority: ren <, <PERSON>, ge., we, qbk
+- Transactional: no prominent features
+- Personal: no prominent features
+- Curiosity: no prominent features
+- Reciprocity: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features

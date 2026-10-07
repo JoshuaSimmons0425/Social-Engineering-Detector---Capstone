@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.01
+- Classifier risk level: Low
+- Key Attributes: escapenumber, com, ever, forwarded, ami
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 75.2%
+- Personal: 18.5%
+- Authority: 6.8%
+- Curiosity: 1.5%
+- Urgency: 1.5%
+- Promotional: 0.6%
+- Reminder: 0.3%
+- Reciprocity: 0.2%
+- Fear: 0.1%
+- Pretexting: 0.1%
+
+XAI features:
+- Transactional: enron, attached, subject, xls, <PERSON>
+- Personal: <PERSON>, busy, nice, enron, see
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Urgency: no prominent features
+- Promotional: no prominent features
+- Reminder: no prominent features
+- Reciprocity: no prominent features
+- Fear: no prominent features
+- Pretexting: no prominent features

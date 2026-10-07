@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.01
+- Classifier risk level: Low
+- Key Attributes: length, new, http, escapenumber, accidentally
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 71.8%
+- Personal: 23.1%
+- Authority: 10.5%
+- Urgency: 2.5%
+- Curiosity: 1.0%
+- Reminder: 0.7%
+- Fear: 0.7%
+- Reciprocity: 0.2%
+- Promotional: 0.2%
+- Pretexting: 0.1%
+
+XAI features:
+- Transactional: may, <PERSON>, wrote, log, hash <
+- Personal: got, <PERSON>, cheers <, rescapenumber, well
+- Authority: escapenumber, escapelong, org, gnupg, vescapenumber
+- Urgency: no prominent features
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Promotional: no prominent features
+- Pretexting: no prominent features

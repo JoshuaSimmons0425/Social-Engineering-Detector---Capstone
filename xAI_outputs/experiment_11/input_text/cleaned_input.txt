@@ -1,0 +1,10 @@
+You Have An Ecard 
+Your neighbor has issued you a greeting at <URL>.
+
+To Enjoy your <PERSON>, click on the following link.
+
+<URL>
+
+(c) 2005-2008 <URL>.
+
+

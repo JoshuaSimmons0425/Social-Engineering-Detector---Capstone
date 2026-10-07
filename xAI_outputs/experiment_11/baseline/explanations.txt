@@ -1,0 +1,35 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: your <, click, url>
+
+(, <URL>, url>.
+- Overall Classification: Malicious
+
+Technique associations:
+- Curiosity: 24.7%
+- Personal: 12.6%
+- Transactional: 6.2%
+- Promotional: 3.4%
+- Pretexting: 2.2%
+- Authority: 2.1%
+- Urgency: 0.3%
+- Reciprocity: 0.2%
+- Fear: 0.2%
+- Reminder: 0.1%
+
+XAI features:
+- Curiosity: click, url>
+
+(, <URL>, link.
+
+<, url>.
+- Personal: greeting, person>,, following, neighbor, enjoy
+- Transactional: no prominent features
+- Promotional: no prominent features
+- Pretexting: no prominent features
+- Authority: no prominent features
+- Urgency: no prominent features
+- Reciprocity: no prominent features
+- Fear: no prominent features
+- Reminder: no prominent features

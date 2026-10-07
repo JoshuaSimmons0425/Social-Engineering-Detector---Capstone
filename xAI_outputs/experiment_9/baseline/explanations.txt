@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.01
+- Classifier risk level: Low
+- Key Attributes: new, products, returned, previously, operations
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 77.4%
+- Personal: 10.5%
+- Promotional: 8.5%
+- Authority: 7.7%
+- Curiosity: 1.3%
+- Urgency: 0.6%
+- Reminder: 0.1%
+- Fear: 0.1%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Transactional: order, ena, application, please, report
+- Personal: head, <PERSON>, houston, development, well
+- Promotional: no prominent features
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Urgency: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

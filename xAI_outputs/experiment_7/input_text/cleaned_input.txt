@@ -1,0 +1,18 @@
+buildbot failure in t-feisty-561 The <PERSON> has detected a new failure of t-feisty-561.
+Full details are available at:
+ <URL>:8010/t-feisty-561/builds/132
+
+Buildbot URL: <URL>:8010/
+
+<PERSON> for this Build: t-feisty-561
+
+Build Reason: 
+Build Source Stamp: HEAD
+Blamelist: jm
+
+BUILD FAILED: failed test
+
+sincerely,
+ -The Buildbot
+
+

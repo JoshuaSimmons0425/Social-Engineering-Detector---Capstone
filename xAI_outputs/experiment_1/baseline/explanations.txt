@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.02
+- Classifier risk level: Low
+- Key Attributes: love, 2day!, rite
+- Overall Classification: Benign
+
+Technique associations:
+- Personal: 38.6%
+- Curiosity: 1.7%
+- Transactional: 0.6%
+- Urgency: 0.3%
+- Reminder: 0.2%
+- Promotional: 0.1%
+- Authority: 0.1%
+- Reciprocity: 0.0%
+- Fear: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Personal: me, ur, up!, think, rite
+- Curiosity: no prominent features
+- Transactional: no prominent features
+- Urgency: no prominent features
+- Reminder: no prominent features
+- Promotional: no prominent features
+- Authority: no prominent features
+- Reciprocity: no prominent features
+- Fear: no prominent features
+- Pretexting: no prominent features
