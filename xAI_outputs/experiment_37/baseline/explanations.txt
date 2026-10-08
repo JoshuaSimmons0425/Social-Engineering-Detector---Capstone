@@ -1,0 +1,30 @@
+Classification:
+- Malicious probability: 0.71
+- Classifier risk level: Medium
+- Key Attributes: <URL>, enhancement, gain, method, make
+- Overall Classification: Malicious
+
+Technique associations:
+- Promotional: 99.0%
+- Urgency: 29.2%
+- Transactional: 3.0%
+- Curiosity: 2.9%
+- Personal: 1.2%
+- Fear: 0.5%
+- Authority: 0.4%
+- Reminder: 0.1%
+- Reciprocity: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Promotional: <URL>, enhancement, gain, make, all
+- Urgency: today!
+<, gain, <URL>, results, be <
+- Transactional: no prominent features
+- Curiosity: no prominent features
+- Personal: no prominent features
+- Fear: no prominent features
+- Authority: no prominent features
+- Reminder: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

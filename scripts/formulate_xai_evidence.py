@@ -21,7 +21,7 @@ def main():
     with open(unused_data_path, "r", encoding="utf-8") as f:
         unused_data = pd.read_csv(f)
 
-    stratified_df = unused_data.groupby('Label', group_keys=False).apply(lambda x: x.sample(n=10, random_state=42))
+    stratified_df = unused_data.groupby('Label', group_keys=False).apply(lambda x: x.sample(n=25, random_state=42)).sample(frac=1, random_state=42) 
     stratified_df = stratified_df['Full_Text'] # Only keep the input message column
     input_texts = stratified_df.tolist()
 

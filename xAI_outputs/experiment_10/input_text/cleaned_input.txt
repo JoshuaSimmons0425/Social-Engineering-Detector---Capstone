@@ -1,13 +1,17 @@
-everybody wants. 
-If you are searching for good chemists shop. You wont find better solution than our site. We
-have everything to help to get rid of ilnesses.Even if you need fast shipment you can always 
-count on us. Get the most experienced help as fast as a mouse click.
+Re: new article, "A Romp Through Infinity" On Thu, Aug 7, 2008 at 11:31 AM, Will <PERSON>  wrote:
+> On Thu, Aug 7, 2008 at 11:29 AM,   wrote:
+>> Supporting multiple levels of infinities, transfinite numbers or even Surreal Numbers should be considered in the same category of features as returning multiple answers from complex trig functions.
+>>
+>> They're an interesting thing to discuss and experiment with but shouldn't distract form getting Perl 6 out the door.  Let's just make sure we're handling inf and  -inf right and leave all that other stuff until later.
+>
+> +1
 
-<URL>
+Agreed.  Let's not fall into the trap of thinking that because a
+general-purpose programming language necessarily does arithmetic, it
+is also a domain-specific language for mathematics.  I agree that we
+should try not to make it too hard to layer such language into Perl6,
+but I see no point in bending over backwards to make it particularly
+easy compared to other domain-specific languages...
 
-5 Aug 2008 21:32:24
-
-You may
-independent
-
-
+-- 
+<PERSON> 

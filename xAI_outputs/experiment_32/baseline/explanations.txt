@@ -1,0 +1,30 @@
+Classification:
+- Malicious probability: 0.65
+- Classifier risk level: Medium
+- Key Attributes: more, girls, length, <URL>, tool
+- Overall Classification: Malicious
+
+Technique associations:
+- Promotional: 98.3%
+- Personal: 5.4%
+- Curiosity: 5.4%
+- Transactional: 1.4%
+- Urgency: 0.8%
+- Authority: 0.6%
+- Fear: 0.5%
+- Reminder: 0.1%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Promotional: more, <URL>, length, tool, bigger!
+<
+- Personal: no prominent features
+- Curiosity: no prominent features
+- Transactional: no prominent features
+- Urgency: no prominent features
+- Authority: no prominent features
+- Fear: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

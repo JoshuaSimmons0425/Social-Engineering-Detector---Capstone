@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: signature
-- Overall Classification: Benign
+- Malicious probability: 0.98
+- Classifier risk level: Critical
+- Key Attributes: <URL>, <EMAIL_ADDRESS>, mailto, :, hello
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 59.6%
+- Transactional: 40.1%
 - Personal: 28.5%
-- Promotional: 16.8%
-- Urgency: 15.3%
+- Promotional: 19.1%
+- Urgency: 15.0%
 - Authority: 14.6%
-- Curiosity: 9.6%
-- Reminder: 6.3%
+- Curiosity: 11.8%
+- Reminder: 6.4%
 - Fear: 6.2%
 - Reciprocity: 4.4%
-- Pretexting: 3.7%
+- Pretexting: 3.6%
 
 XAI features:
-- Transactional: hash, new, revision, signed, message
+- Transactional: ,, bitbitch, blatantly, hello, .
 - Personal: no prominent features
-- Promotional: hash, websvn, begin, signed, message
-- Urgency: pgp, <PERSON>, date, escapenumber, may
+- Promotional: regards, hands, time, best, <EMAIL_ADDRESS>
+- Urgency: <EMAIL_ADDRESS>, <URL>, mailto
 - Authority: no prominent features
-- Curiosity: no prominent features
+- Curiosity: -, way, has, kid, fork
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

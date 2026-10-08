@@ -1,30 +1,31 @@
 Classification:
-- Malicious probability: 0.99
-- Classifier risk level: Critical
-- Key Attributes: prize., money>,, limited, sum., of ₹<
-- Overall Classification: Malicious
+- Malicious probability: 0.36
+- Classifier risk level: Medium
+- Key Attributes: hello ,, save, worldwide, customers, andmanyother .
+-
+- Overall Classification: Benign
 
 Technique associations:
-- Urgency: 96.5%
-- Reciprocity: 93.8%
-- Transactional: 71.8%
-- Promotional: 42.8%
-- Authority: 42.0%
-- Pretexting: 8.8%
-- Personal: 0.6%
-- Curiosity: 0.5%
-- Reminder: 0.4%
+- Promotional: 48.4%
+- Transactional: 4.2%
+- Personal: 3.4%
+- Curiosity: 3.0%
+- Authority: 1.3%
+- Urgency: 0.3%
+- Reciprocity: 0.2%
 - Fear: 0.1%
+- Reminder: 0.0%
+- Pretexting: 0.0%
 
 XAI features:
-- Urgency: please, risk, winner, attention,, process
-- Reciprocity: prize., money>,, provide, winner, congratulations!
-- Transactional: please, deal, payment, credit, card
-- Promotional: money>,, credit, of ₹<, collect, provide
-- Authority: operations,
-<, please, risk, of ₹<, provide
-- Pretexting: no prominent features
+- Promotional: save, welcome, worldwide, cl, andmanyother .
+-
+- Transactional: no prominent features
 - Personal: no prominent features
 - Curiosity: no prominent features
-- Reminder: no prominent features
+- Authority: no prominent features
+- Urgency: no prominent features
+- Reciprocity: no prominent features
 - Fear: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features

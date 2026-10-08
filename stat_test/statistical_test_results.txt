@@ -3,34 +3,34 @@
             NON-PARAMETRIC WITHIN-SUBJECTS STATISTICAL REPORT            
 =========================================================================
 
-Number of Independent Experiment Blocks (N): 20
+Number of Independent Experiment Blocks (N): 50
 Initial Alpha Level (α): 0.05
 Bonferroni Adjusted Alpha Threshold (α_adj): 0.0167
 
 -------------------------------------------------------------------------
 STAGE 1: GLOBAL OMNIBUS TEST (Friedman's ANOVA by Ranks)
 -------------------------------------------------------------------------
-Friedman Chi-Square Statistic: 8.7042
-Asymptotic P-Value:            1.2880e-02
+Friedman Chi-Square Statistic: 6.8571
+Asymptotic P-Value:            3.2433e-02
 Omnibus Statistical Effect?   [SUCCESS] Significant Difference Detected
 
 -------------------------------------------------------------------------
 STAGE 2: POST-HOC PAIRWISE COMPARISONS (Wilcoxon Signed-Rank Tests)
 -------------------------------------------------------------------------
-Matchup: Control (No Evidence) vs Tier 1 Treatment (Baseline Heuristics)
-  - Mean Performance:  4.15 vs 4.27
-  - Wilcoxon W-Stat:   51.5
-  - Pairwise P-Value:  7.9782e-02
-  - Significant?       NO (P >= α_adj)
-
-Matchup: Control (No Evidence) vs Tier 2 Treatment (BERT xAI)
-  - Mean Performance:  4.15 vs 4.37
-  - Wilcoxon W-Stat:   29.0
-  - Pairwise P-Value:  7.8323e-03
+Matchup: Control (No Evidence) vs Tier 1 Treatment (Baseline xAI)
+  - Mean Performance:  4.11 vs 4.24
+  - Wilcoxon W-Stat:   266.0
+  - Pairwise P-Value:  1.2346e-02
   - Significant?       YES (P < α_adj)
 
+Matchup: Control (No Evidence) vs Tier 2 Treatment (BERT xAI)
+  - Mean Performance:  4.11 vs 4.24
+  - Wilcoxon W-Stat:   309.5
+  - Pairwise P-Value:  1.8659e-02
+  - Significant?       NO (P >= α_adj)
+
 Matchup: Tier 1 Treatment (Baseline Heuristics) vs Tier 2 Treatment (BERT xAI)
-  - Mean Performance:  4.27 vs 4.37
-  - Wilcoxon W-Stat:   27.5
-  - Pairwise P-Value:  1.1637e-01
+  - Mean Performance:  4.24 vs 4.24
+  - Wilcoxon W-Stat:   492.5
+  - Pairwise P-Value:  7.7746e-01
   - Significant?       NO (P >= α_adj)

@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: ees, wholesale, assimiliation -, operations, give
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 89.5%
+- Personal: 45.2%
+- Authority: 20.9%
+- Reminder: 1.7%
+- Urgency: 1.2%
+- Curiosity: 0.8%
+- Fear: 0.2%
+- Reciprocity: 0.1%
+- Promotional: 0.1%
+- Pretexting: 0.0%
+
+XAI features:
+- Transactional: enron, update, meeting, request, americas
+- Personal: assumed, working, would, <PERSON>, and <
+- Authority: enron, request, operations, of <, americas
+- Reminder: no prominent features
+- Urgency: no prominent features
+- Curiosity: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Promotional: no prominent features
+- Pretexting: no prominent features

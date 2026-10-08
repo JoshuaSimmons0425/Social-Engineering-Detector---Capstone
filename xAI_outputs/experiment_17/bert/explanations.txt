@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 1.00
+- Malicious probability: 0.99
 - Classifier risk level: Critical
-- Key Attributes: our, <URL>, quality, brands, replica
+- Key Attributes: respond, account, today, failure, confidential
 - Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 53.1%
-- Promotional: 29.1%
+- Transactional: 55.3%
+- Promotional: 29.6%
 - Personal: 28.5%
 - Authority: 14.6%
-- Urgency: 14.0%
-- Curiosity: 10.8%
-- Fear: 6.2%
-- Reminder: 6.0%
+- Urgency: 13.8%
+- Curiosity: 9.4%
+- Reminder: 6.4%
+- Fear: 6.0%
 - Reciprocity: 4.4%
-- Pretexting: 4.1%
+- Pretexting: 3.6%
 
 XAI features:
-- Transactional: most, price, lower, watches, replica
-- Promotional: replica, brands, other, watches, qualitative
+- Transactional: respond, account, today, lawyer, review
+- Promotional: regards, violations, account, today, policy
 - Personal: no prominent features
 - Authority: no prominent features
-- Urgency: <URL>, watches, same, replica, omega
-- Curiosity: omega, watches, same, replica, rolex
-- Fear: no prominent features
+- Urgency: holder, restriction, account, <PERSON>, failure
+- Curiosity: no prominent features
 - Reminder: no prominent features
+- Fear: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

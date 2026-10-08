@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.02
-- Classifier risk level: Low
-- Key Attributes: love, 2day!, rite
-- Overall Classification: Benign
+- Malicious probability: 0.99
+- Classifier risk level: Critical
+- Key Attributes: <URL>, hers, girl,, make, yours
+- Overall Classification: Malicious
 
 Technique associations:
-- Personal: 38.6%
-- Curiosity: 1.7%
-- Transactional: 0.6%
-- Urgency: 0.3%
-- Reminder: 0.2%
-- Promotional: 0.1%
-- Authority: 0.1%
-- Reciprocity: 0.0%
-- Fear: 0.0%
-- Pretexting: 0.0%
+- Promotional: 97.7%
+- Urgency: 21.2%
+- Curiosity: 9.1%
+- Personal: 0.8%
+- Authority: 0.8%
+- Reciprocity: 0.4%
+- Transactional: 0.4%
+- Fear: 0.3%
+- Reminder: 0.1%
+- Pretexting: 0.1%
 
 XAI features:
-- Personal: me, ur, up!, think, rite
+- Promotional: <URL>, make, hers, dreaming, today
+- Urgency: today, make, yours, dreaming, girl,
 - Curiosity: no prominent features
-- Transactional: no prominent features
-- Urgency: no prominent features
-- Reminder: no prominent features
-- Promotional: no prominent features
+- Personal: no prominent features
 - Authority: no prominent features
 - Reciprocity: no prominent features
+- Transactional: no prominent features
 - Fear: no prominent features
+- Reminder: no prominent features
 - Pretexting: no prominent features

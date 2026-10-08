@@ -1,29 +1,35 @@
 Classification:
-- Malicious probability: 0.01
-- Classifier risk level: Low
-- Key Attributes: escapenumber, com, ever, forwarded, ami
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: your <, click, url>
+
+(, <URL>, url>.
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 75.2%
-- Personal: 18.5%
-- Authority: 6.8%
-- Curiosity: 1.5%
-- Urgency: 1.5%
-- Promotional: 0.6%
-- Reminder: 0.3%
+- Curiosity: 24.7%
+- Personal: 12.6%
+- Transactional: 6.2%
+- Promotional: 3.4%
+- Pretexting: 2.2%
+- Authority: 2.1%
+- Urgency: 0.3%
 - Reciprocity: 0.2%
-- Fear: 0.1%
-- Pretexting: 0.1%
+- Fear: 0.2%
+- Reminder: 0.1%
 
 XAI features:
-- Transactional: enron, attached, subject, xls, <PERSON>
-- Personal: <PERSON>, busy, nice, enron, see
-- Authority: no prominent features
-- Curiosity: no prominent features
-- Urgency: no prominent features
+- Curiosity: click, url>
+
+(, <URL>, link.
+
+<, url>.
+- Personal: greeting, person>,, following, neighbor, enjoy
+- Transactional: no prominent features
 - Promotional: no prominent features
-- Reminder: no prominent features
+- Pretexting: no prominent features
+- Authority: no prominent features
+- Urgency: no prominent features
 - Reciprocity: no prominent features
 - Fear: no prominent features
-- Pretexting: no prominent features
+- Reminder: no prominent features

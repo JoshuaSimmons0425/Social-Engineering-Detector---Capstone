@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: !, love, asusual, thanx, franyxxxxx
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: <URL>, today, yours, keep, tips
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 44.8%
+- Transactional: 38.3%
 - Personal: 28.5%
-- Promotional: 15.5%
+- Promotional: 28.0%
+- Urgency: 15.4%
 - Authority: 14.6%
-- Urgency: 14.5%
-- Curiosity: 9.6%
-- Reminder: 6.9%
-- Fear: 6.6%
+- Curiosity: 10.8%
+- Fear: 6.3%
+- Reminder: 6.1%
 - Reciprocity: 4.4%
-- Pretexting: 4.4%
+- Pretexting: 3.7%
 
 XAI features:
-- Transactional: 4, u, goodmate, 2day, !
+- Transactional: tips, today, cool, ,
 - Personal: no prominent features
-- Promotional: thanx, cheered, r, think, u
+- Promotional: make, yours, keep, today, hers
+- Urgency: <URL>, ass, girl, slap, dreaming
 - Authority: no prominent features
-- Urgency: cheered, up, thanx, think, me
-- Curiosity: no prominent features
-- Reminder: no prominent features
+- Curiosity: cool, hers, ass, <URL>, girl
 - Fear: no prominent features
+- Reminder: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

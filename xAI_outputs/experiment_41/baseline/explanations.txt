@@ -1,0 +1,35 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: url>
+<, select:
+> >, software ->, community, repositories (
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 57.7%
+- Personal: 3.8%
+- Curiosity: 0.9%
+- Authority: 0.8%
+- Reminder: 0.1%
+- Urgency: 0.1%
+- Promotional: 0.0%
+- Fear: 0.0%
+- Reciprocity: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Transactional: attached
+> >, bug <, <PERSON>, screen, id: 
+>
+>
+>
+- Personal: no prominent features
+- Curiosity: no prominent features
+- Authority: no prominent features
+- Reminder: no prominent features
+- Urgency: no prominent features
+- Promotional: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 1.00
-- Classifier risk level: Critical
-- Key Attributes: valued, customer, call, bonus, are
-- Overall Classification: Malicious
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: garcia, endpoints, share, sharing, documentation
+- Overall Classification: Benign
 
 Technique associations:
-- Transactional: 48.3%
+- Transactional: 45.7%
 - Personal: 28.5%
-- Promotional: 23.6%
+- Promotional: 21.9%
 - Authority: 14.6%
-- Urgency: 14.4%
-- Curiosity: 10.0%
-- Reminder: 6.4%
-- Fear: 6.1%
+- Curiosity: 11.7%
+- Urgency: 10.8%
+- Reminder: 6.6%
+- Fear: 6.0%
 - Reciprocity: 4.4%
-- Pretexting: 4.2%
+- Pretexting: 3.1%
 
 XAI features:
-- Transactional: call, ,, <PHONE_NUMBER>, ., prize
+- Transactional: subject, garcia, ., follow, ,
 - Personal: no prominent features
-- Promotional: <PHONE_NUMBER>, call, customer, prize, ,
+- Promotional: subject, ,, are, described, best
 - Authority: no prominent features
-- Urgency: <PHONE_NUMBER>, customer, embody, <MONEY>, £
-- Curiosity: prize, <PHONE_NUMBER>, ,, review, recent
+- Curiosity: subject, revised, 'll, best, :
+- Urgency: subject, avery, garcia, examples, up
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

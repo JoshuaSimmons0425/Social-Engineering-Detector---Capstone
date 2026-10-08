@@ -1,10 +1,1 @@
-You Have An Ecard 
-Your neighbor has issued you a greeting at <URL>.
-
-To Enjoy your <PERSON>, click on the following link.
-
-<URL>
-
-(c) 2005-2008 <URL>.
-
-
+begin pgp signed message hash <PERSON> wrote may escapenumber escapenumber escapenumber escapenumber pm <PERSON> wrote author <PERSON> date escapenumber escapenumber escapenumber escapenumber escapenumber escapenumber escapenumber wed escapenumber may escapenumber new revision escapenumber websvn http websvn samba org cgi <PERSON> cgi view rev root samba rev escapenumber log fix length siglen checks <PERSON> signature data modified branches samba escapenumber escapenumber escapenumber source libads authdata c shouldnt samba escapenumber escapenumber well got accidentally checked previous commit see svn rescapenumber cheers <PERSON> begin pgp signature version gnupg vescapenumber escapenumber escapenumber gnu linux comment using gnupg mozilla http enigmail mozdev org escapelong escapelong escapelong aq jwhn end pgp signature

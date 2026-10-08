@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 1.00
-- Classifier risk level: Critical
-- Key Attributes: <URL>, become, products, resistant, beauty
-- Overall Classification: Malicious
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: browse, following, url, receive, duplicate
+- Overall Classification: Benign
 
 Technique associations:
 - Transactional: 45.1%
 - Personal: 28.5%
-- Promotional: 23.2%
-- Urgency: 14.7%
+- Promotional: 19.1%
 - Authority: 14.6%
-- Curiosity: 11.7%
-- Reminder: 6.3%
-- Fear: 6.0%
+- Urgency: 11.8%
+- Curiosity: 9.7%
+- Reminder: 6.5%
+- Fear: 6.1%
 - Reciprocity: 4.4%
-- Pretexting: 3.4%
+- Pretexting: 3.2%
 
 XAI features:
-- Transactional: called, become, ., ,, products
+- Transactional: ., following, papers, :, -
 - Personal: no prominent features
-- Promotional: chemists, become, ., products, beauty
-- Urgency: pharmacy, called, <URL>, canadian, become
+- Promotional: ., -, following, papers, :
 - Authority: no prominent features
-- Curiosity: 's, called, canadian, there, ,
+- Urgency: ., @, enron, invoice, working
+- Curiosity: no prominent features
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

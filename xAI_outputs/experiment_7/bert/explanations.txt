@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: buildbot, full, details, are, <URL>
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: our, get, <URL>, shop, us
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 47.6%
+- Transactional: 50.2%
 - Personal: 28.5%
-- Promotional: 18.7%
+- Promotional: 21.3%
 - Authority: 14.6%
-- Urgency: 13.5%
-- Curiosity: 9.6%
-- Reminder: 6.4%
-- Fear: 6.2%
+- Urgency: 13.3%
+- Curiosity: 10.3%
+- Reminder: 6.5%
+- Fear: 6.1%
 - Reciprocity: 4.4%
-- Pretexting: 3.9%
+- Pretexting: 4.0%
 
 XAI features:
-- Transactional: :, ., source, -, head
+- Transactional: everybody, get, ., we, searching
 - Personal: no prominent features
-- Promotional: head, :, jm, stamp, <URL>
+- Promotional: shop, everybody, <URL>, get, .
 - Authority: no prominent features
-- Urgency: :, head, jm, stamp, failure
-- Curiosity: no prominent features
+- Urgency: <URL>, click, shop, may, .
+- Curiosity: <URL>, ., 5, click, mouse
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.96
+- Classifier risk level: Critical
+- Key Attributes: <PHONE_NUMBER>, free, free!, mobile, exist
+- Overall Classification: Malicious
+
+Technique associations:
+- Reciprocity: 98.9%
+- Promotional: 92.7%
+- Transactional: 19.3%
+- Urgency: 7.1%
+- Personal: 4.5%
+- Authority: 4.4%
+- Curiosity: 1.4%
+- Pretexting: 0.9%
+- Reminder: 0.8%
+- Fear: 0.1%
+
+XAI features:
+- Reciprocity: free, free!, camera, <PHONE_NUMBER>, mobile
+- Promotional: free, free!, camera, mobile, latest
+- Transactional: update, <PHONE_NUMBER>, on <, exist
+- Urgency: no prominent features
+- Personal: no prominent features
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Pretexting: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features

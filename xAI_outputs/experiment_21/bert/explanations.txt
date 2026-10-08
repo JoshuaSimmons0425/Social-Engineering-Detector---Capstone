@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: url, about, &#, _, 28
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 38.9%
+- Personal: 28.5%
+- Promotional: 19.8%
+- Authority: 14.6%
+- Urgency: 12.0%
+- Curiosity: 10.3%
+- Reminder: 6.2%
+- Fear: 6.1%
+- Reciprocity: 4.4%
+- Pretexting: 4.3%
+
+XAI features:
+- Transactional: 28, 2002, 8221, ., ;
+- Personal: no prominent features
+- Promotional: 8220, colophon, -, 10, 2002
+- Authority: no prominent features
+- Urgency: &#, _, colophon, 2, url
+- Curiosity: &#, 8220, _:, girl, am
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

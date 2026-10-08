@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.02
+- Classifier risk level: Low
+- Key Attributes: url>:, new, failure, url: <, 561
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 73.0%
+- Authority: 17.4%
+- Fear: 1.3%
+- Curiosity: 1.3%
+- Personal: 0.8%
+- Promotional: 0.5%
+- Urgency: 0.2%
+- Reminder: 0.1%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Transactional: the <, detected, <PERSON>, has, new
+- Authority: failure, has, feisty-, failed:, 561
+- Fear: no prominent features
+- Curiosity: no prominent features
+- Personal: no prominent features
+- Promotional: no prominent features
+- Urgency: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

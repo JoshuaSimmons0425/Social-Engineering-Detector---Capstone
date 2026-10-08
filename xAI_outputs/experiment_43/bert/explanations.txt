@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: site, go, sexy, up, new
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 46.5%
+- Personal: 28.5%
+- Promotional: 18.0%
+- Authority: 14.6%
+- Urgency: 12.9%
+- Curiosity: 10.0%
+- Reminder: 7.2%
+- Fear: 6.2%
+- Reciprocity: 4.4%
+- Pretexting: 4.1%
+
+XAI features:
+- Transactional: da1482440eb4bea7f128010f467699b9, >-, up, bvokbgr, go
+- Personal: no prominent features
+- Promotional: da1482440eb4bea7f128010f467699b9, site
+- Authority: no prominent features
+- Urgency: up, >-, da1482440eb4bea7f128010f467699b9, <PERSON>, hilton
+- Curiosity: go, paris, hilton, sexy, new
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

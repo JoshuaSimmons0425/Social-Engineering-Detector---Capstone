@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.68
+- Classifier risk level: Medium
+- Key Attributes: site, paris, new, hilton, sexy
+- Overall Classification: Malicious
+
+Technique associations:
+- Curiosity: 34.4%
+- Promotional: 9.2%
+- Transactional: 6.3%
+- Personal: 4.2%
+- Urgency: 1.1%
+- Authority: 0.2%
+- Reminder: 0.1%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+- Fear: 0.0%
+
+XAI features:
+- Curiosity: paris, site, sexy, new, go
+- Promotional: no prominent features
+- Transactional: no prominent features
+- Personal: no prominent features
+- Urgency: no prominent features
+- Authority: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features
+- Fear: no prominent features

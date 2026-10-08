@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 1.00
-- Classifier risk level: Critical
-- Key Attributes: customer,, embody, prize,, <PHONE_NUMBER>, <MONEY>
-- Overall Classification: Malicious
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: follow-, avery, garcia, best,, today.
+- Overall Classification: Benign
 
 Technique associations:
-- Reciprocity: 94.3%
-- Promotional: 46.6%
-- Authority: 20.8%
-- Pretexting: 9.1%
-- Personal: 4.2%
-- Curiosity: 4.1%
-- Transactional: 2.7%
-- Urgency: 1.3%
-- Reminder: 0.8%
-- Fear: 0.2%
+- Transactional: 96.6%
+- Personal: 12.5%
+- Curiosity: 0.1%
+- Reminder: 0.1%
+- Authority: 0.1%
+- Urgency: 0.0%
+- Reciprocity: 0.0%
+- Fear: 0.0%
+- Pretexting: 0.0%
+- Promotional: 0.0%
 
 XAI features:
-- Reciprocity: prize,, <MONEY>, survey, <PHONE_NUMBER>, valued
-- Promotional: <MONEY>, <PHONE_NUMBER>, valued, bonus, embody
-- Authority: customer,, <PHONE_NUMBER>, survey, call <, as
-- Pretexting: no prominent features
-- Personal: no prominent features
+- Transactional: meeting, subject:, revised, share, avery
+- Personal: garcia, later, up, documentation, follow
 - Curiosity: no prominent features
-- Transactional: no prominent features
-- Urgency: no prominent features
 - Reminder: no prominent features
+- Authority: no prominent features
+- Urgency: no prominent features
+- Reciprocity: no prominent features
 - Fear: no prominent features
+- Pretexting: no prominent features
+- Promotional: no prominent features

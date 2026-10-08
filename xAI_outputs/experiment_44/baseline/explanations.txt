@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: <PHONE_NUMBER>, heather, operations, you ,, asst .
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 98.1%
+- Authority: 60.4%
+- Personal: 6.1%
+- Urgency: 3.4%
+- Curiosity: 1.5%
+- Reminder: 0.1%
+- Pretexting: 0.1%
+- Fear: 0.1%
+- Promotional: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Transactional: attached, please, enron, thank, to <
+- Authority: operations, enron, <PHONE_NUMBER>, net, please
+- Personal: no prominent features
+- Urgency: no prominent features
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Fear: no prominent features
+- Promotional: no prominent features
+- Reciprocity: no prominent features

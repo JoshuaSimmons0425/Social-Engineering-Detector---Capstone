@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 1.00
-- Classifier risk level: Critical
-- Key Attributes: health, ., check, assist, take
-- Overall Classification: Malicious
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: request, churn, hello
+- Overall Classification: Benign
 
 Technique associations:
-- Transactional: 51.4%
+- Transactional: 45.1%
 - Personal: 28.5%
-- Promotional: 25.5%
+- Promotional: 16.2%
 - Authority: 14.6%
-- Urgency: 11.9%
-- Curiosity: 9.4%
-- Reminder: 6.4%
-- Fear: 6.2%
+- Urgency: 12.0%
+- Curiosity: 10.0%
+- Reminder: 6.7%
+- Fear: 5.9%
 - Reciprocity: 4.4%
-- Pretexting: 4.0%
+- Pretexting: 3.6%
 
 XAI features:
-- Transactional: ., take, we, :, exact
+- Transactional: ., :, rotate, request, ,
 - Personal: no prominent features
-- Promotional: we, ., health, assist, think
+- Promotional: ., ,, :, rotate, rotation
 - Authority: no prominent features
-- Urgency: ., <URL>, health, specific, offer
-- Curiosity: no prominent features
+- Urgency: ., ,, :, rotate, know
+- Curiosity: plans, group, gwyn, ., koepke
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

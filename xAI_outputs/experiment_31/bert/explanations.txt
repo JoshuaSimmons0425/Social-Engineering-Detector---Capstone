@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.62
+- Classifier risk level: Medium
+- Key Attributes: free, request, website, www, variety
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 50.4%
+- Personal: 28.5%
+- Promotional: 25.9%
+- Authority: 14.6%
+- Urgency: 12.0%
+- Curiosity: 9.8%
+- Reminder: 6.6%
+- Fear: 6.4%
+- Reciprocity: 4.4%
+- Pretexting: 3.0%
+
+XAI features:
+- Transactional: problem, bridges, sample, website, request
+- Personal: no prominent features
+- Promotional: semiconductor, www, fact, robot, store
+- Authority: no prominent features
+- Urgency: <PERSON>, request, sample, sells, com
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

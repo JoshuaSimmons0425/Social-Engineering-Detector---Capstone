@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: areas, ., there, fit, please
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 52.1%
+- Personal: 28.5%
+- Authority: 14.6%
+- Urgency: 12.7%
+- Promotional: 12.0%
+- Curiosity: 8.2%
+- Reminder: 6.2%
+- Fear: 6.0%
+- Reciprocity: 4.4%
+- Pretexting: 3.9%
+
+XAI features:
+- Transactional: -, com, subject, :, <PERSON>
+- Personal: no prominent features
+- Authority: no prominent features
+- Urgency: <PERSON>, director, <PHONE_NUMBER>, :, 08
+- Promotional: -, com, subject, :, 12
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

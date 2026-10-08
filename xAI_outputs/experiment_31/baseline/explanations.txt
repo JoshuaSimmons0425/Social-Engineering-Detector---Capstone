@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.32
+- Classifier risk level: Low
+- Key Attributes: free, store, matter, com, sample
+- Overall Classification: Benign
+
+Technique associations:
+- Promotional: 52.0%
+- Transactional: 9.6%
+- Personal: 3.3%
+- Authority: 2.6%
+- Curiosity: 2.5%
+- Urgency: 1.7%
+- Reciprocity: 1.2%
+- Fear: 0.2%
+- Reminder: 0.2%
+- Pretexting: 0.1%
+
+XAI features:
+- Promotional: free, www, com, website, store
+- Transactional: no prominent features
+- Personal: no prominent features
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Urgency: no prominent features
+- Reciprocity: no prominent features
+- Fear: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features

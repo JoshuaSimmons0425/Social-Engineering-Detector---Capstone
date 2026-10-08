@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: request, churn, hello
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: our, <URL>, quality, brands, replica
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 45.1%
+- Transactional: 53.1%
+- Promotional: 29.1%
 - Personal: 28.5%
-- Promotional: 16.2%
 - Authority: 14.6%
-- Urgency: 12.0%
-- Curiosity: 10.0%
-- Reminder: 6.7%
-- Fear: 5.9%
+- Urgency: 14.0%
+- Curiosity: 10.8%
+- Fear: 6.2%
+- Reminder: 6.0%
 - Reciprocity: 4.4%
-- Pretexting: 3.6%
+- Pretexting: 4.1%
 
 XAI features:
-- Transactional: ., :, rotate, request, ,
+- Transactional: most, price, lower, watches, replica
+- Promotional: replica, brands, other, watches, qualitative
 - Personal: no prominent features
-- Promotional: ., ,, :, rotate, rotation
 - Authority: no prominent features
-- Urgency: ., ,, :, rotate, know
-- Curiosity: plans, group, gwyn, ., koepke
-- Reminder: no prominent features
+- Urgency: <URL>, watches, same, replica, omega
+- Curiosity: omega, watches, same, replica, rolex
 - Fear: no prominent features
+- Reminder: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

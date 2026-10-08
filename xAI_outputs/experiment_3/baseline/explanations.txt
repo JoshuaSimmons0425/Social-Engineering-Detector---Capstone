@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: follow-, avery, garcia, best,, today.
-- Overall Classification: Benign
+- Malicious probability: 0.95
+- Classifier risk level: Critical
+- Key Attributes: <URL>, more, mobile, win:, ingest
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 96.6%
-- Personal: 12.5%
-- Curiosity: 0.1%
+- Promotional: 88.2%
+- Reciprocity: 9.6%
+- Personal: 5.7%
+- Curiosity: 3.1%
+- Urgency: 2.5%
+- Authority: 1.2%
+- Transactional: 0.6%
+- Pretexting: 0.4%
 - Reminder: 0.1%
-- Authority: 0.1%
-- Urgency: 0.0%
-- Reciprocity: 0.0%
-- Fear: 0.0%
-- Pretexting: 0.0%
-- Promotional: 0.0%
+- Fear: 0.1%
 
 XAI features:
-- Transactional: meeting, subject:, revised, share, avery
-- Personal: garcia, later, up, documentation, follow
-- Curiosity: no prominent features
-- Reminder: no prominent features
-- Authority: no prominent features
-- Urgency: no prominent features
+- Promotional: <URL>, more, mobile, winner!, win:
 - Reciprocity: no prominent features
-- Fear: no prominent features
+- Personal: no prominent features
+- Curiosity: no prominent features
+- Urgency: no prominent features
+- Authority: no prominent features
+- Transactional: no prominent features
 - Pretexting: no prominent features
-- Promotional: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features

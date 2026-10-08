@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: six, key, projects, focusing
-- Overall Classification: Benign
+- Malicious probability: 0.99
+- Classifier risk level: Critical
+- Key Attributes: our, !, guaranteed, customer, call
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 50.9%
+- Transactional: 41.2%
 - Personal: 28.5%
+- Promotional: 27.2%
+- Urgency: 20.2%
 - Authority: 14.6%
-- Promotional: 13.8%
-- Urgency: 12.3%
-- Curiosity: 8.3%
-- Reminder: 6.4%
-- Fear: 5.9%
+- Curiosity: 8.7%
+- Fear: 6.2%
+- Reminder: 6.2%
+- Pretexting: 4.8%
 - Reciprocity: 4.4%
-- Pretexting: 4.0%
 
 XAI features:
-- Transactional: ., six, key, projects, focusing
+- Transactional: customer, !, service, call, -
 - Personal: no prominent features
+- Promotional: customer, call, service, our, prize
+- Urgency: <PHONE_NUMBER>, £, customer, cash, between
 - Authority: no prominent features
-- Promotional: ., power, operations, <PERSON>, are
-- Urgency: operations, <PERSON>, request, 35926, ees
 - Curiosity: no prominent features
-- Reminder: no prominent features
 - Fear: no prominent features
-- Reciprocity: no prominent features
+- Reminder: no prominent features
 - Pretexting: no prominent features
+- Reciprocity: no prominent features

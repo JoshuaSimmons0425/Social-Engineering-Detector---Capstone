@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: url, we, now, return, 2002
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: <URL>, !, personal, easily, life
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 38.1%
+- Transactional: 51.7%
+- Promotional: 28.6%
 - Personal: 28.5%
-- Promotional: 22.9%
+- Urgency: 15.7%
 - Authority: 14.6%
-- Urgency: 11.6%
-- Curiosity: 10.8%
-- Reminder: 6.5%
-- Fear: 6.2%
+- Curiosity: 9.4%
+- Reminder: 6.4%
+- Fear: 6.1%
 - Reciprocity: 4.4%
-- Pretexting: 3.9%
+- Pretexting: 3.6%
 
 XAI features:
-- Transactional: ., programming, we, now, date
+- Transactional: !, can, love, easily, change
+- Promotional: personal, life, creator, ,, <URL>
 - Personal: no prominent features
-- Promotional: -, 2002, return, 05, best
+- Urgency: gives, united, proud, !, more
 - Authority: no prominent features
-- Urgency: scheduled, regularly, served, cold, best
-- Curiosity: scheduled, programming, regularly, 2002, -
+- Curiosity: no prominent features
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: click, below, view, doorstep, link
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 48.7%
+- Personal: 28.5%
+- Promotional: 22.5%
+- Authority: 14.6%
+- Urgency: 12.4%
+- Curiosity: 9.6%
+- Reminder: 7.1%
+- Fear: 6.0%
+- Reciprocity: 4.4%
+- Pretexting: 2.9%
+
+XAI features:
+- Transactional: ., click, thank, date, target
+- Personal: no prominent features
+- Promotional: ., click, thank, doorstep, )
+- Authority: no prominent features
+- Urgency: ., thank, date, project, <PERSON>
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

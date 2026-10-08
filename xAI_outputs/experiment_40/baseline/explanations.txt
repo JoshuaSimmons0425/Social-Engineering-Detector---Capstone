@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: migration, personal, node, popsprd, spread
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 75.2%
+- Personal: 11.0%
+- Authority: 1.8%
+- Curiosity: 1.4%
+- Urgency: 1.4%
+- Reminder: 0.6%
+- Promotional: 0.3%
+- Fear: 0.1%
+- Reciprocity: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Transactional: please, data ., april, 26, questions
+- Personal: name, call, should, sheets, using
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Urgency: no prominent features
+- Reminder: no prominent features
+- Promotional: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

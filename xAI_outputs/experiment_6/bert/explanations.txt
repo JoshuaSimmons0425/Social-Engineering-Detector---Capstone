@@ -1,28 +1,28 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: com, reliantenergy, enron, escapenumber, could
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: click, have, <URL>, enjoy, link
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 46.8%
+- Transactional: 38.7%
 - Personal: 28.5%
-- Promotional: 17.2%
-- Urgency: 15.4%
+- Promotional: 28.2%
 - Authority: 14.6%
-- Curiosity: 9.2%
-- Reminder: 6.9%
+- Urgency: 12.5%
+- Curiosity: 11.1%
+- Reminder: 6.4%
 - Fear: 6.2%
 - Reciprocity: 4.4%
-- Pretexting: 4.2%
+- Pretexting: 4.3%
 
 XAI features:
-- Transactional: forwarded, xls, cc, enron, noms
+- Transactional: have, ecard, >,, ., neighbor
 - Personal: no prominent features
-- Promotional: xls, cc, forwarded, subject, escapenumber
-- Urgency: xls, escapenumber, enron, chokshi, corp
+- Promotional: greeting, ecard, enjoy, neighbor, )
 - Authority: no prominent features
-- Curiosity: no prominent features
+- Urgency: issued, has, click, >,, neighbor
+- Curiosity: have, neighbor, <URL>, >., issued
 - Reminder: no prominent features
 - Fear: no prominent features
 - Reciprocity: no prominent features

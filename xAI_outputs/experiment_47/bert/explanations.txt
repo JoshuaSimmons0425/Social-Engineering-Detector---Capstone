@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: train, 32, coach
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 52.5%
+- Personal: 28.5%
+- Promotional: 16.5%
+- Urgency: 14.7%
+- Authority: 14.6%
+- Curiosity: 10.6%
+- Reminder: 7.4%
+- Fear: 6.5%
+- Reciprocity: 4.4%
+- Pretexting: 4.2%
+
+XAI features:
+- Transactional: aug, booked, 2025, ticket, coach
+- Personal: no prominent features
+- Promotional: aug, 1, pnr, booked
+- Urgency: ticket, coach, seat, train, 91
+- Authority: no prominent features
+- Curiosity: seat, 2025, 1, ticket, booked
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

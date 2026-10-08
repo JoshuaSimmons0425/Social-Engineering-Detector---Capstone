@@ -1,29 +1,31 @@
 Classification:
-- Malicious probability: 0.08
-- Classifier risk level: Low
-- Key Attributes: url, url: <, <URL>, you[, we
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: <URL>, life!
+<, love!, more, united
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 9.9%
-- Promotional: 5.9%
-- Curiosity: 4.8%
-- Urgency: 4.2%
-- Personal: 3.4%
-- Authority: 1.8%
-- Fear: 0.9%
-- Reminder: 0.3%
-- Reciprocity: 0.1%
-- Pretexting: 0.1%
+- Promotional: 100.0%
+- Curiosity: 5.7%
+- Fear: 4.7%
+- Urgency: 4.5%
+- Personal: 2.9%
+- Authority: 1.2%
+- Transactional: 0.5%
+- Reciprocity: 0.2%
+- Reminder: 0.1%
+- Pretexting: 0.0%
 
 XAI features:
-- Transactional: no prominent features
-- Promotional: no prominent features
+- Promotional: <URL>, more, life!
+<, real, united
 - Curiosity: no prominent features
+- Fear: no prominent features
 - Urgency: no prominent features
 - Personal: no prominent features
 - Authority: no prominent features
-- Fear: no prominent features
-- Reminder: no prominent features
+- Transactional: no prominent features
 - Reciprocity: no prominent features
+- Reminder: no prominent features
 - Pretexting: no prominent features

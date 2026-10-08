@@ -1,29 +1,29 @@
 Classification:
 - Malicious probability: 0.00
 - Classifier risk level: Low
-- Key Attributes: services, get, upcoming, virgo, assist
+- Key Attributes: xls, see, 22, <PERSON>, attached
 - Overall Classification: Benign
 
 Technique associations:
-- Transactional: 55.2%
+- Transactional: 41.2%
 - Personal: 28.5%
-- Promotional: 22.9%
+- Urgency: 16.8%
 - Authority: 14.6%
-- Urgency: 14.1%
-- Curiosity: 9.7%
-- Fear: 6.2%
-- Reminder: 6.1%
+- Promotional: 13.2%
+- Curiosity: 10.8%
+- Reminder: 6.9%
+- Fear: 5.8%
 - Reciprocity: 4.4%
-- Pretexting: 3.4%
+- Pretexting: 3.7%
 
 XAI features:
-- Transactional: lydecker, virgo, get, ask, unavailable
+- Transactional: ), ,, <PERSON>, 22, july
 - Personal: no prominent features
-- Promotional: sell, bob, attempt, get, lydecker
+- Urgency: xls, ., ,, <PERSON>, attached
 - Authority: no prominent features
-- Urgency: duty, <PERSON>, lydecker, unavailable, make
-- Curiosity: no prominent features
-- Fear: no prominent features
+- Promotional: <PERSON>, (, see, attached, ,
+- Curiosity: xls, ., 2000, ), see
 - Reminder: no prominent features
+- Fear: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

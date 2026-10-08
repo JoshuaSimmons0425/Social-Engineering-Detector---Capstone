@@ -1,0 +1,20 @@
+Re: [opensuse] Re: wine error <PERSON> wrote:
+> Content-ID: 
+>
+>
+> El 2008-02-15 a las 00:28 -0600, <PERSON> escribió:
+>
+> > Even when I launch Yast and select:
+> > Software -> Community Repositories
+> > it gets stuck as it cannot find the list of repositories (see attached
+> > screen shot).
+>
+> Not that one, the "software repositories".
+>
+> -- Saludos
+>        <PERSON>
+The factory yast2-qt has a bug where it hangs when "repositories" is
+selected, you have to either revert to 10.3 yast which or use yast2
+ncurses ie. console yast sw_single, yast2-gtk works.
+see bug <URL>
+<PERSON>

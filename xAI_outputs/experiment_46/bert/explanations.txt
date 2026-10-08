@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: click, <URL>, brands, quality, replica
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 55.1%
+- Personal: 28.5%
+- Promotional: 23.7%
+- Authority: 14.6%
+- Urgency: 13.4%
+- Curiosity: 10.2%
+- Reminder: 6.3%
+- Fear: 6.1%
+- Pretexting: 5.1%
+- Reciprocity: 4.4%
+
+XAI features:
+- Transactional: best, brands, here, click, replica
+- Personal: no prominent features
+- Promotional: classics, replica, here, quality, qualitative
+- Authority: no prominent features
+- Urgency: replica, <URL>, order, watch, purchase
+- Curiosity: watches, here, replica, click, order
+- Reminder: no prominent features
+- Fear: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

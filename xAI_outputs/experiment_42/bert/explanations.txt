@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: exmar, credit, rating, <PERSON>, passed
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 40.9%
+- Personal: 28.5%
+- Promotional: 17.0%
+- Authority: 14.6%
+- Urgency: 13.0%
+- Curiosity: 9.0%
+- Reminder: 6.5%
+- Fear: 6.1%
+- Reciprocity: 4.4%
+- Pretexting: 3.8%
+
+XAI features:
+- Transactional: question, ,, regarding, credit, exmar
+- Personal: no prominent features
+- Promotional: ,, question, regarding, <PERSON>, vacation
+- Authority: no prominent features
+- Urgency: ., <PERSON>, credit, ,, regarding
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

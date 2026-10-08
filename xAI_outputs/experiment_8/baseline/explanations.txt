@@ -1,30 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: rotation, desk, 5290, koepke ., of <
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: <URL>, watches, our, replica, online
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 89.3%
-- Personal: 30.4%
-- Authority: 13.0%
-- Urgency: 1.1%
-- Curiosity: 0.8%
-- Reminder: 0.5%
-- Fear: 0.1%
-- Pretexting: 0.0%
+- Promotional: 100.0%
+- Curiosity: 3.2%
+- Transactional: 0.7%
+- Authority: 0.4%
+- Personal: 0.2%
+- Urgency: 0.1%
 - Reciprocity: 0.0%
-- Promotional: 0.0%
+- Reminder: 0.0%
+- Pretexting: 0.0%
+- Fear: 0.0%
 
 XAI features:
-- Transactional: request ., 15, we, already, <PERSON>
-- Personal: <PERSON>, person> " <, person> ", am, person> :
-- Authority: desk, request ., we, research, case .
-<
-- Urgency: no prominent features
+- Promotional: <URL>, watches, our, replica, price
 - Curiosity: no prominent features
-- Reminder: no prominent features
-- Fear: no prominent features
-- Pretexting: no prominent features
+- Transactional: no prominent features
+- Authority: no prominent features
+- Personal: no prominent features
+- Urgency: no prominent features
 - Reciprocity: no prominent features
-- Promotional: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Fear: no prominent features

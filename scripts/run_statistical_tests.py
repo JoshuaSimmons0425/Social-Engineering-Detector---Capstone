@@ -23,7 +23,7 @@ def generate_box_plot(df: pd.DataFrame, output_dir: str):
     # Clean up labels for presentation presentation
     tier_mapping = {
         "Control_No_Evidence": "Control\n(No Evidence)",
-        "Tier1_Baseline_Evidence": "Tier 1 Treatment\n(Baseline Heuristics)",
+        "Tier1_Baseline_Evidence": "Tier 1 Treatment\n(Baseline xAI)",
         "Tier2_BERT_Evidence": "Tier 2 Treatment\n(BERT xAI)"
     }
     plot_df["Experimental_Tier"] = plot_df["Experimental_Tier"].map(tier_mapping)
@@ -172,7 +172,7 @@ def main():
     
     if omnibus_significant:
         matchups = [
-            ("Control (No Evidence)", "Tier 1 Treatment (Baseline Heuristics)", no_evidence_samples, baseline_evidence_samples),
+            ("Control (No Evidence)", "Tier 1 Treatment (Baseline xAI)", no_evidence_samples, baseline_evidence_samples),
             ("Control (No Evidence)", "Tier 2 Treatment (BERT xAI)", no_evidence_samples, bert_evidence_samples),
             ("Tier 1 Treatment (Baseline Heuristics)", "Tier 2 Treatment (BERT xAI)", baseline_evidence_samples, bert_evidence_samples)
         ]

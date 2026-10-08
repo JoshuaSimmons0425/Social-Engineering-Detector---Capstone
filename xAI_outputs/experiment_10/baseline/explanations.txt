@@ -1,33 +1,32 @@
 Classification:
-- Malicious probability: 0.98
-- Classifier risk level: Critical
-- Key Attributes: <URL>, our, click.
-
-<, site., chemists
-- Overall Classification: Malicious
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: transfinite, numbers, considered, thu,, infinities,
+- Overall Classification: Benign
 
 Technique associations:
-- Promotional: 98.9%
-- Urgency: 29.3%
-- Curiosity: 4.9%
-- Authority: 3.6%
-- Personal: 1.1%
-- Transactional: 0.8%
-- Fear: 0.2%
+- Transactional: 39.8%
+- Personal: 11.3%
+- Curiosity: 1.2%
+- Authority: 0.9%
+- Urgency: 0.4%
 - Reminder: 0.1%
-- Reciprocity: 0.1%
+- Fear: 0.1%
+- Promotional: 0.0%
+- Reciprocity: 0.0%
 - Pretexting: 0.0%
 
 XAI features:
-- Promotional: <URL>, our, site., chemists, shop.
-- Urgency: fast, click.
-
-<, shipment, site., our
+- Transactional: agreed., let', <PERSON>, will <, wrote:
+>
+- Personal: <PERSON>, later.
+>
+> +, 11, thinking, answers
 - Curiosity: no prominent features
 - Authority: no prominent features
-- Personal: no prominent features
-- Transactional: no prominent features
-- Fear: no prominent features
+- Urgency: no prominent features
 - Reminder: no prominent features
+- Fear: no prominent features
+- Promotional: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

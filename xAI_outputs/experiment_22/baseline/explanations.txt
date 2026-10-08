@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: amanda, decision
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 97.2%
+- Authority: 3.5%
+- Personal: 1.7%
+- Curiosity: 0.5%
+- Reminder: 0.3%
+- Urgency: 0.1%
+- Fear: 0.0%
+- Promotional: 0.0%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Transactional: 2025, received, nov, application, decision
+- Authority: no prominent features
+- Personal: no prominent features
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Urgency: no prominent features
+- Fear: no prominent features
+- Promotional: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

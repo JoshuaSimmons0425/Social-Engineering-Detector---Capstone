@@ -1,29 +1,29 @@
 Classification:
-- Malicious probability: 0.00
-- Classifier risk level: Low
-- Key Attributes: garcia, endpoints, share, sharing, documentation
-- Overall Classification: Benign
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: visit, prizes, <URL>, !, more
+- Overall Classification: Malicious
 
 Technique associations:
-- Transactional: 45.7%
+- Transactional: 48.5%
 - Personal: 28.5%
-- Promotional: 21.9%
+- Promotional: 22.2%
 - Authority: 14.6%
-- Curiosity: 11.7%
-- Urgency: 10.8%
-- Reminder: 6.6%
-- Fear: 6.0%
+- Urgency: 13.1%
+- Curiosity: 11.0%
+- Fear: 6.4%
+- Reminder: 6.1%
 - Reciprocity: 4.4%
-- Pretexting: 3.1%
+- Pretexting: 3.7%
 
 XAI features:
-- Transactional: subject, garcia, ., follow, ,
+- Transactional: ipod, mobile, ,, ., win
 - Personal: no prominent features
-- Promotional: subject, ,, are, described, best
+- Promotional: visit, mobile, ingest, winner, eye
 - Authority: no prominent features
-- Curiosity: subject, revised, 'll, best, :
-- Urgency: subject, avery, garcia, examples, up
-- Reminder: no prominent features
+- Urgency: <URL>, mobile, won, winner, mr
+- Curiosity: ipod, soon, winner, more, ,
 - Fear: no prominent features
+- Reminder: no prominent features
 - Reciprocity: no prominent features
 - Pretexting: no prominent features

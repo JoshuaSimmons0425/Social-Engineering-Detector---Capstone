@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.99
+- Classifier risk level: Critical
+- Key Attributes: health, men', health,, products., online
+- Overall Classification: Malicious
+
+Technique associations:
+- Promotional: 99.9%
+- Authority: 3.8%
+- Curiosity: 3.5%
+- Transactional: 1.5%
+- Urgency: 0.7%
+- Personal: 0.6%
+- Fear: 0.0%
+- Reciprocity: 0.0%
+- Reminder: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Promotional: health, men', products., health,, online
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Transactional: no prominent features
+- Urgency: no prominent features
+- Personal: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features

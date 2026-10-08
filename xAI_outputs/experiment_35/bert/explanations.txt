@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: url, we, now, return, 2002
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 38.1%
+- Personal: 28.5%
+- Promotional: 22.9%
+- Authority: 14.6%
+- Urgency: 11.6%
+- Curiosity: 10.8%
+- Reminder: 6.5%
+- Fear: 6.2%
+- Reciprocity: 4.4%
+- Pretexting: 3.9%
+
+XAI features:
+- Transactional: ., programming, we, now, date
+- Personal: no prominent features
+- Promotional: -, 2002, return, 05, best
+- Authority: no prominent features
+- Urgency: scheduled, regularly, served, cold, best
+- Curiosity: scheduled, programming, regularly, 2002, -
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

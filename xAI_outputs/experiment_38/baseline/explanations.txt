@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: help, fit, candidate, formerly, azurix .
+- Overall Classification: Benign
+
+Technique associations:
+- Transactional: 99.8%
+- Personal: 19.1%
+- Authority: 12.1%
+- Urgency: 1.8%
+- Reminder: 1.1%
+- Curiosity: 1.1%
+- Reciprocity: 0.5%
+- Promotional: 0.2%
+- Fear: 0.0%
+- Pretexting: 0.0%
+
+XAI features:
+- Transactional: thanks, attached, please, enron ,, let
+- Personal: resume, thanks, let, <PERSON>, person> ,
+- Authority: enron ,, please, review, director, level
+- Urgency: no prominent features
+- Reminder: no prominent features
+- Curiosity: no prominent features
+- Reciprocity: no prominent features
+- Promotional: no prominent features
+- Fear: no prominent features
+- Pretexting: no prominent features

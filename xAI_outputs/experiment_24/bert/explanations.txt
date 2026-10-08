@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: limited, time, deal, are, prize
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 51.5%
+- Personal: 28.5%
+- Promotional: 23.4%
+- Urgency: 15.4%
+- Authority: 14.6%
+- Curiosity: 9.9%
+- Reminder: 6.8%
+- Fear: 6.3%
+- Reciprocity: 4.4%
+- Pretexting: 4.1%
+
+XAI features:
+- Transactional: deal, ., time, credit, card
+- Personal: no prominent features
+- Promotional: prize, are, winner, ,, collect
+- Urgency: deal, ₹, prize, <PERSON>, <MONEY>
+- Authority: no prominent features
+- Curiosity: no prominent features
+- Reminder: no prominent features
+- Fear: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

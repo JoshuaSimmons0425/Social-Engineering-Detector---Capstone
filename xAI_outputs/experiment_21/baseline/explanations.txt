@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 0.00
+- Classifier risk level: Low
+- Key Attributes: url, url: <, <URL>, girl.&#, about[
+- Overall Classification: Benign
+
+Technique associations:
+- Curiosity: 6.0%
+- Transactional: 3.2%
+- Personal: 2.1%
+- Authority: 1.1%
+- Promotional: 0.3%
+- Urgency: 0.3%
+- Fear: 0.2%
+- Reminder: 0.2%
+- Pretexting: 0.0%
+- Reciprocity: 0.0%
+
+XAI features:
+- Curiosity: no prominent features
+- Transactional: no prominent features
+- Personal: no prominent features
+- Authority: no prominent features
+- Promotional: no prominent features
+- Urgency: no prominent features
+- Fear: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features

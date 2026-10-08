@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: !, results, today, gain, just
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 55.6%
+- Personal: 28.5%
+- Promotional: 20.8%
+- Urgency: 15.7%
+- Authority: 14.6%
+- Curiosity: 10.2%
+- Fear: 6.0%
+- Reminder: 6.0%
+- Reciprocity: 4.4%
+- Pretexting: 3.6%
+
+XAI features:
+- Transactional: !, make, all, improvements, today
+- Personal: no prominent features
+- Promotional: >,, all, make, today, rod
+- Urgency: masculinity, gain, leader, up, goal
+- Authority: no prominent features
+- Curiosity: all, <URL>, ,, rod, impressive
+- Fear: no prominent features
+- Reminder: no prominent features
+- Reciprocity: no prominent features
+- Pretexting: no prominent features

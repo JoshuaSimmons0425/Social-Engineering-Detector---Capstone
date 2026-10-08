@@ -1,0 +1,29 @@
+Classification:
+- Malicious probability: 1.00
+- Classifier risk level: Critical
+- Key Attributes: get, looking, <URL>, perfect, gift
+- Overall Classification: Malicious
+
+Technique associations:
+- Transactional: 47.0%
+- Personal: 28.5%
+- Promotional: 19.6%
+- Authority: 14.6%
+- Urgency: 12.6%
+- Curiosity: 10.9%
+- Fear: 6.2%
+- Reminder: 6.2%
+- Pretexting: 5.1%
+- Reciprocity: 4.4%
+
+XAI features:
+- Transactional: looking, ?, get, watches, qualitative
+- Personal: no prominent features
+- Promotional: watches, get, replica, rolex, !
+- Authority: no prominent features
+- Urgency: watches, ?, <URL>, perfect, <PERSON>
+- Curiosity: watches, rolex, looking, go, replica
+- Fear: no prominent features
+- Reminder: no prominent features
+- Pretexting: no prominent features
+- Reciprocity: no prominent features
