@@ -1,0 +1,4 @@
+Experimental Tier,Accuracy (Ground Truth),False Positive Rate (FPR),False Negative Rate (FNR)
+Control (No Evidence),72.00%,56.00%,0.00%
+Tier 1 (Logistic Regression xAI),90.00%,20.00%,0.00%
+Tier 2 (Contextual BERT xAI),86.00%,28.00%,0.00%
