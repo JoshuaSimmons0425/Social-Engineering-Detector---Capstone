@@ -71,3 +71,4 @@ desktop.ini
 *.temp
 *.bak
 *.swp
+.deepeval/
