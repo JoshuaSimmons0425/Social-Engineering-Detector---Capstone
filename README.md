@@ -145,7 +145,7 @@ The intended workflow is:
 
 Run the preprocessing pipeline to clean the source data, mask PII, apply annotations, deduplicate records, and generate the required dataset splits.
 
-If you want to skip this step, download the data.zip file that already contains the raw, preprocessed and enriched datasets.
+You can skip this step by downloading the splits.zip file in the "Pre Data Splits" release that contains the preprocessed and enriched data used for the workflow.
 
 ### 2. Train the Detection Models
 
