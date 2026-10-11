@@ -169,17 +169,15 @@ python -m scripts.<calibration-script>.py
 Generate structured detection evidence for the input messages.
 
 ```bash
-python -m scriptsformulate_xai_evidence
+python -m scripts.formulate_xai_evidence
 ```
 
 ### 5. Run Risk Assessment
 
-Run the local SLM using one of the three experimental conditions:
+Ensure the local SLM is live on LMStudio to generate the risk assesments across all three experimental conditions:
 
-```text
-no_evidence
-baseline_evidence
-bert_evidence
+```bash
+python -m scripts.generate_risk_assessment
 ```
 
 Before running the script below, make sure you download the Gemma 2 9B model on LM Studio that is running live on your local device endpoint.
