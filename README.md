@@ -6,6 +6,7 @@ This project investigates whether explainable evidence from a social engineering
 
 The system combines:
 
+- Privacy-aware data preprocessing
 - Binary malicious-message detection
 - Multi-label social engineering technique detection
 - Explainable AI (XAI)
@@ -21,8 +22,8 @@ The project evaluates three risk-assessment conditions using the same underlying
 | Condition | Evidence Provided |
 |---|---|
 | **No Evidence** | Original message only |
-| **Baseline Evidence** | Evidence from TF-IDF + Logistic Regression |
-| **BERT Evidence** | Evidence from ModernBERT-based detection |
+| **Baseline Evidence** | Evidence from TF-IDF + Logistic Regression + Original Message |
+| **BERT Evidence** | Evidence from ModernBERT-based detection + Original Message |
 
 The aim is to determine whether model-derived evidence improves the quality and reliability of downstream SLM risk assessments.
 
@@ -108,7 +109,7 @@ Statistical analysis uses repeated-measures non-parametric tests, including Frie
 - Git
 - Sufficient storage for datasets and model checkpoints
 
-The project was developed using an NVIDIA RTX 3060 Ti with 8 GB VRAM.
+The project uses an NVIDIA RTX 3060 Ti with 8 GB VRAM as the primary hardware.
 
 ### Setup
 
@@ -192,7 +193,23 @@ python -m scripts.generate_risk_assessments
 Run the evaluation pipeline on the generated assessments.
 
 ```bash
-python -m scripts.evaluation_risk_assessment
+python -m scripts.evaluation_risk_assessments
+```
+
+### 7. Run Statistical Inference
+
+Once the evaluation pipeline is complete, run the script below for statistical inference results.
+
+```bash
+python -m scripts.run_statistical_tests
+```
+
+### 8. [Optional] Run Objective Validation
+
+The script below runs the additional objective validation of the assigned risk levels against the original binary labels across each experimental condition. This is recommended since the evaluation results are based on subjective rankings.
+
+```bash
+python -m scripts.run_risk_alignment_validation
 ```
 
 ## Repository Structure
@@ -216,7 +233,7 @@ This repository contains a research prototype rather than a production security 
 
 The results are limited by factors including dataset annotation quality, the subjectivity of social engineering labels, XAI attribution limitations, the relatively small evaluation sample, and the limitations of automated LLM-based judging.
 
-Further validation using larger datasets and human security-expert evaluation is required before the approach could be considered suitable for operational deployment.
+Further validation using larger datasets and human security-expert evaluation is required before the approach could be considered suitable for operational deployment, or let alone reliable statistical significance.
 
 ## Academic Context
 
